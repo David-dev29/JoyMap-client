@@ -1,1 +1,1 @@
-# KUMA
+# JoyMap-client
