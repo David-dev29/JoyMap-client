@@ -23,7 +23,7 @@ export default function AddUserInfo() {
 
     try {
       // ✅ Crear usuario en el backend
-      const response = await fetch('http://192.168.100.7:3000/api/users/create', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

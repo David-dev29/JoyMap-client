@@ -124,7 +124,7 @@ export default function DeliveryOrder() {
 
       console.log('📦 Creando orden:', orderData);
 
-      const response = await fetch('http://192.168.100.7:3000/api/orders/create', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

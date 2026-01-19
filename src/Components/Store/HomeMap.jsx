@@ -211,7 +211,7 @@ export default function HomeMap({
   useEffect(() => {
     const loadBusinesses = async () => {
       try {
-        const res = await fetch(`http://192.168.100.7:3000/api/businesses/type/${type}`);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/businesses/type/${type}`);
         const { response } = await res.json();
 
         console.log(`📦 Negocios de tipo "${type}":`, response);

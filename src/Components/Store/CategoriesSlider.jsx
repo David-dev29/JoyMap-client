@@ -13,7 +13,7 @@ export default function CategoriesSlider({
 
   useEffect(() => {
     // ✅ Fetch dinámico según el tipo
-    fetch(`http://192.168.100.7:3000/api/business-categories/type/${type}`)
+    fetch(`${import.meta.env.VITE_API_URL}/api/business-categories/type/${type}`)
       .then(res => res.json())
       .then(data => {
         if (data.success) {

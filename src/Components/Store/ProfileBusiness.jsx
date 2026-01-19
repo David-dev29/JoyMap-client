@@ -36,7 +36,7 @@ const CategoryIcons = ({
       if (path.startsWith("http")) return path;
 
       // 🔥 cache-busting
-      return `http://192.168.100.7:3000/${path}?t=${Date.now()}`;
+      return `${import.meta.env.VITE_API_URL}/${path}?t=${Date.now()}`;
     };
 
     setCategories((prev) =>
@@ -102,7 +102,7 @@ const CategoryIcons = ({
   const fetchCategories = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://192.168.100.7:3000/api/businesses/businesses");
+      const response = await fetch("${import.meta.env.VITE_API_URL}/api/businesses/businesses");
 
       if (!response.ok) {
         throw new Error(`Error ${response.status}: ${response.statusText}`);
@@ -120,7 +120,7 @@ const CategoryIcons = ({
   if (!path) return null;
   if (path.startsWith("http")) return path;
 
-  return `http://192.168.100.7:3000/${path}`;
+  return `${import.meta.env.VITE_API_URL}/${path}`;
 };
 
       
@@ -177,7 +177,7 @@ const CategoryIcons = ({
   if (!path) return null;
   if (path.startsWith("http")) return path;
 
-  return `http://192.168.100.7:3000/${path}`;
+  return `${import.meta.env.VITE_API_URL}/${path}`;
 };
 
       

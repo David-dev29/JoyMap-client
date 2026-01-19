@@ -26,7 +26,7 @@ export default function BusinessView({ type = "comida" }) {
 
   const loadBusinessFromSlug = async (slug) => {
     try {
-      const res = await fetch(`http://192.168.100.7:3000/api/businesses/slug/${slug}`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/businesses/slug/${slug}`);
       const data = await res.json();
       
       if (data.success && data.response) {

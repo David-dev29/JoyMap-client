@@ -11,7 +11,7 @@ import CartScreen from "../Components/Store/CartScreen.jsx";
 import PromoModal from "../Components/Store/PromoModal.jsx";
 import { useFavorites } from "../Components/Store/FavoritosContext.jsx";
 
-const API_URL = "http://192.168.100.7:3000/api/products";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/products`;
 
 // ✅ Helper para normalizar nombres
 const normalizeString = (str) =>
@@ -46,7 +46,7 @@ function Food({ scrollContainerRef, selectedBusinessFromMap,
   useEffect(() => {
     const fetchSubcategories = async () => {
       try {
-        const response = await fetch("http://192.168.100.7:3000/api/subcategories?type=${type}");
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/subcategories?type=${type}`);
         const result = await response.json();
 
         console.log("📦 Respuesta bruta de subcategorías:", result);

@@ -45,7 +45,7 @@ export default function AddressScreen() {
           const { latitude, longitude } = position.coords;
           try {
             const response = await fetch(
-              `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=2c222e2bccbf49d88bc233f3ec9e9a53`
+              `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${import.meta.env.VITE_OPENCAGE_KEY}`
             );
             const data = await response.json();
             const result = data?.results?.[0]?.formatted;
@@ -77,7 +77,7 @@ export default function AddressScreen() {
         `https://api.radar.io/v1/geocode/forward?query=${encodeURIComponent(newAddress)}&country=MX`,
         {
           headers: {
-            'Authorization': 'prj_test_pk_79028f5cd842b67359071ecff838a9b87b1f71fa'
+            'Authorization': import.meta.env.VITE_RADAR_KEY
           }
         }
       );

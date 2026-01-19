@@ -29,7 +29,7 @@ export default function MapHeaderEncorto({
   ];
 
   useEffect(() => {
-    fetch('http://192.168.100.7:3000/api/stores')
+    fetch(`${import.meta.env.VITE_API_URL}/api/stores`)
       .then(res => res.json())
       .then(data => {
         setStoreData(data.store_data);
