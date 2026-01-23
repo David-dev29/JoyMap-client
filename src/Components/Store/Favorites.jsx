@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { useFavorites } from "../Store/FavoritosContext";
+import { useFavorites } from "../../context/FavoritesContext";
 
 const Favorites = ({ allProducts = [] }) => {
   const navigate = useNavigate();

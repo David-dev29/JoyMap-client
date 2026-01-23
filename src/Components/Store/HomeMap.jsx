@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Circle } from 'r
 import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Supercluster from "supercluster";
-import { Navigation, AlertCircle } from 'lucide-react';
+import { Navigation } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 // Hooks personalizados
@@ -103,12 +103,6 @@ function MapUpdater({ userLocation, initialBusiness }) {
     }
   }, [userLocation, map, initialBusiness]);
 
-  useEffect(() => {
-    if (initialBusiness) {
-      console.log('📍 Initial business detectado:', initialBusiness);
-    }
-  }, [initialBusiness, map]);
-
   return null;
 }
 
@@ -185,37 +179,21 @@ export default function HomeMap({
 }) {
   const [mapRef, setMapRef] = useState(null);
 
-  // 📍 Usar hook de geolocalización
-  const {
-    location: userLocation,
-    loading: locationLoading,
-    error: locationError,
-    permissionStatus,
-    requestLocation
-  } = useGeolocation({
+  // Usar hook de geolocalización
+  const { location: userLocation } = useGeolocation({
     fallback: DEFAULT_LOCATION
   });
 
-  // 📦 Usar hook de negocios
-  const {
-    businesses: rawBusinesses,
-    loading: businessesLoading,
-    error: businessesError,
-    businessesWithCoords
-  } = useBusinesses(type);
+  // Usar hook de negocios
+  const { businesses: rawBusinesses } = useBusinesses(type);
 
   // Convertir negocios a formato GeoJSON para el mapa
   const businesses = useMemo(() => {
-    console.log(`🗺️ Procesando ${rawBusinesses.length} negocios para el mapa...`);
-
     const points = rawBusinesses
       .filter(b => {
         const hasCoords = b.location?.coordinates &&
                          Array.isArray(b.location.coordinates) &&
                          b.location.coordinates.length === 2;
-        if (!hasCoords) {
-          console.warn(`⚠️ Negocio sin coordenadas válidas: ${b.name}`, b.location);
-        }
         return hasCoords;
       })
       .map(b => ({
@@ -242,20 +220,15 @@ export default function HomeMap({
         },
       }));
 
-    console.log(`✅ ${points.length} negocios con coordenadas válidas`);
     return points;
   }, [rawBusinesses, type]);
 
-  // 🔥 FILTRAR NEGOCIOS SEGÚN LA CATEGORÍA SELECCIONADA
+  // Filtrar negocios según la categoría seleccionada
   const filteredBusinesses = useMemo(() => {
     if (!selectedCategory) {
-      console.log("🔍 Mostrando todos los negocios:", businesses.length);
       return businesses;
     }
-
-    const filtered = businesses.filter(b => b.properties.categorySlug === selectedCategory);
-    console.log(`🔍 Filtrando por "${selectedCategory}":`, filtered.length, "negocios");
-    return filtered;
+    return businesses.filter(b => b.properties.categorySlug === selectedCategory);
   }, [businesses, selectedCategory]);
 
   // 🎯 Handle business click
@@ -282,8 +255,6 @@ export default function HomeMap({
       isOpen: business.isOpen,
       emoji: business.emoji,
     };
-
-    console.log("🖱️ Business clickeado:", businessData);
 
     onBusinessOpen?.(businessData);
 
@@ -313,39 +284,6 @@ export default function HomeMap({
 
   return (
     <div className="relative w-full h-[calc(100vh-64px)]">
-      {/* Indicador de carga de negocios */}
-      {businessesLoading && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-[500]
-                        bg-white px-4 py-2 rounded-full shadow-lg">
-          <span className="text-sm text-gray-600">Cargando negocios...</span>
-        </div>
-      )}
-
-      {/* Error de negocios */}
-      {businessesError && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-[500]
-                        bg-red-50 px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 text-red-500" />
-          <span className="text-sm text-red-600">Error al cargar negocios</span>
-        </div>
-      )}
-
-      {/* Indicador de permisos de ubicación */}
-      {permissionStatus === 'denied' && (
-        <div className="absolute top-20 left-4 right-4 z-[500]
-                        bg-yellow-50 px-4 py-2 rounded-lg shadow-lg">
-          <p className="text-sm text-yellow-700">
-            Activa la ubicación para ver negocios cerca de ti
-          </p>
-          <button
-            onClick={requestLocation}
-            className="text-sm text-blue-600 underline mt-1"
-          >
-            Intentar de nuevo
-          </button>
-        </div>
-      )}
-
       <MapContainer
         center={initialCenter}
         zoom={MAP_CONFIG.defaultZoom}
@@ -423,16 +361,8 @@ export default function HomeMap({
         </button>
       </div>
 
-      {/* Debug info (solo en desarrollo) */}
-      {import.meta.env.DEV && (
-        <div className="absolute bottom-24 left-4 z-[400] bg-black/70 text-white text-xs p-2 rounded">
-          <div>📍 Ubicación: {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Cargando...'}</div>
-          <div>🏪 Negocios: {filteredBusinesses.length}/{businesses.length}</div>
-          <div>🔑 Permisos: {permissionStatus}</div>
-        </div>
-      )}
 
-      <style jsx global>{`
+      <style>{`
         .custom-marker,
         .cluster-marker,
         .user-location-marker {

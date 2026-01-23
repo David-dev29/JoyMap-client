@@ -21,29 +21,22 @@ export function useGeolocation(options = {}) {
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      console.warn('⚠️ Geolocation no soportado en este navegador');
-      setError('Geolocation no soportado');
       setLocation(fallback);
       setLoading(false);
       return;
     }
 
     setLoading(true);
-    console.log('📍 Solicitando ubicación...');
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude, accuracy } = position.coords;
-        console.log(`✅ Ubicación obtenida: ${latitude}, ${longitude} (precisión: ${accuracy}m)`);
-
         setLocation({ lat: latitude, lng: longitude, accuracy });
         setError(null);
         setLoading(false);
         setPermissionStatus('granted');
       },
       (err) => {
-        console.warn('⚠️ Error obteniendo ubicación:', err.message);
-        setError(err.message);
         setLocation(fallback);
         setLoading(false);
 
@@ -64,7 +57,6 @@ export function useGeolocation(options = {}) {
     if (navigator.permissions) {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         setPermissionStatus(result.state);
-        console.log(`📍 Permiso de geolocalización: ${result.state}`);
 
         result.addEventListener('change', () => {
           setPermissionStatus(result.state);

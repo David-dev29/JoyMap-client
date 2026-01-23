@@ -1,46 +1,37 @@
 import React, { useState, useEffect, useRef, memo } from "react";
 import { Search } from "lucide-react";
 
-// ✅ Botón memoizado
-const SubcategoryButton = memo(({ subcat, label, isActive, onClick }) => {
+// Botón de categoría memoizado
+const CategoryButton = memo(({ category, isActive, onClick }) => {
   return (
     <button
-      data-subcat={subcat}
-      onClick={() => onClick(subcat)}
-      className={`tab-button relative py-2 px-1 text-sm font-medium focus:outline-none whitespace-nowrap ${
-        isActive ? "active" : ""
+      data-category={category.id}
+      onClick={() => onClick(category.id)}
+      className={`tab-button relative py-2 px-3 text-sm font-medium focus:outline-none whitespace-nowrap transition-colors ${
+        isActive ? "active text-orange-600" : "text-gray-700 hover:text-orange-500"
       }`}
       role="tab"
       aria-selected={isActive}
     >
-      {label}
+      {category.name}
     </button>
   );
 });
 
 const CategoryTabs = ({
+  categories = [],
   activeCategory,
-  activeSubcategory,
-  onSubcategoryClick,
+  onCategoryClick,
   searchValue,
   setSearchValue,
-  subcategoriesMap,
 }) => {
-  const subcategories = subcategoriesMap[activeCategory] || [];
-  
-  console.log("🔍 CategoryTabs render:");
-  console.log("  - activeCategory:", activeCategory);
-  console.log("  - subcategoriesMap keys:", Object.keys(subcategoriesMap));
-  console.log("  - subcategories encontradas:", subcategories.length);
-  console.log("  - subcategories:", subcategories);
-  
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const markerRef = useRef(null);
   const tabsRef = useRef(null);
   const [markerStyle, setMarkerStyle] = useState({ left: 0, width: 0 });
 
-  // ✅ Shadow sticky
+  // Shadow sticky
   useEffect(() => {
     const stickyEl = markerRef.current;
     if (!stickyEl) return;
@@ -53,10 +44,10 @@ const CategoryTabs = ({
     return () => observer.disconnect();
   }, []);
 
-  // ✅ Actualiza marcador y centra tab activo
+  // Actualiza marcador y centra tab activo
   useEffect(() => {
-    if (!tabsRef.current) return;
-    const activeTab = tabsRef.current.querySelector(`[data-subcat="${activeSubcategory}"]`);
+    if (!tabsRef.current || !activeCategory) return;
+    const activeTab = tabsRef.current.querySelector(`[data-category="${activeCategory}"]`);
     if (!activeTab) return;
 
     const { offsetLeft, offsetWidth } = activeTab;
@@ -65,7 +56,12 @@ const CategoryTabs = ({
     requestAnimationFrame(() => {
       activeTab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     });
-  }, [activeSubcategory, subcategories]);
+  }, [activeCategory, categories]);
+
+  // Si no hay categorías
+  if (categories.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -80,15 +76,16 @@ const CategoryTabs = ({
 
         <div className="px-4 sm:px-6 lg:px-8 relative">
           <nav
-            className="flex items-center space-x-4 overflow-x-auto custom-scroll-hide py-1 relative"
+            className="flex items-center space-x-2 overflow-x-auto custom-scroll-hide py-1 relative"
             role="tablist"
             ref={tabsRef}
           >
-            {/* 🔍 Buscador */}
+            {/* Buscador */}
             {!isSearchOpen ? (
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className="p-1 text-gray-600 hover:text-orange-500 flex-shrink-0"
+                aria-label="Buscar productos"
               >
                 <Search className="w-5 h-5" />
               </button>
@@ -114,25 +111,18 @@ const CategoryTabs = ({
               </div>
             )}
 
-            {/* ✅ Subcategorías */}
-            {!isSearchOpen && subcategories.length > 0 ? (
-              subcategories.map(({ id, label }) => (
-                <SubcategoryButton
-                  key={id}
-                  subcat={id}
-                  label={label}
-                  isActive={activeSubcategory === id}
-                  onClick={onSubcategoryClick}
-                />
-              ))
-            ) : !isSearchOpen ? (
-              <div className="text-sm text-gray-500 py-2">
-                No hay subcategorías disponibles
-              </div>
-            ) : null}
+            {/* Categorías */}
+            {!isSearchOpen && categories.map(category => (
+              <CategoryButton
+                key={category.id}
+                category={category}
+                isActive={activeCategory === category.id}
+                onClick={onCategoryClick}
+              />
+            ))}
 
             {/* Línea activa */}
-            {!isSearchOpen && subcategories.length > 0 && (
+            {!isSearchOpen && categories.length > 0 && (
               <div
                 className="absolute bottom-0 h-0.5 bg-orange-600 transition-all duration-300 ease-out"
                 style={{ left: markerStyle.left, width: markerStyle.width }}
@@ -144,7 +134,7 @@ const CategoryTabs = ({
         {!isSearchOpen && <div className="border-b border-gray-200 ml-4 mr-4" />}
       </div>
 
-      <style jsx>{`
+      <style>{`
         .custom-scroll-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
@@ -153,11 +143,7 @@ const CategoryTabs = ({
           display: none;
         }
         .tab-button {
-          color: #1f2937;
           transition: color 0.15s ease;
-        }
-        .tab-button:hover {
-          color: #f97316;
         }
         .tab-button.active {
           color: #ea580c;

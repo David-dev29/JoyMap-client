@@ -13,10 +13,9 @@ export default function BusinessView({ type = "comida" }) {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // ✅ Cargar negocio desde la URL cuando hay un slug
+  // Cargar negocio desde la URL cuando hay un slug
   useEffect(() => {
     if (businessSlug) {
-      console.log(`🔗 URL detectada para negocio: ${businessSlug}`);
       loadBusinessFromSlug(businessSlug);
     } else {
       setMenuOpen(false);
@@ -30,9 +29,7 @@ export default function BusinessView({ type = "comida" }) {
       const data = await res.json();
       
       if (data.success && data.response) {
-        console.log('✅ Negocio encontrado:', data.response);
-        
-        // ✅ CONSTRUIR OBJETO CORRECTAMENTE
+        // Construir objeto del negocio
         const businessData = {
           id: data.response._id,
           name: data.response.name,
@@ -52,11 +49,9 @@ export default function BusinessView({ type = "comida" }) {
         setSelectedBusiness(businessData);
         setMenuOpen(true);
       } else {
-        console.log('⚠️ Negocio no encontrado, redirigiendo...');
         navigate(`/${type === 'comida' ? 'home' : 'tienda'}`, { replace: true });
       }
     } catch (error) {
-      console.error('❌ Error cargando negocio:', error);
       navigate(`/${type === 'comida' ? 'home' : 'tienda'}`, { replace: true });
     }
   };
@@ -72,7 +67,6 @@ export default function BusinessView({ type = "comida" }) {
 
   const handleCategorySelect = (categorySlug) => {
     setSelectedCategory(categorySlug);
-    console.log(`📂 Categoría de ${type} seleccionada:`, categorySlug || "Todos");
   };
 
   // ✅ Manejar apertura de negocio desde el mapa

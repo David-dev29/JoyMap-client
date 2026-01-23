@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useOutletContext } from "react-router-dom";
-import ShareButton from '../Components/ShareButton.jsx';
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import HeroBannerTienda from "../Components/Store/HeroBanner.jsx";
 import CategoryIcons from "../Components/Store/ProfileBusiness.jsx";
 import CategoryTabs from "../Components/Store/CategoryTabs.jsx";
@@ -8,406 +6,394 @@ import ProductGrid from "../Components/Store/ProductGrid.jsx";
 import ProductModal from "../Components/Store/ProductModal.jsx";
 import CartSummaryModal from "../Components/Store/CartSummaryModal.jsx";
 import CartScreen from "../Components/Store/CartScreen.jsx";
-import PromoModal from "../Components/Store/PromoModal.jsx";
-import { useFavorites } from "../Components/Store/FavoritosContext.jsx";
+import { useFavorites } from "../context/FavoritesContext";
 
-const API_URL = `${import.meta.env.VITE_API_URL}/api/products`;
+const API_URL = import.meta.env.VITE_API_URL;
 
-// ✅ Helper para normalizar nombres
+// Helper para normalizar nombres
 const normalizeString = (str) =>
   str?.normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/\s+/g, "-") || "";
 
-function Food({ scrollContainerRef, selectedBusinessFromMap, 
-  type = "comida" // ✅ NUEVO: tipo de productos/categorías
- }) { // 🔥 RECIBIR selectedBusinessFromMap
-  const [subcategoriesMap, setSubcategoriesMap] = useState({});
-  const [categoriesData, setCategoriesData] = useState([]);
+function Food({
+  scrollContainerRef,
+  selectedBusinessFromMap,
+  type = "comida"
+}) {
+  // Estado de categorías y productos
+  const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
-  const [activeSubcategory, setActiveSubcategory] = useState(null);
+  const [allProducts, setAllProducts] = useState([]);
+
+  // Estado de UI
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showCartScreen, setShowCartScreen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [noMenu, setNoMenu] = useState(false);
+
+  // Carrito
   const [cartItems, setCartItems] = useState(
     JSON.parse(localStorage.getItem("cartItems")) || []
   );
   const [itemCount, setItemCount] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [showCartScreen, setShowCartScreen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
+
+  // Favoritos
   const { favoriteIds, toggleFavorite } = useFavorites();
-  const [productosConDescuento, setProductosConDescuento] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [refsReady, setRefsReady] = useState(false);
-  const subcatRefs = useRef({});
 
-  // 🔍 Cargar subcategorías desde el backend
+  // Refs
+  const categoryRefs = useRef({});
+
+  // Obtener businessId del negocio seleccionado
+  const businessId = selectedBusinessFromMap?.id;
+
+  // Cargar categorías y productos del negocio
   useEffect(() => {
-    const fetchSubcategories = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/subcategories?type=${type}`);
-        const result = await response.json();
+    if (!businessId) {
+      setLoading(false);
+      setNoMenu(true);
+      return;
+    }
 
-        console.log("📦 Respuesta bruta de subcategorías:", result);
-
-        const map = {};
-        const categoriesInfo = [];
-
-        result.data.forEach(cat => {
-          if (!cat.categoryName || !cat.subcategories) return;
-
-          const normalizedKey = normalizeString(cat.categoryName);
-          
-          map[normalizedKey] = cat.subcategories.map(sub => ({
-            id: sub._id,
-            name: sub.name,
-            label: sub.name
-          }));
-
-          categoriesInfo.push({
-            id: cat.categoryId,
-            normalizedName: normalizedKey,
-            originalName: cat.categoryName
-          });
-        });
-
-        console.log("🗺️ subcategoriesMap generado:", map);
-        console.log("📋 categoriesInfo generado:", categoriesInfo);
-        
-        setSubcategoriesMap(map);
-        setCategoriesData(categoriesInfo);
-
-        if (categoriesInfo.length > 0 && !activeCategory) {
-          setActiveCategory(categoriesInfo[0].normalizedName);
-        }
-      } catch (error) {
-        console.error("❌ Error al cargar subcategorías:", error);
-      }
-    };
-
-    fetchSubcategories();
-  }, [type]);
-
-  // 🔍 Cargar productos
-  useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchBusinessMenu = async () => {
       try {
         setLoading(true);
-        const response = await fetch(API_URL);
+        setError(null);
+        setNoMenu(false);
 
-        if (!response.ok) throw new Error("Error al cargar los productos");
+        // Endpoint por negocio con productos incluidos
+        const response = await fetch(
+          `${API_URL}/api/product-categories/business/${businessId}?populate=products`
+        );
 
-        const data = await response.json();
-        const productos = data.response || data;
-
-        console.log("📦 Productos recibidos del backend:", productos);
-
-        if (!Array.isArray(productos)) {
-          throw new Error("Formato de datos inválido");
+        if (!response.ok) {
+          throw new Error("Error al cargar el menú");
         }
 
-        const processed = productos.map((p) => {
-          const hasDiscount = Math.random() < 0.5;
-          const discountPercentage = hasDiscount
-            ? Math.floor(Math.random() * 21) + 10
-            : 0;
-          const discountedPrice = hasDiscount
-            ? p.price * (1 - discountPercentage / 100)
-            : p.price;
+        const data = await response.json();
 
-          return {
+        // Soportar múltiples formatos de respuesta
+        const categoriesData = data.categories || data.response || data.data || [];
+
+        if (!Array.isArray(categoriesData) || categoriesData.length === 0) {
+          setNoMenu(true);
+          setCategories([]);
+          setAllProducts([]);
+          setLoading(false);
+          return;
+        }
+
+        // Procesar categorías
+        const processedCategories = categoriesData.map(cat => ({
+          id: cat._id,
+          name: cat.name,
+          slug: normalizeString(cat.name),
+          products: (cat.products || []).map(p => ({
             ...p,
             id: p._id || p.id,
-            hasDiscount,
-            discountPercentage,
-            discountedPrice,
-            normalizedCategory: normalizeString(p.category)
-          };
-        });
+            categoryId: cat._id,
+            categoryName: cat.name,
+            normalizedCategory: normalizeString(cat.name),
+            // Agregar descuentos aleatorios para demo
+            hasDiscount: Math.random() < 0.3,
+            discountPercentage: Math.floor(Math.random() * 21) + 10,
+            get discountedPrice() {
+              return this.hasDiscount
+                ? this.price * (1 - this.discountPercentage / 100)
+                : this.price;
+            }
+          }))
+        }));
 
-        console.log("🧮 Productos procesados:", processed);
+        // Filtrar categorías sin productos
+        const categoriesWithProducts = processedCategories.filter(
+          cat => cat.products.length > 0
+        );
 
-        setProductosConDescuento(processed);
-        setError(null);
+        if (categoriesWithProducts.length === 0) {
+          setNoMenu(true);
+          setCategories([]);
+          setAllProducts([]);
+          setLoading(false);
+          return;
+        }
+
+        setCategories(categoriesWithProducts);
+
+        // Aplanar todos los productos
+        const allProds = categoriesWithProducts.flatMap(cat => cat.products);
+        setAllProducts(allProds);
+
+        // Establecer primera categoría como activa
+        if (categoriesWithProducts.length > 0 && !activeCategory) {
+          setActiveCategory(categoriesWithProducts[0].id);
+        }
+
       } catch (err) {
-        console.error("❌ Error fetching products:", err);
+        console.error("Error fetching business menu:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
-  }, []);
+    fetchBusinessMenu();
+  }, [businessId]);
 
-  // 🔁 Crear refs dinámicas
+  // Crear refs para las categorías
   useEffect(() => {
-    subcatRefs.current = {};
-    setRefsReady(false);
+    categoryRefs.current = {};
+    categories.forEach(cat => {
+      categoryRefs.current[cat.id] = React.createRef();
+    });
+  }, [categories]);
 
-    if (Array.isArray(subcategoriesMap[activeCategory])) {
-      subcategoriesMap[activeCategory].forEach(({ id }) => {
-        subcatRefs.current[id] = React.createRef();
-      });
-      setTimeout(() => setRefsReady(true), 0);
-    }
+  // Productos filtrados por búsqueda
+  const productosFiltrados = useMemo(() => {
+    if (!searchValue) return allProducts;
 
-    console.log("🎯 Categoría activa:", activeCategory);
-    console.log("📍 Subcategorías disponibles:", subcategoriesMap[activeCategory]);
-  }, [activeCategory, subcategoriesMap]);
-
-  // ✅ Filtrado mejorado de productos
-  const productosFiltrados = productosConDescuento.filter((p) => {
     const search = normalizeString(searchValue);
-    return (
+    return allProducts.filter(p =>
       normalizeString(p.name).includes(search) ||
-      normalizeString(p.category).includes(search)
+      normalizeString(p.categoryName).includes(search) ||
+      normalizeString(p.description || "").includes(search)
     );
-  });
+  }, [allProducts, searchValue]);
 
-  // ✅ Establecer primera subcategoría al cambiar categoría
-  useEffect(() => {
-    const firstSubcat = subcategoriesMap[activeCategory]?.[0]?.id;
-    if (firstSubcat) {
-      console.log("🎯 Estableciendo primera subcategoría:", firstSubcat);
-      setActiveSubcategory(firstSubcat);
-    }
-  }, [activeCategory, subcategoriesMap]);
+  // Productos de la categoría activa
+  const productosCategoria = useMemo(() => {
+    if (!activeCategory) return [];
+    const category = categories.find(c => c.id === activeCategory);
+    return category?.products || [];
+  }, [categories, activeCategory]);
 
-  const handleSubcategoryClick = (subcatId) => {
-    setActiveSubcategory(subcatId);
-    const el = subcatRefs.current[subcatId]?.current;
-    if (!el) return;
-    const y = el.offsetTop - 80;
-    
-    // Scroll en el contenedor correcto
-    if (scrollContainerRef?.current) {
-      scrollContainerRef.current.scrollTo({ top: y, behavior: "smooth" });
-    } else {
-      window.scrollTo({ top: y, behavior: "smooth" });
+  // Manejar click en categoría
+  const handleCategoryClick = (categoryId) => {
+    setActiveCategory(categoryId);
+
+    const el = categoryRefs.current[categoryId]?.current;
+    if (el) {
+      const y = el.offsetTop - 80;
+      if (scrollContainerRef?.current) {
+        scrollContainerRef.current.scrollTo({ top: y, behavior: "smooth" });
+      } else {
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
     }
   };
 
-  useEffect(() => {
-    if (!refsReady) return;
-
-    const handleScroll = () => {
-      const categories = subcategoriesMap[activeCategory];
-      if (!categories || !Array.isArray(categories)) return;
-
-      const container = scrollContainerRef?.current;
-      const scrollPos = container ? container.scrollTop + 80 : window.scrollY + 80;
-      let closestSubcat = activeSubcategory;
-      let minDistance = Infinity;
-
-      categories.forEach(({ id }) => {
-        const el = subcatRefs.current[id]?.current;
-        if (!el) return;
-        const distance = Math.abs(el.offsetTop - scrollPos);
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestSubcat = id;
-        }
-      });
-
-      if (closestSubcat !== activeSubcategory)
-        setActiveSubcategory(closestSubcat);
-    };
-
-    const container = scrollContainerRef?.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll, { passive: true });
-      handleScroll();
-      return () => container.removeEventListener("scroll", handleScroll);
-    } else {
-      window.addEventListener("scroll", handleScroll, { passive: true });
-      handleScroll();
-      return () => window.removeEventListener("scroll", handleScroll);
-    }
-  }, [activeCategory, activeSubcategory, refsReady, subcategoriesMap, scrollContainerRef]);
-
+  // Actualizar contadores del carrito
   useEffect(() => {
     setItemCount(cartItems.reduce((acc, i) => acc + (i?.quantity || 0), 0));
-    
+
     setTotalPrice(
       cartItems.reduce((acc, i) => {
         if (!i || !i.product) return acc;
-        
         const price = i.product.discountedPrice || i.product.price || 0;
         const quantity = i.quantity || 0;
-        
         return acc + (price * quantity);
       }, 0)
     );
   }, [cartItems]);
 
-  // 🧩 Render principal
+  // Agregar producto al carrito
+  const handleAddToCart = (product, quantity) => {
+    setCartItems((prev) => {
+      const productId = product.id || product._id;
+
+      if (!productId) {
+        console.error('Producto sin ID:', product);
+        return prev;
+      }
+
+      const idx = prev.findIndex((i) => {
+        const itemId = i.product?.id || i.product?._id;
+        return itemId === productId;
+      });
+
+      let updated = [...prev];
+
+      if (idx >= 0) {
+        updated[idx] = {
+          ...updated[idx],
+          quantity: updated[idx].quantity + quantity,
+        };
+      } else {
+        updated.push({
+          product: {
+            ...product,
+            id: productId,
+            image: product.image || ''
+          },
+          quantity
+        });
+      }
+
+      localStorage.setItem("cartItems", JSON.stringify(updated));
+      return updated;
+    });
+    setSelectedProduct(null);
+  };
+
+  // Construir subcategoriesMap para CategoryTabs (compatibilidad)
+  const subcategoriesMap = useMemo(() => {
+    const map = {};
+    categories.forEach(cat => {
+      map[cat.slug] = [{
+        id: cat.id,
+        name: cat.name,
+        label: cat.name
+      }];
+    });
+    return map;
+  }, [categories]);
+
+  // Render principal
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando menú...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center text-red-600">
+          <p className="text-xl mb-2">Error al cargar el menú</p>
+          <p className="text-sm text-gray-500">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (noMenu || categories.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="text-center px-6">
+          <div className="text-6xl mb-4">🍽️</div>
+          <p className="text-xl font-medium text-gray-700 mb-2">
+            Este negocio aún no tiene productos
+          </p>
+          <p className="text-gray-500">
+            El menú estará disponible pronto
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showCartScreen) {
+    return (
+      <CartScreen
+        cartItems={cartItems}
+        onBack={() => setShowCartScreen(false)}
+      />
+    );
+  }
+
   return (
     <div>
-      {loading ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">Cargando productos...</p>
-          </div>
-        </div>
-      ) : error ? (
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center text-red-600">
-            <p className="text-xl mb-2">⚠️ Error al cargar productos</p>
-            <p className="text-sm">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
-      ) : showCartScreen ? (
-        <CartScreen
-          cartItems={cartItems}
-          onBack={() => setShowCartScreen(false)}
-        />
-      ) : (
-        <>
+      {/* Header con info del negocio */}
+      <CategoryIcons
+        activeCategory={activeCategory}
+        setActiveCategory={handleCategoryClick}
+        cartItems={cartItems}
+        isTienda={true}
+        scrollContainerRef={scrollContainerRef}
+        selectedBusinessFromMap={selectedBusinessFromMap}
+        type={type}
+        categories={categories}
+      />
 
-        
+      <HeroBannerTienda business={selectedBusinessFromMap} />
 
-          {/* 🔥 PASAR selectedBusinessFromMap */}
-          <CategoryIcons
-            activeCategory={activeCategory}
-            setActiveCategory={(cat) => {
-              console.log("🖱️ Categoría seleccionada:", cat);
-              setActiveCategory(cat);
-              
-              if (scrollContainerRef?.current) {
-                scrollContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
-              } else {
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }
-            }}
-            cartItems={cartItems}
+      {/* Tabs de categorías */}
+      <CategoryTabs
+        categories={categories}
+        activeCategory={activeCategory}
+        onCategoryClick={handleCategoryClick}
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+      />
+
+      {/* Productos */}
+      {searchValue ? (
+        // Resultados de búsqueda
+        productosFiltrados.length > 0 ? (
+          <ProductGrid
+            products={productosFiltrados}
             isTienda={true}
-            scrollContainerRef={scrollContainerRef}
-            selectedBusinessFromMap={selectedBusinessFromMap} // 🔥 NUEVA PROP
-             type={type} // ✅ PASAR EL TIPO
+            onProductClick={setSelectedProduct}
+            onToggleFavorite={toggleFavorite}
           />
-
-          <HeroBannerTienda />
-
-          <CategoryTabs
-            activeCategory={activeCategory}
-            activeSubcategory={activeSubcategory}
-            onSubcategoryClick={handleSubcategoryClick}
-            searchValue={searchValue}
-            setSearchValue={setSearchValue}
-            subcatRefs={subcatRefs}
-            subcategoriesMap={subcategoriesMap}
-          />
-
-          {searchValue ? (
-            productosFiltrados.length > 0 ? (
-              <ProductGrid
-                products={productosFiltrados}
-                isTienda={true}
-                onProductClick={setSelectedProduct}
-                onToggleFavorite={toggleFavorite}
-              />
-            ) : (
-              <div className="px-4 py-6 text-gray-500">
-                No se encontraron productos.
-              </div>
-            )
-          ) : (
-            <div key={activeCategory}>
-              {subcategoriesMap[activeCategory]?.map(({ id, name }) => {
-                const productosSubcat = productosConDescuento.filter((p) => {
-                  const matchCategory = p.normalizedCategory === activeCategory;
-                  const matchSubcategory = normalizeString(p.subcategory || "") === normalizeString(name);
-
-                  return matchCategory && matchSubcategory;
-                });
-
-                if (!productosSubcat.length) return null;
-
-                return (
-                  <div
-                    key={id}
-                    ref={subcatRefs.current[id]}
-                    data-subcat={id}
-                    className="mb-6"
-                  >
-                    <h2 className="text-xl font-bold text-gray-700 px-4 mt-6 mb-2">
-                      {name}
-                    </h2>
-                    <ProductGrid
-                      products={productosSubcat}
-                      isTienda={true}
-                      onProductClick={setSelectedProduct}
-                      onToggleFavorite={toggleFavorite}
-                    />
-                  </div>
-                );
-              })}
+        ) : (
+          <div className="px-4 py-12 text-center">
+            <div className="text-4xl mb-3">🔍</div>
+            <p className="text-gray-500">No se encontraron productos para "{searchValue}"</p>
+          </div>
+        )
+      ) : (
+        // Productos por categoría
+        <div className="pb-24">
+          {categories.map(category => (
+            <div
+              key={category.id}
+              ref={categoryRefs.current[category.id]}
+              className="mb-6"
+            >
+              <h2 className="text-xl font-bold text-gray-700 px-4 mt-6 mb-2">
+                {category.name}
+              </h2>
+              {category.products.length > 0 ? (
+                <ProductGrid
+                  products={category.products}
+                  isTienda={true}
+                  onProductClick={setSelectedProduct}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ) : (
+                <div className="px-4 py-4 text-gray-400 text-sm">
+                  No hay productos en esta categoría
+                </div>
+              )}
             </div>
-          )}
+          ))}
+        </div>
+      )}
 
-          <ProductModal
-            product={selectedProduct}
-            isOpen={!!selectedProduct}
-            onClose={() => setSelectedProduct(null)}
-            onAddToCart={(product, quantity) => {
-              setCartItems((prev) => {
-                const productId = product.id || product._id;
-                
-                if (!productId) {
-                  console.error('❌ Producto sin ID:', product);
-                  return prev;
-                }
+      {/* Modal de producto */}
+      <ProductModal
+        product={selectedProduct}
+        isOpen={!!selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddToCart={handleAddToCart}
+        isFavorite={selectedProduct && favoriteIds.has(selectedProduct.id)}
+        onToggleFavorite={() => toggleFavorite(selectedProduct)}
+      />
 
-                const idx = prev.findIndex((i) => {
-                  const itemId = i.product?.id || i.product?._id;
-                  return itemId === productId;
-                });
-
-                let updated = [...prev];
-                
-                if (idx >= 0) {
-                  updated[idx] = {
-                    ...updated[idx],
-                    quantity: updated[idx].quantity + quantity,
-                  };
-                } else {
-                  updated.push({ 
-                    product: {
-                      ...product,
-                      id: productId,
-                      image: product.image || ''
-                    }, 
-                    quantity 
-                  });
-                }
-
-                localStorage.setItem("cartItems", JSON.stringify(updated));
-                return updated;
-              });
-              setSelectedProduct(null);
-            }}
-            isFavorite={selectedProduct && favoriteIds.has(selectedProduct.id)}
-            onToggleFavorite={() => toggleFavorite(selectedProduct)}
-          />
-
-          {itemCount > 0 && !selectedProduct && (
-            <CartSummaryModal
-              itemCount={itemCount}
-              totalPrice={totalPrice}
-              cartItems={cartItems}
-              onViewCart={() => setShowCartScreen(true)}
-            />
-          )}
-        </>
+      {/* Resumen del carrito */}
+      {itemCount > 0 && !selectedProduct && (
+        <CartSummaryModal
+          itemCount={itemCount}
+          totalPrice={totalPrice}
+          cartItems={cartItems}
+          onViewCart={() => setShowCartScreen(true)}
+        />
       )}
     </div>
   );
