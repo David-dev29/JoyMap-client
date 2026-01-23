@@ -227,9 +227,11 @@ function Food({
           product: {
             ...product,
             id: productId,
-            image: product.image || ''
+            image: product.image || '',
+            businessId: businessId // Incluir businessId del negocio actual
           },
-          quantity
+          quantity,
+          businessId: businessId // También a nivel de item para fácil acceso
         });
       }
 

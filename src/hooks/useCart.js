@@ -22,8 +22,11 @@ export function useCart() {
 
   /**
    * Agregar producto al carrito
+   * @param {Object} product - Producto a agregar (debe incluir businessId)
+   * @param {number} quantity - Cantidad
+   * @param {string} businessId - ID del negocio (opcional si ya está en product)
    */
-  const addItem = useCallback((product, quantity = 1) => {
+  const addItem = useCallback((product, quantity = 1, businessId = null) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex(
         (item) => (item.product.id || item.product._id) === (product.id || product._id)
@@ -39,8 +42,15 @@ export function useCart() {
         return updated;
       }
 
-      // Agregar nuevo item
-      return [...prev, { product, quantity }];
+      // Determinar businessId
+      const itemBusinessId = businessId || product.businessId;
+
+      // Agregar nuevo item con businessId
+      return [...prev, {
+        product: { ...product, businessId: itemBusinessId },
+        quantity,
+        businessId: itemBusinessId
+      }];
     });
   }, []);
 

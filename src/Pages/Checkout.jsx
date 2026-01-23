@@ -187,7 +187,15 @@ export default function Checkout() {
         quantity: item.quantity
       }));
 
+      // Obtener businessId del carrito (todos los items son del mismo negocio)
+      const businessId = cartItems[0]?.businessId || cartItems[0]?.product?.businessId;
+
+      if (!businessId) {
+        throw new Error('No se pudo identificar el negocio. Por favor, vuelve a agregar los productos.');
+      }
+
       const orderData = {
+        businessId: businessId,
         customerId: currentUser._id,
         customer: {
           name: currentUser.name || name,
