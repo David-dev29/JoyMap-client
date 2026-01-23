@@ -22,6 +22,19 @@ import { useAddresses } from '../hooks/useAddresses';
 import { createOrder } from '../services/orderService';
 import { PAYMENT_METHODS, DELIVERY_FEE } from '../constants';
 
+// Helper para normalizar URLs de imágenes
+const normalizeImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  // Si tiene dominio pero no protocolo
+  if (url.includes('cloudfront.net') || url.includes('amazonaws.com') || url.includes('.com/')) {
+    return `https://${url}`;
+  }
+  return url;
+};
+
 // Sección colapsable reutilizable
 function CollapsibleSection({ title, icon: Icon, children, defaultOpen = false, badge }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -152,10 +165,10 @@ export default function Checkout() {
 
     try {
       let currentUser = user;
+      let authToken = null;
 
       // Si no está autenticado, registrar primero
       if (!isAuthenticated) {
-        console.log('📝 Registrando usuario...');
         const registerResult = await quickRegister(name.trim(), phone.trim(), selectedAddress);
 
         if (!registerResult.success) {
@@ -163,7 +176,7 @@ export default function Checkout() {
         }
 
         currentUser = registerResult.user;
-        console.log('✅ Usuario registrado:', currentUser);
+        authToken = registerResult.token; // Obtener token directamente del registro
       }
 
       // Preparar datos de la orden
@@ -196,11 +209,9 @@ export default function Checkout() {
         coupon: coupon || null
       };
 
-      console.log('📦 Creando orden:', orderData);
+      // Pasar el token directamente si se acaba de registrar
+      const result = await createOrder(orderData, authToken);
 
-      const result = await createOrder(orderData);
-
-      console.log('✅ Orden creada:', result);
       clearCart();
       navigate('/deliveryScreen', { replace: true });
 
@@ -254,17 +265,26 @@ export default function Checkout() {
               <div key={item.product.id || item.product._id} className="flex gap-3 py-2 border-b border-gray-100 last:border-0">
                 {/* Imagen */}
                 <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                  {item.product.image ? (
-                    <img
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-2xl">
-                      🛒
-                    </div>
-                  )}
+                  {(() => {
+                    const imageUrl = normalizeImageUrl(item.product.image || item.product.imageUrl);
+                    return imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null;
+                  })()}
+                  <div
+                    className="w-full h-full items-center justify-center text-2xl"
+                    style={{ display: normalizeImageUrl(item.product.image || item.product.imageUrl) ? 'none' : 'flex' }}
+                  >
+                    🍽️
+                  </div>
                 </div>
 
                 {/* Info */}

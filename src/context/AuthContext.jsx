@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
           phone: result.user.phone
         }));
 
-        return { success: true, user: result.user, isNewUser: result.isNewUser };
+        return { success: true, user: result.user, token: result.token, isNewUser: result.isNewUser };
       } else {
         throw new Error(result.message || 'Error en registro');
       }
