@@ -3,8 +3,13 @@ import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Circle } from 'r
 import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Supercluster from "supercluster";
-import { Navigation } from 'lucide-react';
+import { Navigation, AlertCircle } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
+
+// Hooks personalizados
+import { useGeolocation } from '../../hooks/useGeolocation';
+import { useBusinesses } from '../../hooks/useBusinesses';
+import { DEFAULT_LOCATION, MAP_CONFIG, DEFAULT_BUSINESS_EMOJI } from '../../constants';
 
 // 🎨 Marker de ubicación del usuario
 const createUserLocationIcon = () => {
@@ -28,19 +33,19 @@ const createUserLocationIcon = () => {
 const createMarkerIcon = (business) => {
   const html = renderToStaticMarkup(
     <div className="flex flex-col items-center">
-      <div className="relative bg-white rounded-full shadow-lg border-2 border-red-500 
+      <div className="relative bg-white rounded-full shadow-lg border-2 border-red-500
                       hover:scale-110 transition-transform cursor-pointer">
         <div className="w-10 h-10 flex items-center justify-center">
           <span className="text-xl">{business.emoji}</span>
         </div>
         {business.discount && (
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] 
+          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px]
                           font-bold px-1.5 py-0.5 rounded-full">
             -{business.discount}%
           </div>
         )}
         {business.isOpen && (
-          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 
+          <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500
                           rounded-full border-2 border-white"></div>
         )}
       </div>
@@ -67,7 +72,7 @@ const createMarkerIcon = (business) => {
 // 🎨 Cluster minimalista
 const createClusterIcon = (count) => {
   const size = count < 10 ? 36 : count < 50 ? 44 : 52;
-  
+
   const html = renderToStaticMarkup(
     <div className="relative">
       <div className={`bg-red-500 rounded-full shadow-lg flex items-center justify-center
@@ -91,22 +96,19 @@ const createClusterIcon = (count) => {
 // 🗺️ Componente para centrar el mapa
 function MapUpdater({ userLocation, initialBusiness }) {
   const map = useMap();
-  
+
   useEffect(() => {
     if (userLocation && !initialBusiness) {
-      map.setView(userLocation, 16, { animate: true, duration: 1 });
+      map.setView([userLocation.lat, userLocation.lng], 16, { animate: true, duration: 1 });
     }
   }, [userLocation, map, initialBusiness]);
-  
-  // ✅ Si hay initialBusiness, centrar en él
+
   useEffect(() => {
     if (initialBusiness) {
-      // El negocio puede venir del backend, necesitamos sus coordenadas
-      // Por ahora, si no las tiene, no hacemos nada
       console.log('📍 Initial business detectado:', initialBusiness);
     }
   }, [initialBusiness, map]);
-  
+
   return null;
 }
 
@@ -132,8 +134,8 @@ function MapMarkers({ businesses, onBusinessClick, onClusterClick }) {
     if (!bounds || !businesses.length) return [];
 
     const cluster = new Supercluster({
-      radius: 60,
-      maxZoom: 18,
+      radius: MAP_CONFIG.clusterRadius,
+      maxZoom: MAP_CONFIG.maxZoom,
     });
 
     cluster.load(businesses);
@@ -175,82 +177,74 @@ function MapMarkers({ businesses, onBusinessClick, onClusterClick }) {
 }
 
 // 🎯 Componente principal
-export default function HomeMap({ 
+export default function HomeMap({
   selectedCategory,
   type = "comida",
   onBusinessOpen,
   initialBusiness
 }) {
-  const [businesses, setBusinesses] = useState([]);
   const [mapRef, setMapRef] = useState(null);
-  const [userLocation, setUserLocation] = useState(null);
 
-  const initialCenter = [19.03908, -98.33858];
-  const initialZoom = 17;
+  // 📍 Usar hook de geolocalización
+  const {
+    location: userLocation,
+    loading: locationLoading,
+    error: locationError,
+    permissionStatus,
+    requestLocation
+  } = useGeolocation({
+    fallback: DEFAULT_LOCATION
+  });
 
-  // 📍 Obtener ubicación del usuario
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation([latitude, longitude]);
-          console.log("📍 Ubicación detectada:", latitude, longitude);
-        },
-        (error) => {
-          console.log("⚠️ No se pudo obtener ubicación, usando predeterminada");
-          setUserLocation(initialCenter);
+  // 📦 Usar hook de negocios
+  const {
+    businesses: rawBusinesses,
+    loading: businessesLoading,
+    error: businessesError,
+    businessesWithCoords
+  } = useBusinesses(type);
+
+  // Convertir negocios a formato GeoJSON para el mapa
+  const businesses = useMemo(() => {
+    console.log(`🗺️ Procesando ${rawBusinesses.length} negocios para el mapa...`);
+
+    const points = rawBusinesses
+      .filter(b => {
+        const hasCoords = b.location?.coordinates &&
+                         Array.isArray(b.location.coordinates) &&
+                         b.location.coordinates.length === 2;
+        if (!hasCoords) {
+          console.warn(`⚠️ Negocio sin coordenadas válidas: ${b.name}`, b.location);
         }
-      );
-    } else {
-      setUserLocation(initialCenter);
-    }
-  }, []);
+        return hasCoords;
+      })
+      .map(b => ({
+        type: "Feature",
+        properties: {
+          id: b._id,
+          name: b.name,
+          emoji: b.mapIcon || b.emoji || DEFAULT_BUSINESS_EMOJI[type] || '🏪',
+          rating: b.rating || 4.5,
+          isOpen: b.isOpen !== false,
+          discount: b.discount || null,
+          categorySlug: b.category?.slug,
+          categoryName: b.category?.name,
+          categoryIcon: b.category?.icon,
+          logo: b.logo,
+          banner: b.banner,
+          deliveryTime: b.deliveryTime,
+          deliveryCost: b.deliveryCost,
+          minOrderAmount: b.minOrderAmount,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: b.location.coordinates,
+        },
+      }));
 
-  // ✅ Cargar negocios según el tipo
-  useEffect(() => {
-    const loadBusinesses = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/businesses/type/${type}`);
-        const { response } = await res.json();
-
-        console.log(`📦 Negocios de tipo "${type}":`, response);
-
-        const points = response
-          .filter(b => b.location?.coordinates)
-          .map(b => ({
-            type: "Feature",
-            properties: {
-              id: b._id,
-              name: b.name,
-              emoji: b.mapIcon || b.emoji || (type === 'tienda' ? '🏪' : '🍔'),
-              rating: b.rating || 4.5,
-              isOpen: b.isOpen !== false,
-              discount: b.discount || null,
-              categorySlug: b.category?.slug,
-              categoryName: b.category?.name,
-              categoryIcon: b.category?.icon,
-              logo: b.logo,
-              banner: b.banner,
-              deliveryTime: b.deliveryTime,
-              deliveryCost: b.deliveryCost,
-              minOrderAmount: b.minOrderAmount,
-            },
-            geometry: {
-              type: "Point",
-              coordinates: b.location.coordinates,
-            },
-          }));
-
-        setBusinesses(points);
-        console.log(`✅ ${points.length} negocios de tipo "${type}" procesados`);
-      } catch (error) {
-        console.error("❌ Error:", error);
-      }
-    };
-
-    loadBusinesses();
-  }, [type]);
+    console.log(`✅ ${points.length} negocios con coordenadas válidas`);
+    return points;
+  }, [rawBusinesses, type]);
 
   // 🔥 FILTRAR NEGOCIOS SEGÚN LA CATEGORÍA SELECCIONADA
   const filteredBusinesses = useMemo(() => {
@@ -258,7 +252,7 @@ export default function HomeMap({
       console.log("🔍 Mostrando todos los negocios:", businesses.length);
       return businesses;
     }
-    
+
     const filtered = businesses.filter(b => b.properties.categorySlug === selectedCategory);
     console.log(`🔍 Filtrando por "${selectedCategory}":`, filtered.length, "negocios");
     return filtered;
@@ -266,38 +260,37 @@ export default function HomeMap({
 
   // 🎯 Handle business click
   const handleBusinessClick = (business, lat, lng) => {
-  const buildImageUrl = (path) => {
-    if (!path) return null;
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-      return path;
+    const buildImageUrl = (path) => {
+      if (!path) return null;
+      if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+      }
+      return `https://${path}`;
+    };
+
+    const businessData = {
+      id: business.id,
+      name: business.name,
+      rating: business.rating,
+      category: business.categoryName || 'Sin categoría',
+      categorySlug: business.categorySlug,
+      logo: buildImageUrl(business.logo),
+      banner: buildImageUrl(business.banner),
+      deliveryTime: business.deliveryTime || '30-40 min',
+      deliveryCost: business.deliveryCost || 25,
+      minOrderAmount: business.minOrderAmount || 50,
+      isOpen: business.isOpen,
+      emoji: business.emoji,
+    };
+
+    console.log("🖱️ Business clickeado:", businessData);
+
+    onBusinessOpen?.(businessData);
+
+    if (mapRef) {
+      mapRef.setView([lat, lng], 16, { animate: true });
     }
-    return `https://${path}`;
   };
-
-  const businessData = {
-    id: business.id,
-    name: business.name,
-    rating: business.rating,
-    // ✅ FIX: Solo pasar el nombre de la categoría
-    category: business.categoryName || 'Sin categoría',
-    categorySlug: business.categorySlug,
-    logo: buildImageUrl(business.logo),
-    banner: buildImageUrl(business.banner),
-    deliveryTime: business.deliveryTime || '30-40 min',
-    deliveryCost: business.deliveryCost || 25,
-    minOrderAmount: business.minOrderAmount || 50,
-    isOpen: business.isOpen,
-    emoji: business.emoji,
-  };
-
-  console.log("🖱️ Business clickeado:", businessData);
-  
-  onBusinessOpen?.(businessData);
-  
-  if (mapRef) {
-    mapRef.setView([lat, lng], 16, { animate: true });
-  }
-};
 
   // 🎯 Handle cluster click
   const handleClusterClick = (lat, lng) => {
@@ -309,22 +302,60 @@ export default function HomeMap({
   // 🎯 Recentrar mapa
   const handleRecenter = () => {
     if (mapRef && userLocation) {
-      mapRef.setView(userLocation, 16, { animate: true, duration: 0.5 });
+      mapRef.setView([userLocation.lat, userLocation.lng], 16, { animate: true, duration: 0.5 });
     }
   };
 
+  // Centro inicial del mapa
+  const initialCenter = userLocation
+    ? [userLocation.lat, userLocation.lng]
+    : [DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lng];
+
   return (
     <div className="relative w-full h-[calc(100vh-64px)]">
+      {/* Indicador de carga de negocios */}
+      {businessesLoading && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-[500]
+                        bg-white px-4 py-2 rounded-full shadow-lg">
+          <span className="text-sm text-gray-600">Cargando negocios...</span>
+        </div>
+      )}
+
+      {/* Error de negocios */}
+      {businessesError && (
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-[500]
+                        bg-red-50 px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-red-500" />
+          <span className="text-sm text-red-600">Error al cargar negocios</span>
+        </div>
+      )}
+
+      {/* Indicador de permisos de ubicación */}
+      {permissionStatus === 'denied' && (
+        <div className="absolute top-20 left-4 right-4 z-[500]
+                        bg-yellow-50 px-4 py-2 rounded-lg shadow-lg">
+          <p className="text-sm text-yellow-700">
+            Activa la ubicación para ver negocios cerca de ti
+          </p>
+          <button
+            onClick={requestLocation}
+            className="text-sm text-blue-600 underline mt-1"
+          >
+            Intentar de nuevo
+          </button>
+        </div>
+      )}
+
       <MapContainer
         center={initialCenter}
-        zoom={initialZoom}
+        zoom={MAP_CONFIG.defaultZoom}
         className="w-full h-full"
         zoomControl={false}
         ref={setMapRef}
       >
         <MapUpdater userLocation={userLocation} initialBusiness={initialBusiness} />
-        
-        <TileLayer 
+
+        <TileLayer
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         />
@@ -333,12 +364,12 @@ export default function HomeMap({
         {userLocation && (
           <>
             <Marker
-              position={userLocation}
+              position={[userLocation.lat, userLocation.lng]}
               icon={createUserLocationIcon()}
               zIndexOffset={1000}
             />
             <Circle
-              center={userLocation}
+              center={[userLocation.lat, userLocation.lng]}
               radius={300}
               pathOptions={{
                 color: '#3B82F6',
@@ -359,7 +390,7 @@ export default function HomeMap({
       </MapContainer>
 
       {/* Controles de zoom y recentrar */}
-      <div className="absolute bottom-8 right-4 flex flex-col gap-1.5 z-[00]">
+      <div className="absolute bottom-8 right-4 flex flex-col gap-1.5 z-[400]">
         <button
           onClick={handleRecenter}
           className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center
@@ -392,6 +423,15 @@ export default function HomeMap({
         </button>
       </div>
 
+      {/* Debug info (solo en desarrollo) */}
+      {import.meta.env.DEV && (
+        <div className="absolute bottom-24 left-4 z-[400] bg-black/70 text-white text-xs p-2 rounded">
+          <div>📍 Ubicación: {userLocation ? `${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` : 'Cargando...'}</div>
+          <div>🏪 Negocios: {filteredBusinesses.length}/{businesses.length}</div>
+          <div>🔑 Permisos: {permissionStatus}</div>
+        </div>
+      )}
+
       <style jsx global>{`
         .custom-marker,
         .cluster-marker,
@@ -399,7 +439,7 @@ export default function HomeMap({
           background: transparent !important;
           border: none !important;
         }
-        
+
         .leaflet-container {
           font-family: inherit;
           z-index: 0 !important;

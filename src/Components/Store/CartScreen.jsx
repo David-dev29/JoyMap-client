@@ -225,7 +225,7 @@ export default function CartScreen() {
               </div>
             </div>
             <button
-              onClick={() => navigate("/address", { replace: true })}
+              onClick={() => navigate("/checkout", { replace: true })}
               className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-orange-600 text-white text-sm font-semibold shadow-md hover:bg-orange-700 active:scale-95 transition-all w-full sm:w-auto"
             >
               <CheckCircle className="w-5 h-5" />

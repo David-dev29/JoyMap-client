@@ -12,6 +12,7 @@ import Favorites from "./Components/Store/Favorites.jsx";
 import DeliveryOrder from "./Components/Store/DeliveryOrder.jsx";
 import AccountSummary from "./Components/Store/AccountSummary.jsx";
 import Profile from "./Pages/Profile.jsx";
+import Checkout from "./Pages/Checkout.jsx";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "cart",
         element: <CartScreen />,
+      },
+      {
+        path: "checkout",
+        element: <Checkout />,
       },
       {
         path: "address",
