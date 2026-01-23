@@ -1,10 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ChevronRight, ChevronDown, TruckElectric } from 'lucide-react';
+import { X, ChevronRight, ChevronDown, TruckElectric, User, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CartModal from './CartModal';
+import { useAuth } from '../../context/AuthContext';
+import { authPost } from '../../utils/authFetch';
 
 export default function DeliveryOrder() {
   const navigate = useNavigate();
+  const { user, isAuthenticated, quickRegister } = useAuth();
 
   const [selectedTip, setSelectedTip] = useState('MXN 5');
   const [showMyData, setShowMyData] = useState(false);
@@ -15,9 +18,12 @@ export default function DeliveryOrder() {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // ✅ Cargar datos del carrito y usuario
+  // Campos para usuario no autenticado
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+
+  // Cargar datos del carrito
   const [cartItems, setCartItems] = useState([]);
-  const [userData, setUserData] = useState(null);
   const [userAddress, setUserAddress] = useState('');
 
   const dropdownRef = useRef(null);
@@ -35,25 +41,26 @@ export default function DeliveryOrder() {
     { label: 'Transferencia', value: 'transfer' },
   ];
 
-  // ✅ Cargar datos al montar
+  // Cargar datos al montar
   useEffect(() => {
     const storedCart = localStorage.getItem('cartItems');
     if (storedCart) {
       setCartItems(JSON.parse(storedCart));
     }
 
-    const storedUser = localStorage.getItem('userData');
-    if (storedUser) {
-      setUserData(JSON.parse(storedUser));
-    }
-
     const storedAddress = localStorage.getItem('userAddress');
     if (storedAddress) {
       setUserAddress(storedAddress);
     }
-  }, []);
 
-  // ✅ Calcular totales
+    // Pre-llenar datos si el usuario está autenticado
+    if (user) {
+      setName(user.name || '');
+      setPhone(user.phone || '');
+    }
+  }, [user]);
+
+  // Calcular totales
   const subtotal = cartItems.reduce((acc, item) => {
     const price = item.product.price || 0;
     const quantity = item.quantity || 0;
@@ -61,22 +68,28 @@ export default function DeliveryOrder() {
   }, 0);
 
   const deliveryFee = 15;
-  
+
   const getTipAmount = () => {
     if (selectedTip === 'none') return 0;
     if (selectedTip === 'MXN 5') return 5;
     if (selectedTip === 'MXN 10') return 10;
-    return 0; // Para "other" necesitarías un input adicional
+    return 0;
   };
 
   const total = subtotal + deliveryFee + getTipAmount();
 
-  // ✅ Crear orden
+  // Crear orden con autenticación
   const handleConfirmAddress = async () => {
-    if (!userData) {
-      alert('Por favor agrega tus datos primero');
-      navigate('/new-user-info');
-      return;
+    // Validar campos requeridos
+    if (!isAuthenticated) {
+      if (!name.trim() || !phone.trim()) {
+        alert('Por favor ingresa tu nombre y teléfono');
+        return;
+      }
+      if (phone.length < 10) {
+        alert('El teléfono debe tener al menos 10 dígitos');
+        return;
+      }
     }
 
     if (!selectedPayment) {
@@ -93,6 +106,22 @@ export default function DeliveryOrder() {
     setLoading(true);
 
     try {
+      let currentUser = user;
+
+      // Si no está autenticado, registrar primero
+      if (!isAuthenticated) {
+        console.log('📝 Registrando usuario...');
+        const registerResult = await quickRegister(name.trim(), phone.trim(), userAddress || null);
+
+        if (!registerResult.success) {
+          throw new Error(registerResult.error || 'Error al registrar usuario');
+        }
+
+        currentUser = registerResult.user;
+        console.log('✅ Usuario registrado:', currentUser);
+      }
+
+      // Preparar datos de la orden
       const orderItems = cartItems.map(item => ({
         productId: item.product.id || item.product._id,
         name: item.product.name,
@@ -101,11 +130,11 @@ export default function DeliveryOrder() {
       }));
 
       const orderData = {
-        customerId: userData.id, // ✅ Ahora envías el ID del usuario
-  customer: {
-    name: userData.name,
-    phone: userData.phone
-  },
+        customerId: currentUser._id,
+        customer: {
+          name: currentUser.name,
+          phone: currentUser.phone
+        },
         items: orderItems,
         subtotal: subtotal,
         deliveryFee: deliveryFee,
@@ -124,13 +153,11 @@ export default function DeliveryOrder() {
 
       console.log('📦 Creando orden:', orderData);
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData)
-      });
+      // Crear orden con token de autorización
+      const response = await authPost(
+        `${import.meta.env.VITE_API_URL}/api/orders/create`,
+        orderData
+      );
 
       const result = await response.json();
 
@@ -195,13 +222,63 @@ export default function DeliveryOrder() {
 
         {/* My Data Section */}
         <div>
-          <button 
+          <button
             onClick={() => setShowMyData(!showMyData)}
             className="flex items-center justify-between w-full text-left"
           >
-            <h2 className="font-semibold text-gray-900">Mis datos</h2>
+            <h2 className="font-semibold text-gray-900">
+              Mis datos {isAuthenticated && <span className="text-green-600 text-sm font-normal">(verificado)</span>}
+            </h2>
             <ChevronDown className={`w-5 h-5 text-gray-600 transition-transform ${showMyData ? 'rotate-180' : ''}`} />
           </button>
+
+          {/* Formulario de datos - siempre visible si no está autenticado, o expandible si está autenticado */}
+          {(showMyData || !isAuthenticated) && (
+            <div className="mt-3 space-y-3">
+              {/* Campo Nombre */}
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Nombre completo"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  disabled={isAuthenticated}
+                  maxLength={50}
+                  className={`w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    isAuthenticated ? 'bg-gray-100 text-gray-600' : 'bg-white'
+                  }`}
+                />
+              </div>
+
+              {/* Campo Teléfono */}
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div className="flex">
+                  <span className="inline-flex items-center px-3 py-3 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-600 text-sm">
+                    +52
+                  </span>
+                  <input
+                    type="tel"
+                    placeholder="Teléfono (10 dígitos)"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    disabled={isAuthenticated}
+                    maxLength={10}
+                    className={`flex-1 pl-3 pr-3 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      isAuthenticated ? 'bg-gray-100 text-gray-600' : 'bg-white'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {!isAuthenticated && (
+                <p className="text-xs text-gray-500">
+                  Al confirmar, crearemos tu cuenta automáticamente
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Comment Section */}
@@ -314,7 +391,7 @@ export default function DeliveryOrder() {
       {/* Bottom Order Button */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4">
         <div className="max-w-sm mx-auto">
-          <button 
+          <button
             className={`w-full py-4 rounded-lg font-semibold text-lg transition-colors ${
               loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'
             } text-white`}
@@ -328,9 +405,9 @@ export default function DeliveryOrder() {
 
       {/* Modal */}
       {isCartModalOpen && (
-        <CartModal 
+        <CartModal
           onClose={() => setIsCartModalOpen(false)}
-          onGoToCart={handleGoToCart} 
+          onGoToCart={handleGoToCart}
         />
       )}
 

@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { ChevronLeft, User, Phone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export default function AddUserInfo() {
   const navigate = useNavigate();
+  const { quickRegister } = useAuth();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,36 +24,13 @@ export default function AddUserInfo() {
     setLoading(true);
 
     try {
-      // ✅ Crear usuario en el backend
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/users/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name.trim(),
-          phone: phone.trim()
-        })
-      });
+      const result = await quickRegister(name.trim(), phone.trim());
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        // Guardar usuario en localStorage (incluye el ID)
-        const userData = {
-          id: result.user._id,
-          name: result.user.name,
-          phone: result.user.phone
-        };
-        
-        localStorage.setItem('userData', JSON.stringify(userData));
-        
-        console.log('✅ Usuario guardado:', userData);
-        
-        // Regresar a la pantalla de dirección
+      if (result.success) {
+        console.log('Usuario registrado:', result.user);
         navigate('/address', { replace: true });
       } else {
-        throw new Error(result.message || 'Error al crear usuario');
+        throw new Error(result.error || 'Error al crear usuario');
       }
     } catch (error) {
       console.error('Error al guardar datos:', error);

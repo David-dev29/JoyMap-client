@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nrefactor: move hardcoded URLs and API keys to environment variables\n\n- Create .env file with VITE_API_URL, VITE_OPENCAGE_KEY, VITE_RADAR_KEY\n- Replace all hardcoded 192.168.100.7:3000 URLs with import.meta.env.VITE_API_URL\n- Move OpenCage and Radar.io API keys to environment variables\n- Configure vite server.host: true for mobile testing on local network\n- Update .gitignore to exclude .vite directory\n- Remove .vite from git tracking\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}

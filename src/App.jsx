@@ -11,6 +11,7 @@ import AddUserInfo from "./Components/Store/AddUserInfo.jsx";
 import Favorites from "./Components/Store/Favorites.jsx";
 import DeliveryOrder from "./Components/Store/DeliveryOrder.jsx";
 import AccountSummary from "./Components/Store/AccountSummary.jsx";
+import Profile from "./Pages/Profile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
       {
         path: "favoritos",
         element: <Favorites />,
+      },
+      {
+        path: "profile",
+        element: <Profile />,
       },
     ],
   },

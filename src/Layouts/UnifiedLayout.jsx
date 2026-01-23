@@ -6,7 +6,7 @@ import { useState } from "react";
 export default function HeaderUnifiedLayout() {
   const [searchComponent, setSearchComponent] = useState(null);
   const location = useLocation();
-  const hideHeaderOnRoutes = ["/cart", "/address", "/deliveryScreen", "/new-address", "/new-user-info", "/favoritos", "/deliveryOrder", "/accountSummary"];
+  const hideHeaderOnRoutes = ["/cart", "/address", "/deliveryScreen", "/new-address", "/new-user-info", "/favoritos", "/deliveryOrder", "/accountSummary", "/profile"];
 
   const shouldHideHeader = hideHeaderOnRoutes.includes(location.pathname);
 

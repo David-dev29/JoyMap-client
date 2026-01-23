@@ -2,14 +2,17 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App';
+import { AuthProvider } from './context/AuthContext';
 import { FavoritesProvider } from './Components/Store/FavoritosContext';
 
 // Montar tu aplicación
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <FavoritesProvider>
-      <App />
-    </FavoritesProvider>
+    <AuthProvider>
+      <FavoritesProvider>
+        <App />
+      </FavoritesProvider>
+    </AuthProvider>
   </StrictMode>
 );
 
