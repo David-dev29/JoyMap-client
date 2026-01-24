@@ -28,7 +28,7 @@ function TimelineStep({ icon: Icon, title, subtitle, isCompleted, isActive, isLa
             isCompleted
               ? 'bg-success text-white'
               : isActive
-              ? 'bg-primary-500 text-white'
+              ? 'bg-[#E53935] text-white'
               : 'bg-gray-200 text-gray-400'
           }`}
           initial={false}
@@ -73,8 +73,8 @@ function DeliveryPersonCard({ name, rating, onCall, onMessage }) {
     >
       <div className="flex items-center gap-4">
         {/* Avatar */}
-        <div className="w-14 h-14 rounded-full bg-primary-100 flex items-center justify-center">
-          <Bike className="w-7 h-7 text-primary-500" />
+        <div className="w-14 h-14 rounded-full bg-[#FFCDD2] flex items-center justify-center">
+          <Bike className="w-7 h-7 text-[#E53935]" />
         </div>
 
         {/* Info */}
@@ -91,15 +91,15 @@ function DeliveryPersonCard({ name, rating, onCall, onMessage }) {
         <div className="flex gap-2">
           <button
             onClick={onCall}
-            className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-[#FFEBEE] flex items-center justify-center"
           >
-            <Phone className="w-5 h-5 text-primary-500" />
+            <Phone className="w-5 h-5 text-[#E53935]" />
           </button>
           <button
             onClick={onMessage}
-            className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-[#FFEBEE] flex items-center justify-center"
           >
-            <MessageCircle className="w-5 h-5 text-primary-500" />
+            <MessageCircle className="w-5 h-5 text-[#E53935]" />
           </button>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function DeliveryTrackingScreen() {
         {/* Estimated Time Card */}
         <motion.div
           className={`rounded-2xl p-6 text-center ${
-            isCompleted ? 'bg-success' : 'bg-primary-500'
+            isCompleted ? 'bg-success' : 'bg-[#E53935]'
           }`}
           layout
         >
@@ -251,7 +251,7 @@ export default function DeliveryTrackingScreen() {
             className="w-full px-6 py-4 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <Package className="w-5 h-5 text-primary-500" />
+              <Package className="w-5 h-5 text-[#E53935]" />
               <span className="font-semibold text-gray-900">Detalles del pedido</span>
             </div>
             <motion.div
@@ -307,14 +307,14 @@ export default function DeliveryTrackingScreen() {
                     </div>
                     <div className="flex justify-between font-bold pt-2 border-t border-gray-100">
                       <span>Total</span>
-                      <span className="text-primary-600">${orderData.total.toFixed(2)}</span>
+                      <span className="text-[#D32F2F]">${orderData.total.toFixed(2)}</span>
                     </div>
                   </div>
 
                   {/* Address */}
                   <div className="mt-4 p-3 bg-gray-50 rounded-xl">
                     <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-primary-500 mt-0.5 flex-shrink-0" />
+                      <MapPin className="w-4 h-4 text-[#E53935] mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">Dirección de entrega</p>
                         <p className="text-sm text-gray-600">{orderData.address}</p>
@@ -328,7 +328,7 @@ export default function DeliveryTrackingScreen() {
         </div>
 
         {/* Help Button */}
-        <button className="w-full bg-white rounded-2xl shadow-soft p-4 flex items-center justify-center gap-2 text-primary-600 font-semibold hover:bg-primary-50 transition-colors">
+        <button className="w-full bg-white rounded-2xl shadow-soft p-4 flex items-center justify-center gap-2 text-[#D32F2F] font-semibold hover:bg-[#FFEBEE] transition-colors">
           <HelpCircle className="w-5 h-5" />
           ¿Necesitas ayuda con tu pedido?
         </button>
@@ -353,7 +353,7 @@ export default function DeliveryTrackingScreen() {
                   </button>
                 ))}
               </div>
-              <button className="text-primary-600 font-medium text-sm">
+              <button className="text-[#D32F2F] font-medium text-sm">
                 Escribir reseña
               </button>
             </motion.div>

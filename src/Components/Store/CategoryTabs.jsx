@@ -8,7 +8,7 @@ const CategoryButton = memo(({ category, isActive, onClick }) => {
       data-category={category.id}
       onClick={() => onClick(category.id)}
       className={`tab-button relative py-2 px-3 text-sm font-medium focus:outline-none whitespace-nowrap transition-colors ${
-        isActive ? "active text-primary-600" : "text-gray-700 hover:text-primary-500"
+        isActive ? "active text-[#D32F2F]" : "text-gray-700 hover:text-[#E53935]"
       }`}
       role="tab"
       aria-selected={isActive}
@@ -84,7 +84,7 @@ const CategoryTabs = ({
             {!isSearchOpen ? (
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-1 text-gray-600 hover:text-primary-500 flex-shrink-0"
+                className="p-1 text-gray-600 hover:text-[#E53935] flex-shrink-0"
                 aria-label="Buscar productos"
               >
                 <Search className="w-5 h-5" />
@@ -104,7 +104,7 @@ const CategoryTabs = ({
                     setIsSearchOpen(false);
                     setSearchValue("");
                   }}
-                  className="text-sm font-bold text-primary-600 hover:underline"
+                  className="text-sm font-bold text-[#D32F2F] hover:underline"
                 >
                   Cerrar
                 </button>
@@ -124,7 +124,7 @@ const CategoryTabs = ({
             {/* Línea activa */}
             {!isSearchOpen && categories.length > 0 && (
               <div
-                className="absolute bottom-0 h-0.5 bg-primary-600 transition-all duration-300 ease-out"
+                className="absolute bottom-0 h-0.5 bg-[#D32F2F] transition-all duration-300 ease-out"
                 style={{ left: markerStyle.left, width: markerStyle.width }}
               />
             )}
@@ -146,7 +146,7 @@ const CategoryTabs = ({
           transition: color 0.15s ease;
         }
         .tab-button.active {
-          color: #ea580c;
+          color: #E53935;
         }
       `}</style>
     </>

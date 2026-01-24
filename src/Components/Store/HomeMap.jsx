@@ -33,13 +33,13 @@ const createUserLocationIcon = () => {
 const createMarkerIcon = (business) => {
   const html = renderToStaticMarkup(
     <div className="flex flex-col items-center">
-      <div className="relative bg-white rounded-full shadow-lg border-2 border-red-500
+      <div className="relative bg-white rounded-full shadow-lg border-2 border-[#E53935]
                       hover:scale-110 transition-transform cursor-pointer">
         <div className="w-10 h-10 flex items-center justify-center">
           <span className="text-xl">{business.emoji}</span>
         </div>
         {business.discount && (
-          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px]
+          <div className="absolute -top-1 -right-1 bg-[#E53935] text-white text-[9px]
                           font-bold px-1.5 py-0.5 rounded-full">
             -{business.discount}%
           </div>
@@ -75,7 +75,7 @@ const createClusterIcon = (count) => {
 
   const html = renderToStaticMarkup(
     <div className="relative">
-      <div className={`bg-red-500 rounded-full shadow-lg flex items-center justify-center
+      <div className={`bg-[#E53935] rounded-full shadow-lg flex items-center justify-center
                        hover:scale-110 transition-transform cursor-pointer border-3 border-white`}
            style={{ width: size, height: size }}>
         <span className="text-white font-bold" style={{ fontSize: size / 3 }}>

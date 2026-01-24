@@ -143,7 +143,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }) 
             </div>
             <div
               className={`w-5 h-5 rounded-full border-2 ${
-                selected ? 'border-red-500 bg-red-500' : 'border-gray-300 bg-white'
+                selected ? 'border-[#E53935] bg-[#E53935]' : 'border-gray-300 bg-white'
               } flex items-center justify-center`}
             >
               {selected && <div className="w-2 h-2 bg-white rounded-full" />}
@@ -185,7 +185,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }) 
 
           <button
             onClick={handleAdd}
-            className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold py-3 rounded-xl transition-all shadow-md"
+            className="flex-1 bg-[#E53935] hover:bg-[#D32F2F] text-white text-sm font-semibold py-3 rounded-xl transition-all shadow-md"
           >
             Agregar MXN {totalPrice}
           </button>

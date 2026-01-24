@@ -80,7 +80,7 @@ export default function InstallPWAButton() {
     <div className="fixed bottom-5 right-5 z-40 animate-bounce">
       <button
         onClick={handleInstall}
-        className="bg-primary-500 hover:bg-primary-600 text-white font-semibold px-5 py-3 rounded-full flex items-center gap-2 shadow-lg transition-all duration-200 hover:shadow-xl active:scale-95"
+        className="bg-[#E53935] hover:bg-[#D32F2F] text-white font-semibold px-5 py-3 rounded-full flex items-center gap-2 shadow-lg transition-all duration-200 hover:shadow-xl active:scale-95"
         aria-label="Instalar aplicación"
       >
         <Download size={20} />

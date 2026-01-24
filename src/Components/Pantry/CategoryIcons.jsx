@@ -28,7 +28,7 @@ const CategoryIcons = ({ activeCategory, setActiveCategory, isTienda }) => {
           {categories.map((category) => {
             const isActive = activeCategory === category.id;
             const borderColor = isActive
-              ? (isTienda ? 'border-red-600' : 'border-green-600')
+              ? (isTienda ? 'border-[#D32F2F]' : 'border-green-600')
               : '';
   
             return (

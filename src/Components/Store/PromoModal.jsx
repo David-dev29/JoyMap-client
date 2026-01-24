@@ -51,7 +51,7 @@ const PromoModal = () => {
                 />
                 <button
                   onClick={closeModal}
-                  className="absolute bottom-4 right-4 bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-white font-bold py-2 px-6 rounded-full shadow-lg transform transition-all hover:scale-105 active:scale-95 text-sm"
+                  className="absolute bottom-4 right-4 bg-gradient-to-r from-[#EF5350] to-[#E53935] hover:from-[#E53935] hover:to-[#D32F2F] text-white font-bold py-2 px-6 rounded-full shadow-lg transform transition-all hover:scale-105 active:scale-95 text-sm"
                 >
                   Pide ya
                 </button>

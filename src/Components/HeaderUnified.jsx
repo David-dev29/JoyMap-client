@@ -55,63 +55,65 @@ export default function HeaderUnified({
   return (
     <>
       {/* HEADER PRINCIPAL */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-soft">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[#E53935] to-[#D32F2F] shadow-lg">
         <div className="max-w-lg mx-auto">
           {/* Top Row */}
           <div className="h-14 px-4 flex items-center justify-between gap-3">
-            {/* Logo */}
+            {/* Logo con nombre */}
             <div className="flex items-center gap-2">
               {loading ? (
-                <div className="w-9 h-9 rounded-xl bg-gray-100 animate-pulse" />
+                <div className="w-9 h-9 rounded-xl bg-white/20 animate-pulse" />
               ) : logoUrl ? (
-                <div className="w-9 h-9 rounded-xl overflow-hidden bg-white shadow-sm border border-gray-100">
+                <div className="w-9 h-9 rounded-xl overflow-hidden bg-white shadow-sm">
                   <img
                     src={logoUrl}
                     alt="Logo"
                     className="w-full h-full object-contain"
                     onError={(e) => {
-                      e.target.parentElement.innerHTML = '<div class="w-full h-full bg-primary-500 flex items-center justify-center"><span class="text-white font-bold text-sm">JM</span></div>';
+                      e.target.parentElement.innerHTML = '<div class="w-full h-full bg-white flex items-center justify-center"><span class="text-[#E53935] font-bold text-sm">JM</span></div>';
                     }}
                   />
                 </div>
               ) : (
-                <div className="w-9 h-9 rounded-xl bg-primary-500 flex items-center justify-center shadow-sm">
-                  <span className="text-white font-bold text-sm">JM</span>
+                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm">
+                  <span className="text-[#E53935] font-bold text-sm">JM</span>
                 </div>
               )}
+              {/* Logo tipográfico */}
+              <span className="text-white font-bold text-lg tracking-tight">JoyMap</span>
             </div>
 
             {/* Ubicación (Centro) */}
             <button
               onClick={() => navigate('/address')}
-              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full hover:bg-gray-50 transition-colors max-w-[200px]"
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 transition-colors max-w-[180px]"
             >
-              <MapPin className="w-4 h-4 text-primary-500 flex-shrink-0" />
-              <span className="text-sm font-medium text-gray-700 truncate">
+              <MapPin className="w-4 h-4 text-white flex-shrink-0" />
+              <span className="text-sm font-medium text-white truncate">
                 {userAddress}
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+              <ChevronDown className="w-3.5 h-3.5 text-white/70 flex-shrink-0" />
             </button>
 
             {/* Acciones (Derecha) */}
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1">
               {/* Búsqueda */}
               <button
                 onClick={() => setSearchActive(true)}
-                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/15 transition-colors"
               >
-                <Search className="w-5 h-5 text-gray-600" />
+                <Search className="w-5 h-5 text-white" />
               </button>
 
               {/* Notificaciones */}
               <button
                 onClick={() => setNotificationsOpen(true)}
-                className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                className="relative w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/15 transition-colors"
               >
-                <Bell className="w-5 h-5 text-gray-600" />
+                <Bell className="w-5 h-5 text-white" />
                 {notificationCount > 0 && (
-                  <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-primary-500 rounded-full flex items-center justify-center">
-                    <span className="text-[10px] font-bold text-white">{notificationCount}</span>
+                  <span className="absolute top-1 right-1 min-w-[18px] h-[18px] bg-white rounded-full flex items-center justify-center">
+                    <span className="text-[10px] font-bold text-[#E53935]">{notificationCount}</span>
                   </span>
                 )}
               </button>
@@ -119,15 +121,15 @@ export default function HeaderUnified({
               {/* Perfil */}
               <button
                 onClick={() => navigate(isAuthenticated ? '/profile' : '/new-user-info')}
-                className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden"
+                className="w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border-2 border-white/30"
               >
                 {isAuthenticated ? (
-                  <div className="w-full h-full bg-primary-500 flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">{userInitial}</span>
+                  <div className="w-full h-full bg-white flex items-center justify-center">
+                    <span className="text-[#E53935] font-bold text-sm">{userInitial}</span>
                   </div>
                 ) : (
-                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                    <User className="w-5 h-5 text-gray-500" />
+                  <div className="w-full h-full bg-white/20 flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
                   </div>
                 )}
               </button>
@@ -178,7 +180,7 @@ export default function HeaderUnified({
                     <button
                       key={tag}
                       onClick={() => onSearch?.(tag)}
-                      className="px-4 py-2 bg-gray-100 rounded-full text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-600 transition-colors"
+                      className="px-4 py-2 bg-gray-100 rounded-full text-sm font-medium text-gray-700 hover:bg-[#FFEBEE] hover:text-[#D32F2F] transition-colors"
                     >
                       {tag}
                     </button>

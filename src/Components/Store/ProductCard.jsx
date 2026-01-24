@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 
 const ProductCard = ({ product, isTienda, onProductClick }) => {
   const buttonColorClass = isTienda
-    ? "bg-primary-600 hover:bg-primary-700"
+    ? "bg-[#D32F2F] hover:bg-[#C62828]"
     : "bg-green-600 hover:bg-green-700";
 
   const { hasDiscount, discountPercentage } = product;
@@ -74,7 +74,7 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
 
         {/* Etiqueta descuento */}
         {hasDiscount && (
-          <div className="absolute top-0 -left-2 bg-primary-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-r-lg shadow whitespace-nowrap">
+          <div className="absolute top-0 -left-2 bg-[#E53935] text-white text-[8px] font-bold px-2 py-0.5 rounded-r-lg shadow whitespace-nowrap">
             -{discountPercentage}%
           </div>
         )}
@@ -120,7 +120,7 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
             aria-label={`Agregar ${product.name}`}
             onClick={handleButtonClick}
             type="button"
-            className={`${buttonColorClass} w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${isTienda ? "primary-500" : "green-500"}`}
+            className={`${buttonColorClass} w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isTienda ? "focus:ring-[#E53935]" : "focus:ring-green-500"}`}
           >
             <Plus
               className="w-4 h-4 text-white"

@@ -66,7 +66,7 @@ export default function AddUserInfo() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Escribe tu nombre completo"
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
               maxLength={50}
             />
           </div>
@@ -95,7 +95,7 @@ export default function AddUserInfo() {
                   setPhone(value);
                 }}
                 placeholder="2221234567"
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
                 maxLength={10}
               />
             </div>
@@ -114,7 +114,7 @@ export default function AddUserInfo() {
           className={`w-full py-4 rounded-lg font-medium transition-all ${
             loading || !name.trim() || !phone.trim()
               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-primary-500 hover:bg-primary-600 text-white active:scale-95'
+              : 'bg-[#E53935] hover:bg-[#D32F2F] text-white active:scale-95'
           }`}
         >
           {loading ? 'Guardando...' : 'Confirmar'}

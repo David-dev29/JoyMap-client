@@ -37,7 +37,7 @@ const HeroBannerFood = () => {
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`w-2.5 h-2.5 rounded-full transition-all ${
-              index === currentSlide ? "bg-red-500" : "bg-red-200"
+              index === currentSlide ? "bg-[#E53935]" : "bg-[#EF9A9A]"
             }`}
           />
         ))}

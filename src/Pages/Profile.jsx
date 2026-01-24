@@ -63,7 +63,7 @@ export default function Profile() {
         </p>
         <button
           onClick={() => navigate('/')}
-          className="px-6 py-3 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
+          className="px-6 py-3 bg-[#E53935] text-white rounded-lg font-medium hover:bg-[#D32F2F] transition-colors"
         >
           Explorar negocios
         </button>
@@ -83,14 +83,14 @@ export default function Profile() {
 
       {/* User Info Card */}
       <div className="bg-white m-4 rounded-xl shadow-sm overflow-hidden">
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-6">
+        <div className="bg-gradient-to-r from-[#E53935] to-[#D32F2F] p-6">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
               <User className="w-8 h-8 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">{user.name}</h2>
-              <p className="text-primary-100 flex items-center gap-1 mt-1">
+              <p className="text-[#FFCDD2] flex items-center gap-1 mt-1">
                 <Phone className="w-4 h-4" />
                 +52 {user.phone}
               </p>
@@ -103,7 +103,7 @@ export default function Profile() {
       <div className="bg-white mx-4 mb-4 rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-100">
           <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-primary-500" />
+            <MapPin className="w-5 h-5 text-[#E53935]" />
             Mis Direcciones
           </h3>
         </div>
@@ -130,7 +130,7 @@ export default function Profile() {
 
         <button
           onClick={() => navigate('/new-address')}
-          className="w-full p-4 text-primary-600 font-medium hover:bg-primary-50 transition-colors border-t border-gray-100"
+          className="w-full p-4 text-[#D32F2F] font-medium hover:bg-[#FFEBEE] transition-colors border-t border-gray-100"
         >
           + Agregar nueva dirección
         </button>
@@ -140,14 +140,14 @@ export default function Profile() {
       <div className="bg-white mx-4 mb-4 rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-100">
           <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            <Package className="w-5 h-5 text-primary-500" />
+            <Package className="w-5 h-5 text-[#E53935]" />
             Mis Pedidos
           </h3>
         </div>
 
         {loadingOrders ? (
           <div className="p-8 text-center">
-            <div className="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-8 h-8 border-2 border-[#E53935] border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="text-gray-500 mt-2">Cargando pedidos...</p>
           </div>
         ) : orders.length > 0 ? (

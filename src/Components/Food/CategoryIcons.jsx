@@ -36,7 +36,7 @@ const CategoryIcons = ({ activeCategory, setActiveCategory, isTienda }) => {
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
               className={`flex flex-col items-center bg-white rounded-2xl p-2 w-20 sm:w-24 hover:scale-105 transition-transform shadow-md ${
-                activeCategory === category.id ? 'border-2 border-primary-600' : ''
+                activeCategory === category.id ? 'border-2 border-[#D32F2F]' : ''
               }`}
             >
               <img
@@ -46,7 +46,7 @@ const CategoryIcons = ({ activeCategory, setActiveCategory, isTienda }) => {
               />
               <span
                 className={`text-[10px] sm:text-xs text-center font-medium leading-tight ${
-                  activeCategory === category.id ? 'text-primary-600' : 'text-gray-700'
+                  activeCategory === category.id ? 'text-[#D32F2F]' : 'text-gray-700'
                 }`}
               >
                 {category.name}

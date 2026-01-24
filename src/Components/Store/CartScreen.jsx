@@ -197,7 +197,7 @@ export default function CartScreen() {
             </p>
             <button
               onClick={handleBack}
-              className="mt-6 px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
+              className="mt-6 px-6 py-3 bg-[#D32F2F] text-white rounded-lg font-semibold hover:bg-[#C62828] transition-colors"
             >
               Explorar productos
             </button>
@@ -220,13 +220,13 @@ export default function CartScreen() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex-1 sm:text-left text-center">
               <div className="text-xs text-gray-500 mb-1">Total del pedido</div>
-              <div className={`text-2xl font-extrabold text-red-700 transition-transform ${animateTotal ? 'scale-110' : ''}`}>
+              <div className={`text-2xl font-extrabold text-[#D32F2F] transition-transform ${animateTotal ? 'scale-110' : ''}`}>
                 MXN {totalPrice}
               </div>
             </div>
             <button
               onClick={() => navigate("/checkout", { replace: true })}
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary-600 text-white text-sm font-semibold shadow-md hover:bg-primary-700 active:scale-95 transition-all w-full sm:w-auto"
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#D32F2F] text-white text-sm font-semibold shadow-md hover:bg-[#C62828] active:scale-95 transition-all w-full sm:w-auto"
             >
               <CheckCircle className="w-5 h-5" />
               Continuar
