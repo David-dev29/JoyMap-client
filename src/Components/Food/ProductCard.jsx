@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 
 const ProductCard = ({ product, isTienda, onProductClick }) => {
   const buttonColorClass = isTienda
-    ? "bg-orange-600 hover:bg-orange-700"
+    ? "bg-primary-600 hover:bg-primary-700"
     : "bg-green-600 hover:bg-green-700";
 
   const handleRowClick = () => {
@@ -64,7 +64,7 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
                 <span className="text-xs text-gray-400 line-through">
                   ${product.price.toFixed(2)}
                 </span>
-                <span className="text-[10px] px-1 py-0.5 rounded bg-orange-500 text-white font-bold">
+                <span className="text-[10px] px-1 py-0.5 rounded bg-primary-500 text-white font-bold">
                   -{discountPercentage}%
                 </span>
               </>
@@ -74,7 +74,7 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
           <button
             aria-label={`Agregar ${product.name}`}
             className={`${buttonColorClass} w-9 h-9 rounded-lg flex items-center justify-center transition-colors shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-${
-              isTienda ? "orange-500" : "green-500"
+              isTienda ? "primary-500" : "green-500"
             }`}
             onClick={handleButtonClick}
             type="button"

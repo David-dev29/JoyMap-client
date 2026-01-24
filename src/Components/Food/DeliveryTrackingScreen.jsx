@@ -49,7 +49,7 @@ export default function DeliveryTrackingScreen() {
     switch (orderStatus) {
       case 'Pagado': return 'bg-blue-500';
       case 'En preparación': return 'bg-yellow-500';
-      case 'En camino': return 'bg-orange-500';
+      case 'En camino': return 'bg-primary-500';
       case 'Completado': return 'bg-green-500';
       default: return 'bg-blue-500';
     }
@@ -59,7 +59,7 @@ export default function DeliveryTrackingScreen() {
     switch (orderStatus) {
       case 'Pagado': return 'bg-blue-100 text-blue-800';
       case 'En preparación': return 'bg-yellow-100 text-yellow-800';
-      case 'En camino': return 'bg-orange-100 text-orange-800';
+      case 'En camino': return 'bg-primary-100 text-primary-800';
       case 'Completado': return 'bg-green-100 text-green-800';
       default: return 'bg-blue-100 text-blue-800';
     }

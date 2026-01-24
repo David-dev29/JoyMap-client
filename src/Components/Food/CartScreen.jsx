@@ -169,7 +169,7 @@ export default function CartScreen() {
           {/* Botón */}
           <button
             onClick={() => navigate("/address", { replace: true })}
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-orange-600 text-white text-sm font-semibold shadow-md hover:bg-orange-800 transition-all w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-primary-600 text-white text-sm font-semibold shadow-md hover:bg-primary-800 transition-all w-full sm:w-auto"
           >
             <CheckCircle className="w-5 h-5" />
             Continuar

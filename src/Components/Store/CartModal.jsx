@@ -37,7 +37,7 @@ export default function CartModal({ onClose, onGoToCart }) {
           <div className="space-y-3">
             <button
               onClick={onGoToCart}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 px-6 rounded-xl font-medium transition-colors"
+              className="w-full bg-primary-500 hover:bg-primary-600 text-white py-3 px-6 rounded-xl font-medium transition-colors"
             >
               Ir al carrito
             </button>

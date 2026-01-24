@@ -393,7 +393,7 @@ export default function DeliveryOrder() {
         <div className="max-w-sm mx-auto">
           <button
             className={`w-full py-4 rounded-lg font-semibold text-lg transition-colors ${
-              loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-orange-600 hover:bg-orange-700'
+              loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'
             } text-white`}
             onClick={handleConfirmAddress}
             disabled={loading}

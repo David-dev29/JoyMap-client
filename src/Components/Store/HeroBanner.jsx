@@ -157,8 +157,8 @@ const HeroBannerTienda = () => {
             disabled={isTransitioning}
             className={`transition-all duration-300 rounded-full disabled:opacity-50 ${
               index === currentSlide 
-                ? "w-8 h-3 bg-orange-500 shadow-lg" 
-                : "w-3 h-3 bg-orange-200 hover:bg-orange-300 hover:scale-110"
+                ? "w-8 h-3 bg-primary-500 shadow-lg" 
+                : "w-3 h-3 bg-primary-200 hover:bg-primary-300 hover:scale-110"
             }`}
           />
         ))}

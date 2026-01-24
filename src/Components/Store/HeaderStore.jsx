@@ -5,7 +5,7 @@ const HeaderStore = () => {
     const navigate = useNavigate();
   
     return (
-      <header className="px-5 py-7 rounded-b-3xl shadow-xl select-none bg-orange-400 text-white">
+      <header className="px-5 py-7 rounded-b-3xl shadow-xl select-none bg-primary-400 text-white">
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-3xl font-extrabold tracking-wide">EN•CORTO</h1>
           <Search className="w-6 h-6 cursor-pointer hover:text-white/80 transition-colors" />
@@ -19,7 +19,7 @@ const HeaderStore = () => {
   
           <button
             onClick={() => navigate('/tienda')}
-            className="flex-1 text-center font-medium flex items-center justify-center gap-2 text-orange-600 z-10"
+            className="flex-1 text-center font-medium flex items-center justify-center gap-2 text-primary-600 z-10"
           >
             <Store className="w-5 h-5 animate-bounce" />
             Tienda
