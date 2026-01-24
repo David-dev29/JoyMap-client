@@ -92,15 +92,17 @@ export default function BusinessView({ type = "comida" }) {
 
   return (
     <div className="relative w-full h-screen">
-      {/* Slider de categorías */}
-      <div className="absolute top-36 left-0 right-0 z-40 px-4 pt-2 bg-transparent pb-4 pointer-events-none">
-        <div className="pointer-events-auto">
-          <CategoriesSlider 
-            onCategorySelect={handleCategorySelect}
-            searchActive={searchActive}
-            selectedCategory={selectedCategory}
-            type={type}
-          />
+      {/* Slider de categorías - pegado debajo del header */}
+      <div className="absolute top-[180px] left-0 right-0 z-40 pointer-events-none">
+        <div className="max-w-lg mx-auto px-4">
+          <div className="bg-white/95 backdrop-blur-sm rounded-xl shadow-sm py-2 px-1 pointer-events-auto">
+            <CategoriesSlider
+              onCategorySelect={handleCategorySelect}
+              searchActive={searchActive}
+              selectedCategory={selectedCategory}
+              type={type}
+            />
+          </div>
         </div>
       </div>
 

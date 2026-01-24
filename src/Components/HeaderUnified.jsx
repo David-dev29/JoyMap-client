@@ -30,6 +30,9 @@ export default function HeaderUnified({
   const [appConfig, setAppConfig] = useState({
     appName: 'JoyMap',
     appLogo: null,
+    logoText: null,
+    primaryColor: '#E53935',
+    slogan: null,
   });
   const [loadingConfig, setLoadingConfig] = useState(true);
 
@@ -45,22 +48,37 @@ export default function HeaderUnified({
     { id: 'envios', name: 'Envíos', icon: Package, path: '/envios', active: isEnvios },
   ];
 
-  // Cargar configuración de la app desde backend
+  // Cargar configuración de la app desde backend (/api/settings)
   useEffect(() => {
     const fetchAppConfig = async () => {
       try {
-        // Intentar obtener config de la app
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/stores`);
+        // Intentar obtener config de la app desde /api/settings
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings`);
         const data = await res.json();
-        if (data.store_data) {
+
+        if (data.success && data.settings) {
           setAppConfig({
-            appName: data.store_data.name || 'JoyMap',
-            appLogo: data.store_data.logoUrl || null,
+            appName: data.settings.appName || 'JoyMap',
+            appLogo: data.settings.logo || null,
+            logoText: data.settings.logoText || null,
+            primaryColor: data.settings.primaryColor || '#E53935',
+            slogan: data.settings.slogan || null,
           });
         }
       } catch (error) {
-        // Usar valores por defecto si falla
-        console.log('Using default app config');
+        // Fallback: intentar /api/stores como respaldo
+        try {
+          const fallbackRes = await fetch(`${import.meta.env.VITE_API_URL}/api/stores`);
+          const fallbackData = await fallbackRes.json();
+          if (fallbackData.store_data) {
+            setAppConfig({
+              appName: fallbackData.store_data.name || 'JoyMap',
+              appLogo: fallbackData.store_data.logoUrl || null,
+            });
+          }
+        } catch (fallbackError) {
+          console.log('Using default app config');
+        }
       } finally {
         setLoadingConfig(false);
       }
@@ -334,7 +352,8 @@ export default function HeaderUnified({
       </AnimatePresence>
 
       {/* Spacer para el contenido debajo del header flotante */}
-      <div className="h-44" />
+      {/* Header: ~170px, Categories: ~50px adicionales */}
+      <div className="h-[170px]" />
 
       {/* Animación sutil para el icono activo */}
       <style>
