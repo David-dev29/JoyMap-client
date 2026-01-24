@@ -17,7 +17,7 @@ import {
   Star,
 } from 'lucide-react';
 
-// Timeline Step Component
+// Timeline Step Component - Proper colors: green (done), amber (active), gray (pending)
 function TimelineStep({ icon: Icon, title, subtitle, isCompleted, isActive, isLast }) {
   return (
     <div className="flex gap-4">
@@ -26,9 +26,9 @@ function TimelineStep({ icon: Icon, title, subtitle, isCompleted, isActive, isLa
         <motion.div
           className={`w-10 h-10 rounded-full flex items-center justify-center z-10 ${
             isCompleted
-              ? 'bg-success text-white'
+              ? 'bg-green-500 text-white'
               : isActive
-              ? 'bg-[#E53935] text-white'
+              ? 'bg-amber-500 text-white'
               : 'bg-gray-200 text-gray-400'
           }`}
           initial={false}
@@ -42,7 +42,7 @@ function TimelineStep({ icon: Icon, title, subtitle, isCompleted, isActive, isLa
           )}
         </motion.div>
         {!isLast && (
-          <div className={`w-0.5 h-12 ${isCompleted ? 'bg-success' : 'bg-gray-200'}`} />
+          <div className={`w-0.5 h-12 ${isCompleted ? 'bg-green-500' : 'bg-gray-200'}`} />
         )}
       </div>
 
@@ -63,25 +63,25 @@ function TimelineStep({ icon: Icon, title, subtitle, isCompleted, isActive, isLa
   );
 }
 
-// Delivery Person Card
+// Delivery Person Card - Neutral colors, gray icons
 function DeliveryPersonCard({ name, rating, onCall, onMessage }) {
   return (
     <motion.div
-      className="bg-white rounded-2xl shadow-soft p-4"
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
     >
       <div className="flex items-center gap-4">
         {/* Avatar */}
-        <div className="w-14 h-14 rounded-full bg-[#FFCDD2] flex items-center justify-center">
-          <Bike className="w-7 h-7 text-[#E53935]" />
+        <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
+          <Bike className="w-7 h-7 text-gray-600" />
         </div>
 
         {/* Info */}
         <div className="flex-1">
           <p className="font-semibold text-gray-900">{name}</p>
           <div className="flex items-center gap-1 mt-0.5">
-            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+            <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
             <span className="text-sm text-gray-600">{rating}</span>
             <span className="text-sm text-gray-400">• Repartidor</span>
           </div>
@@ -91,15 +91,15 @@ function DeliveryPersonCard({ name, rating, onCall, onMessage }) {
         <div className="flex gap-2">
           <button
             onClick={onCall}
-            className="w-10 h-10 rounded-full bg-[#FFEBEE] flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center hover:bg-green-200 transition-colors"
           >
-            <Phone className="w-5 h-5 text-[#E53935]" />
+            <Phone className="w-5 h-5 text-green-600" />
           </button>
           <button
             onClick={onMessage}
-            className="w-10 h-10 rounded-full bg-[#FFEBEE] flex items-center justify-center"
+            className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
           >
-            <MessageCircle className="w-5 h-5 text-[#E53935]" />
+            <MessageCircle className="w-5 h-5 text-gray-600" />
           </button>
         </div>
       </div>
@@ -158,7 +158,7 @@ export default function DeliveryTrackingScreen() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white sticky top-0 z-10 shadow-soft">
+      <div className="bg-white sticky top-0 z-10 shadow-sm">
         <div className="max-w-lg mx-auto flex items-center justify-between h-14 px-4">
           <button
             onClick={() => navigate('/')}
@@ -174,10 +174,10 @@ export default function DeliveryTrackingScreen() {
       </div>
 
       <div className="max-w-lg mx-auto p-4 space-y-4">
-        {/* Estimated Time Card */}
+        {/* Estimated Time Card - Green when done, Amber when in progress */}
         <motion.div
           className={`rounded-2xl p-6 text-center ${
-            isCompleted ? 'bg-success' : 'bg-[#E53935]'
+            isCompleted ? 'bg-green-500' : 'bg-amber-500'
           }`}
           layout
         >
@@ -227,7 +227,7 @@ export default function DeliveryTrackingScreen() {
         </AnimatePresence>
 
         {/* Timeline */}
-        <div className="bg-white rounded-2xl shadow-soft p-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h3 className="font-bold text-gray-900 mb-6">Estado del pedido</h3>
           <div className="ml-1">
             {steps.map((step, index) => (
@@ -245,13 +245,13 @@ export default function DeliveryTrackingScreen() {
         </div>
 
         {/* Order Details (Collapsible) */}
-        <div className="bg-white rounded-2xl shadow-soft overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <button
             onClick={() => setShowDetails(!showDetails)}
             className="w-full px-6 py-4 flex items-center justify-between"
           >
             <div className="flex items-center gap-3">
-              <Package className="w-5 h-5 text-[#E53935]" />
+              <Package className="w-5 h-5 text-gray-600" />
               <span className="font-semibold text-gray-900">Detalles del pedido</span>
             </div>
             <motion.div
@@ -307,14 +307,14 @@ export default function DeliveryTrackingScreen() {
                     </div>
                     <div className="flex justify-between font-bold pt-2 border-t border-gray-100">
                       <span>Total</span>
-                      <span className="text-[#D32F2F]">${orderData.total.toFixed(2)}</span>
+                      <span className="text-[#E53935]">${orderData.total.toFixed(2)}</span>
                     </div>
                   </div>
 
                   {/* Address */}
                   <div className="mt-4 p-3 bg-gray-50 rounded-xl">
                     <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-[#E53935] mt-0.5 flex-shrink-0" />
+                      <MapPin className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-sm font-medium text-gray-900">Dirección de entrega</p>
                         <p className="text-sm text-gray-600">{orderData.address}</p>
@@ -327,8 +327,8 @@ export default function DeliveryTrackingScreen() {
           </AnimatePresence>
         </div>
 
-        {/* Help Button */}
-        <button className="w-full bg-white rounded-2xl shadow-soft p-4 flex items-center justify-center gap-2 text-[#D32F2F] font-semibold hover:bg-[#FFEBEE] transition-colors">
+        {/* Help Button - Red as CTA */}
+        <button className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center justify-center gap-2 text-[#E53935] font-semibold hover:bg-gray-50 transition-colors">
           <HelpCircle className="w-5 h-5" />
           ¿Necesitas ayuda con tu pedido?
         </button>
@@ -337,7 +337,7 @@ export default function DeliveryTrackingScreen() {
         <AnimatePresence>
           {isCompleted && (
             <motion.div
-              className="bg-white rounded-2xl shadow-soft p-6 text-center"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
@@ -347,13 +347,13 @@ export default function DeliveryTrackingScreen() {
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
-                    className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-yellow-100 transition-colors"
+                    className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-amber-100 transition-colors group"
                   >
-                    <Star className="w-6 h-6 text-gray-400 hover:text-yellow-400" />
+                    <Star className="w-6 h-6 text-gray-400 group-hover:text-amber-400" />
                   </button>
                 ))}
               </div>
-              <button className="text-[#D32F2F] font-medium text-sm">
+              <button className="text-[#E53935] font-medium text-sm">
                 Escribir reseña
               </button>
             </motion.div>

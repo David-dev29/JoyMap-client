@@ -64,7 +64,7 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
                 <span className="text-xs text-gray-400 line-through">
                   ${product.price.toFixed(2)}
                 </span>
-                <span className="text-[10px] px-1 py-0.5 rounded bg-[#E53935] text-white font-bold">
+                <span className="text-[10px] px-1 py-0.5 rounded bg-amber-500 text-white font-bold">
                   -{discountPercentage}%
                 </span>
               </>

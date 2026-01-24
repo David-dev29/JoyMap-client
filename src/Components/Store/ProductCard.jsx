@@ -72,9 +72,9 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
         
         )}
 
-        {/* Etiqueta descuento */}
+        {/* Etiqueta descuento - Amber for promotions */}
         {hasDiscount && (
-          <div className="absolute top-0 -left-2 bg-[#E53935] text-white text-[8px] font-bold px-2 py-0.5 rounded-r-lg shadow whitespace-nowrap">
+          <div className="absolute top-0 -left-2 bg-amber-500 text-white text-[8px] font-bold px-2 py-0.5 rounded-r-lg shadow whitespace-nowrap">
             -{discountPercentage}%
           </div>
         )}

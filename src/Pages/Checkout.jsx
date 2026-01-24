@@ -37,7 +37,7 @@ const normalizeImageUrl = (url) => {
 };
 
 // Card Section Component
-function Section({ title, icon: Icon, children, defaultOpen = true, badge, onToggle }) {
+function Section({ title, icon: Icon, children, defaultOpen = true, badge, badgeType = 'default', onToggle }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   const handleToggle = () => {
@@ -45,9 +45,21 @@ function Section({ title, icon: Icon, children, defaultOpen = true, badge, onTog
     onToggle?.(!isOpen);
   };
 
+  // Badge colors based on type
+  const getBadgeClass = () => {
+    switch (badgeType) {
+      case 'success':
+        return 'bg-green-100 text-green-700';
+      case 'warning':
+        return 'bg-amber-100 text-amber-700';
+      default:
+        return 'bg-gray-100 text-gray-600';
+    }
+  };
+
   return (
     <motion.div
-      className="bg-white rounded-2xl shadow-soft overflow-hidden"
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
@@ -58,14 +70,14 @@ function Section({ title, icon: Icon, children, defaultOpen = true, badge, onTog
       >
         <div className="flex items-center gap-3">
           {Icon && (
-            <div className="w-10 h-10 rounded-xl bg-[#FFEBEE] flex items-center justify-center">
-              <Icon className="w-5 h-5 text-[#E53935]" />
+            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
+              <Icon className="w-5 h-5 text-gray-600" />
             </div>
           )}
           <div className="text-left">
             <span className="font-semibold text-gray-900">{title}</span>
             {badge && (
-              <span className="ml-2 text-xs bg-[#FFCDD2] text-[#D32F2F] px-2 py-0.5 rounded-full">
+              <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${getBadgeClass()}`}>
                 {badge}
               </span>
             )}
@@ -420,6 +432,7 @@ export default function Checkout() {
           title="Datos de contacto"
           icon={User}
           badge={isAuthenticated ? 'Verificado' : null}
+          badgeType={isAuthenticated ? 'success' : 'default'}
           defaultOpen={!isAuthenticated}
         >
           <div className="space-y-3">
@@ -495,7 +508,7 @@ export default function Checkout() {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-gray-900 text-sm truncate">{item.product.name}</p>
-                    <p className="text-[#D32F2F] font-semibold text-sm mt-1">
+                    <p className="text-gray-700 font-semibold text-sm mt-1">
                       ${(item.product.price * item.quantity).toFixed(2)}
                     </p>
 
