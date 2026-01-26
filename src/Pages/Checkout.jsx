@@ -17,6 +17,8 @@ import {
   MessageSquare,
   Tag,
   Heart,
+  Ticket,
+  X,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -160,12 +162,15 @@ export default function Checkout() {
   const [selectedTip, setSelectedTip] = useState(10);
   const [customTip, setCustomTip] = useState('');
   const [comment, setComment] = useState('');
-  const [coupon, setCoupon] = useState('');
+  const [couponCode, setCouponCode] = useState('');
   const [loading, setLoading] = useState(false);
 
   // Address states
   const [showNewAddress, setShowNewAddress] = useState(false);
   const [newAddressQuery, setNewAddressQuery] = useState('');
+
+  // Applied coupon state
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
   // Pre-fill user data
   useEffect(() => {
@@ -175,6 +180,36 @@ export default function Checkout() {
     }
   }, [user]);
 
+  // Load applied coupon from localStorage
+  useEffect(() => {
+    const savedCoupon = localStorage.getItem('appliedCoupon');
+    if (savedCoupon) {
+      try {
+        const coupon = JSON.parse(savedCoupon);
+        const currentBusinessId = cartItems[0]?.businessId || cartItems[0]?.product?.businessId;
+
+        // Verify coupon is for current business
+        if (coupon.businessId === currentBusinessId) {
+          setAppliedCoupon(coupon);
+          setCouponCode(coupon.code);
+          console.log('🎟️ Cupón cargado:', coupon);
+        } else {
+          // Coupon is for different business, remove it
+          localStorage.removeItem('appliedCoupon');
+        }
+      } catch (e) {
+        localStorage.removeItem('appliedCoupon');
+      }
+    }
+  }, [cartItems]);
+
+  // Remove applied coupon
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    localStorage.removeItem('appliedCoupon');
+  };
+
   // Calculations
   const tipAmount = useMemo(() => {
     if (customTip && !isNaN(parseFloat(customTip))) {
@@ -183,7 +218,23 @@ export default function Checkout() {
     return selectedTip;
   }, [selectedTip, customTip]);
 
-  const total = subtotal + DELIVERY_FEE + tipAmount;
+  // Calculate coupon discount
+  const couponDiscount = useMemo(() => {
+    if (!appliedCoupon) return 0;
+
+    // Check minimum order
+    if (appliedCoupon.minOrder && subtotal < appliedCoupon.minOrder) {
+      return 0;
+    }
+
+    if (appliedCoupon.discountType === 'percentage') {
+      return (subtotal * appliedCoupon.discount) / 100;
+    }
+    // Fixed amount discount
+    return Math.min(appliedCoupon.discount, subtotal);
+  }, [appliedCoupon, subtotal]);
+
+  const total = subtotal + DELIVERY_FEE + tipAmount - couponDiscount;
 
   // Search addresses
   const handleAddressSearch = async () => {
@@ -268,6 +319,9 @@ export default function Checkout() {
         subtotal: subtotal,
         deliveryFee: DELIVERY_FEE,
         tip: tipAmount,
+        couponCode: appliedCoupon?.code || null,
+        couponDiscount: couponDiscount,
+        couponId: appliedCoupon?.couponId || null,
         total: total,
         deliveryAddress: {
           street: selectedAddress || addresses[0]?.street || 'Dirección no especificada',
@@ -276,13 +330,14 @@ export default function Checkout() {
         },
         paymentMethod: selectedPayment,
         paymentStatus: 'pending',
-        notes: comment,
-        coupon: coupon || null
+        notes: comment
       };
 
       const result = await createOrder(orderData, authToken);
 
+      // Clear cart and applied coupon
       clearCart();
+      localStorage.removeItem('appliedCoupon');
       navigate('/deliveryScreen', { replace: true });
 
     } catch (error) {
@@ -616,16 +671,48 @@ export default function Checkout() {
               rows={3}
             />
 
-            <div className="relative">
-              <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Cupón de descuento"
-                value={coupon}
-                onChange={(e) => setCoupon(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
-              />
-            </div>
+            {/* Applied Coupon Display */}
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Ticket className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-green-800">
+                      {appliedCoupon.code}
+                    </p>
+                    <p className="text-xs text-green-600">
+                      {appliedCoupon.discountType === 'percentage'
+                        ? `${appliedCoupon.discount}% de descuento`
+                        : `$${appliedCoupon.discount} de descuento`}
+                    </p>
+                    {appliedCoupon.minOrder > 0 && subtotal < appliedCoupon.minOrder && (
+                      <p className="text-xs text-amber-600 mt-0.5">
+                        ⚠️ Mínimo: ${appliedCoupon.minOrder} (faltan ${(appliedCoupon.minOrder - subtotal).toFixed(2)})
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={handleRemoveCoupon}
+                  className="p-2 hover:bg-green-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-green-700" />
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Cupón de descuento"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
+                />
+              </div>
+            )}
           </div>
         </Section>
 
@@ -645,6 +732,18 @@ export default function Checkout() {
               <span className="text-gray-600">Propina</span>
               <span className="font-medium">${tipAmount.toFixed(2)}</span>
             </div>
+
+            {/* Coupon Discount */}
+            {appliedCoupon && couponDiscount > 0 && (
+              <div className="flex justify-between text-green-600">
+                <span className="flex items-center gap-1">
+                  <Ticket className="w-4 h-4" />
+                  Descuento ({appliedCoupon.code})
+                </span>
+                <span className="font-medium">-${couponDiscount.toFixed(2)}</span>
+              </div>
+            )}
+
             <div className="border-t border-gray-200 pt-3 flex justify-between">
               <span className="font-bold text-gray-900 text-base">Total</span>
               <span className="font-bold text-[#D32F2F] text-xl">${total.toFixed(2)}</span>

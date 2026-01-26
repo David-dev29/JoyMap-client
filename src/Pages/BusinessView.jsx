@@ -12,12 +12,43 @@ export default function BusinessView({ type = "comida" }) {
   const [searchActive, setSearchActive] = useState(false);
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [activeCoupon, setActiveCoupon] = useState(null);
 
   // Estado para el mapa
   const [mapControls, setMapControls] = useState({
     recenter: null,
     hasUserLocation: false,
   });
+
+  // Fetch cupón activo cuando cambia el negocio
+  useEffect(() => {
+    const fetchActiveCoupon = async () => {
+      const businessId = selectedBusiness?.id;
+      if (!businessId) {
+        setActiveCoupon(null);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/coupons/business/${businessId}/active`
+        );
+        const data = await response.json();
+
+        if (data.success && data.coupon) {
+          console.log('🎟️ Cupón activo encontrado:', data.coupon);
+          setActiveCoupon(data.coupon);
+        } else {
+          setActiveCoupon(null);
+        }
+      } catch (error) {
+        console.error('Error fetching active coupon:', error);
+        setActiveCoupon(null);
+      }
+    };
+
+    fetchActiveCoupon();
+  }, [selectedBusiness?.id]);
 
   // Cargar negocio desde la URL cuando hay un slug
   useEffect(() => {
@@ -174,6 +205,7 @@ export default function BusinessView({ type = "comida" }) {
         business={selectedBusiness}
         onClose={handleMenuClose}
         type={type}
+        activeCoupon={activeCoupon}
       />
     </div>
   );

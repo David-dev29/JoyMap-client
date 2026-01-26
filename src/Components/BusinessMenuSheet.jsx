@@ -3,7 +3,7 @@ import { useRef } from "react";
 import Food from "../Pages/Food";
 import { X } from "lucide-react";
 
-export default function BusinessMenuSheet({ open, onClose, business }) {
+export default function BusinessMenuSheet({ open, onClose, business, activeCoupon }) {
   const scrollRef = useRef(null);
 
   return (
@@ -71,10 +71,11 @@ export default function BusinessMenuSheet({ open, onClose, business }) {
                 transition={{ delay: 0.1 }}
                 className="pt-6"
               >
-                {/* 🔥 PASAR business como prop */}
-                <Food 
-                  scrollContainerRef={scrollRef} 
+                {/* 🔥 PASAR business y cupón como props */}
+                <Food
+                  scrollContainerRef={scrollRef}
                   selectedBusinessFromMap={business}
+                  activeCoupon={activeCoupon}
                 />
               </motion.div>
             </div>

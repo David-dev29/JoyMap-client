@@ -20,7 +20,8 @@ const normalizeString = (str) =>
 function Food({
   scrollContainerRef,
   selectedBusinessFromMap,
-  type = "comida"
+  type = "comida",
+  activeCoupon
 }) {
   // Estado de categorías y productos
   const [categories, setCategories] = useState([]);
@@ -352,6 +353,7 @@ function Food({
         selectedBusinessFromMap={selectedBusinessFromMap}
         type={type}
         categories={categories}
+        activeCoupon={activeCoupon}
       />
 
       <HeroBannerTienda business={selectedBusinessFromMap} />

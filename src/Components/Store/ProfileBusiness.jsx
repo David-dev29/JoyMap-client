@@ -24,7 +24,7 @@ const parsePaymentMethods = (pm) => {
 };
 
 // 🎟️ Componente CouponBanner
-const CouponBanner = ({ coupon, brandColor, onApply }) => {
+const CouponBanner = ({ coupon, brandColor, onApply, applied }) => {
   const [copied, setCopied] = useState(false);
 
   if (!coupon) return null;
@@ -44,9 +44,13 @@ const CouponBanner = ({ coupon, brandColor, onApply }) => {
   return (
     <div className="mx-4 mb-3 mt-2">
       <div
-        className="rounded-xl p-3 shadow-md relative overflow-hidden"
+        className={`rounded-xl p-3 shadow-md relative overflow-hidden transition-all duration-300 ${
+          applied ? 'ring-2 ring-green-400 ring-offset-2' : ''
+        }`}
         style={{
-          background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}dd 100%)`
+          background: applied
+            ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)'
+            : `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}dd 100%)`
         }}
       >
         {/* Patrón decorativo */}
@@ -60,17 +64,29 @@ const CouponBanner = ({ coupon, brandColor, onApply }) => {
           <div className="flex items-center gap-3">
             {/* Icono de cupón */}
             <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-              <Ticket className="w-5 h-5 text-white" />
+              {applied ? (
+                <Check className="w-5 h-5 text-white" />
+              ) : (
+                <Ticket className="w-5 h-5 text-white" />
+              )}
             </div>
 
             <div>
               <p className="text-white font-semibold text-sm flex items-center gap-1">
-                <span>🎉</span> ¡Cupón disponible!
+                {applied ? (
+                  <>
+                    <span>✅</span> ¡Cupón aplicado!
+                  </>
+                ) : (
+                  <>
+                    <span>🎉</span> ¡Cupón disponible!
+                  </>
+                )}
               </p>
               <p className="text-white/90 text-xs">
                 {coupon.description || `${coupon.discount}% de descuento`}
               </p>
-              {coupon.minOrder && (
+              {coupon.minOrder && !applied && (
                 <p className="text-white/70 text-[10px] mt-0.5">
                   Mínimo: ${coupon.minOrder}
                 </p>
@@ -93,7 +109,7 @@ const CouponBanner = ({ coupon, brandColor, onApply }) => {
                 <Copy className="w-3.5 h-3.5 text-white/70" />
               )}
             </button>
-            {onApply && (
+            {onApply && !applied && (
               <button
                 onClick={() => onApply(coupon)}
                 className="bg-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors"
@@ -101,6 +117,11 @@ const CouponBanner = ({ coupon, brandColor, onApply }) => {
               >
                 Aplicar
               </button>
+            )}
+            {applied && (
+              <div className="bg-white/30 px-3 py-1.5 rounded-lg">
+                <span className="text-white text-xs font-semibold">Aplicado</span>
+              </div>
             )}
           </div>
         </div>
@@ -112,19 +133,43 @@ const CouponBanner = ({ coupon, brandColor, onApply }) => {
 // ✅ Cache de imágenes en memoria
 const imageCache = new Map();
 
-const CategoryIcons = ({ 
-  activeCategory, 
-  setActiveCategory, 
-  cartItems = [], 
+const CategoryIcons = ({
+  activeCategory,
+  setActiveCategory,
+  cartItems = [],
   scrollContainerRef,
   selectedBusinessFromMap, // 🔥 NUEVA PROP desde el mapa
-   type = "comida" // ✅ NUEVA PROP
+  type = "comida", // ✅ NUEVA PROP
+  activeCoupon // 🎟️ Cupón activo del negocio
 }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
+  const [couponApplied, setCouponApplied] = useState(false);
+
+  // 🎟️ Función para aplicar cupón
+  const handleApplyCoupon = useCallback((coupon) => {
+    const businessId = selectedBusinessFromMap?.id;
+
+    // Guardar el cupón en localStorage para usarlo en el checkout
+    localStorage.setItem('appliedCoupon', JSON.stringify({
+      code: coupon.code,
+      discount: coupon.discount,
+      discountType: coupon.discountType || 'percentage',
+      description: coupon.description,
+      businessId: businessId,
+      minOrder: coupon.minOrder || 0,
+      couponId: coupon._id || coupon.id
+    }));
+
+    setCouponApplied(true);
+    console.log('🎟️ Cupón aplicado:', coupon.code);
+
+    // Resetear el estado después de 3 segundos
+    setTimeout(() => setCouponApplied(false), 3000);
+  }, [selectedBusinessFromMap?.id]);
 
 // ✅ SOCKET: escuchar actualizaciones de negocios
   useEffect(() => {
@@ -681,12 +726,10 @@ const CategoryIcons = ({
 
       {/* Banner de cupón disponible */}
       <CouponBanner
-        coupon={selectedBusinessFromMap?.activeCoupon}
+        coupon={activeCoupon}
         brandColor={selectedBusinessFromMap?.brandColor}
-        onApply={(coupon) => {
-          console.log('Aplicar cupón:', coupon);
-          // TODO: Implementar lógica para aplicar cupón al carrito
-        }}
+        onApply={handleApplyCoupon}
+        applied={couponApplied}
       />
     </>
   );
