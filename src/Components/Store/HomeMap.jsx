@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Circle } from 'r
 import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Supercluster from "supercluster";
-import { Navigation } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 
 // Hooks personalizados
@@ -175,7 +174,8 @@ export default function HomeMap({
   selectedCategory,
   type = "comida",
   onBusinessOpen,
-  initialBusiness
+  initialBusiness,
+  onMapReady, // Callback para exponer funciones del mapa
 }) {
   const [mapRef, setMapRef] = useState(null);
 
@@ -277,17 +277,27 @@ export default function HomeMap({
     }
   };
 
+  // Exponer funciones del mapa al componente padre
+  useEffect(() => {
+    if (onMapReady) {
+      onMapReady({
+        recenter: handleRecenter,
+        hasUserLocation: !!userLocation,
+      });
+    }
+  }, [userLocation, mapRef]);
+
   // Centro inicial del mapa
   const initialCenter = userLocation
     ? [userLocation.lat, userLocation.lng]
     : [DEFAULT_LOCATION.lat, DEFAULT_LOCATION.lng];
 
   return (
-    <div className="relative w-full h-[calc(100vh-64px)]">
+    <div className="relative w-full h-full overflow-hidden">
       <MapContainer
         center={initialCenter}
         zoom={MAP_CONFIG.defaultZoom}
-        className="w-full h-full"
+        className="absolute inset-0"
         zoomControl={false}
         ref={setMapRef}
       >
@@ -326,41 +336,6 @@ export default function HomeMap({
           onClusterClick={handleClusterClick}
         />
       </MapContainer>
-
-      {/* Controles de zoom y recentrar */}
-      <div className="absolute bottom-8 right-4 flex flex-col gap-1.5 z-[400]">
-        <button
-          onClick={handleRecenter}
-          className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center
-                     hover:bg-blue-50 transition-all text-gray-700 hover:text-blue-600
-                     active:scale-95 group relative"
-          title="Ir a mi ubicación"
-        >
-          <Navigation className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" fill="currentColor" />
-          {userLocation && (
-            <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full"></div>
-          )}
-        </button>
-
-        <button
-          onClick={() => mapRef?.zoomIn()}
-          className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center
-                     hover:bg-gray-50 transition-colors text-xl font-semibold text-gray-700
-                     active:scale-95"
-        >
-          +
-        </button>
-
-        <button
-          onClick={() => mapRef?.zoomOut()}
-          className="w-10 h-10 bg-white rounded-lg shadow-lg flex items-center justify-center
-                     hover:bg-gray-50 transition-colors text-xl font-semibold text-gray-700
-                     active:scale-95"
-        >
-          −
-        </button>
-      </div>
-
 
       <style>{`
         .custom-marker,

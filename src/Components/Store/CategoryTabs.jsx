@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, memo } from "react";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 
 // Botón de categoría memoizado
 const CategoryButton = memo(({ category, isActive, onClick }) => {
@@ -29,6 +29,7 @@ const CategoryTabs = ({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const markerRef = useRef(null);
   const tabsRef = useRef(null);
+  const searchInputRef = useRef(null);
   const [markerStyle, setMarkerStyle] = useState({ left: 0, width: 0 });
 
   // Shadow sticky
@@ -58,6 +59,13 @@ const CategoryTabs = ({
     });
   }, [activeCategory, categories]);
 
+  // Focus en input cuando se abre el buscador
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  }, [isSearchOpen]);
+
   // Si no hay categorías
   if (categories.length === 0) {
     return null;
@@ -72,66 +80,78 @@ const CategoryTabs = ({
           scrolled ? "shadow-md" : ""
         }`}
       >
-        {!isSearchOpen && <div className="border-b border-gray-200 ml-4 mr-4" />}
-
-        <div className="px-4 sm:px-6 lg:px-8 relative">
-          <nav
-            className="flex items-center space-x-2 overflow-x-auto custom-scroll-hide py-1 relative"
-            role="tablist"
-            ref={tabsRef}
-          >
-            {/* Buscador */}
-            {!isSearchOpen ? (
+        {/* Barra de búsqueda expandida */}
+        {isSearchOpen ? (
+          <div className="px-4 py-3 border-b border-gray-100">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Buscar en el menú..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="w-full pl-10 pr-10 py-3 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#E53935]/20 focus:bg-white transition-all"
+              />
               <button
-                onClick={() => setIsSearchOpen(true)}
-                className="p-1 text-gray-600 hover:text-[#E53935] flex-shrink-0"
-                aria-label="Buscar productos"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-            ) : (
-              <div className="flex-1 flex items-center gap-3 bg-white h-full rounded-xl px-2">
-                <input
-                  type="text"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Buscar productos..."
-                  className="flex-1 outline-none text-sm"
-                  autoFocus
-                />
-                <button
-                  onClick={() => {
-                    setIsSearchOpen(false);
+                onClick={() => {
+                  if (searchValue) {
                     setSearchValue("");
-                  }}
-                  className="text-sm font-bold text-[#D32F2F] hover:underline"
+                  } else {
+                    setIsSearchOpen(false);
+                  }
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-200 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4 text-gray-500" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="border-b border-gray-200 ml-4 mr-4" />
+
+            <div className="px-4 sm:px-6 lg:px-8 relative">
+              <nav
+                className="flex items-center space-x-2 overflow-x-auto custom-scroll-hide py-1 relative"
+                role="tablist"
+                ref={tabsRef}
+              >
+                {/* Botón de búsqueda */}
+                <button
+                  onClick={() => setIsSearchOpen(true)}
+                  className="p-2 text-gray-600 hover:text-[#E53935] hover:bg-gray-100 rounded-lg flex-shrink-0 transition-colors"
+                  aria-label="Buscar productos"
                 >
-                  Cerrar
+                  <Search className="w-5 h-5" />
                 </button>
-              </div>
-            )}
 
-            {/* Categorías */}
-            {!isSearchOpen && categories.map(category => (
-              <CategoryButton
-                key={category.id}
-                category={category}
-                isActive={activeCategory === category.id}
-                onClick={onCategoryClick}
-              />
-            ))}
+                {/* Separador */}
+                <div className="w-px h-6 bg-gray-200 flex-shrink-0" />
 
-            {/* Línea activa */}
-            {!isSearchOpen && categories.length > 0 && (
-              <div
-                className="absolute bottom-0 h-0.5 bg-[#D32F2F] transition-all duration-300 ease-out"
-                style={{ left: markerStyle.left, width: markerStyle.width }}
-              />
-            )}
-          </nav>
-        </div>
+                {/* Categorías */}
+                {categories.map(category => (
+                  <CategoryButton
+                    key={category.id}
+                    category={category}
+                    isActive={activeCategory === category.id}
+                    onClick={onCategoryClick}
+                  />
+                ))}
 
-        {!isSearchOpen && <div className="border-b border-gray-200 ml-4 mr-4" />}
+                {/* Línea activa */}
+                {categories.length > 0 && (
+                  <div
+                    className="absolute bottom-0 h-0.5 bg-[#D32F2F] transition-all duration-300 ease-out"
+                    style={{ left: markerStyle.left, width: markerStyle.width }}
+                  />
+                )}
+              </nav>
+            </div>
+
+            <div className="border-b border-gray-200 ml-4 mr-4" />
+          </>
+        )}
       </div>
 
       <style>{`
