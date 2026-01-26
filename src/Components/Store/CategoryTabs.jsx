@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef, memo } from "react";
+import React, { useState, useEffect, useRef, memo, useCallback } from "react";
 import { Search, X } from "lucide-react";
 
 // Botón de categoría memoizado
-const CategoryButton = memo(({ category, isActive, onClick }) => {
+const CategoryButton = memo(React.forwardRef(({ category, isActive, onClick }, ref) => {
   return (
     <button
+      ref={ref}
       data-category={category.id}
       onClick={() => onClick(category.id)}
       className={`tab-button relative py-2 px-3 text-sm font-medium focus:outline-none whitespace-nowrap transition-colors ${
@@ -16,7 +17,7 @@ const CategoryButton = memo(({ category, isActive, onClick }) => {
       {category.name}
     </button>
   );
-});
+}));
 
 const CategoryTabs = ({
   categories = [],
@@ -28,7 +29,8 @@ const CategoryTabs = ({
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const markerRef = useRef(null);
-  const tabsRef = useRef(null);
+  const tabsContainerRef = useRef(null);
+  const activeTabRef = useRef(null);
   const searchInputRef = useRef(null);
   const [markerStyle, setMarkerStyle] = useState({ left: 0, width: 0 });
 
@@ -45,19 +47,41 @@ const CategoryTabs = ({
     return () => observer.disconnect();
   }, []);
 
-  // Actualiza marcador y centra tab activo
+  // ════════════════════════════════════════════════════════════════════════
+  // AUTO-CENTRAR TAB ACTIVO cuando cambia activeCategory
+  // ════════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    if (!tabsRef.current || !activeCategory) return;
-    const activeTab = tabsRef.current.querySelector(`[data-category="${activeCategory}"]`);
-    if (!activeTab) return;
+    if (!tabsContainerRef.current || !activeCategory || isSearchOpen) return;
 
-    const { offsetLeft, offsetWidth } = activeTab;
-    setMarkerStyle({ left: offsetLeft, width: offsetWidth });
+    // Pequeño delay para asegurar que el DOM esté actualizado
+    const timeoutId = setTimeout(() => {
+      const container = tabsContainerRef.current;
+      const activeTab = container?.querySelector(`[data-category="${activeCategory}"]`);
 
-    requestAnimationFrame(() => {
-      activeTab.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-    });
-  }, [activeCategory, categories]);
+      if (!activeTab || !container) return;
+
+      const containerWidth = container.offsetWidth;
+      const containerScrollLeft = container.scrollLeft;
+      const tabLeft = activeTab.offsetLeft;
+      const tabWidth = activeTab.offsetWidth;
+
+      // Calcular posición para centrar el tab
+      const scrollPosition = tabLeft - (containerWidth / 2) + (tabWidth / 2);
+
+      container.scrollTo({
+        left: Math.max(0, scrollPosition),
+        behavior: 'smooth'
+      });
+
+      // Actualizar posición del marcador
+      setMarkerStyle({
+        left: tabLeft,
+        width: tabWidth
+      });
+    }, 50);
+
+    return () => clearTimeout(timeoutId);
+  }, [activeCategory, categories, isSearchOpen]);
 
   // Focus en input cuando se abre el buscador
   useEffect(() => {
@@ -65,6 +89,11 @@ const CategoryTabs = ({
       setTimeout(() => searchInputRef.current?.focus(), 100);
     }
   }, [isSearchOpen]);
+
+  // Handler para click en categoría
+  const handleTabClick = useCallback((categoryId) => {
+    onCategoryClick(categoryId);
+  }, [onCategoryClick]);
 
   // Si no hay categorías
   if (categories.length === 0) {
@@ -113,9 +142,9 @@ const CategoryTabs = ({
 
             <div className="px-4 sm:px-6 lg:px-8 relative">
               <nav
+                ref={tabsContainerRef}
                 className="flex items-center space-x-2 overflow-x-auto custom-scroll-hide py-1 relative"
                 role="tablist"
-                ref={tabsRef}
               >
                 {/* Botón de búsqueda */}
                 <button
@@ -133,14 +162,15 @@ const CategoryTabs = ({
                 {categories.map(category => (
                   <CategoryButton
                     key={category.id}
+                    ref={activeCategory === category.id ? activeTabRef : null}
                     category={category}
                     isActive={activeCategory === category.id}
-                    onClick={onCategoryClick}
+                    onClick={handleTabClick}
                   />
                 ))}
 
                 {/* Línea activa */}
-                {categories.length > 0 && (
+                {categories.length > 0 && markerStyle.width > 0 && (
                   <div
                     className="absolute bottom-0 h-0.5 bg-[#D32F2F] transition-all duration-300 ease-out"
                     style={{ left: markerStyle.left, width: markerStyle.width }}

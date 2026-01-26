@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import HeroBannerTienda from "../Components/Store/HeroBanner.jsx";
 import CategoryIcons from "../Components/Store/ProfileBusiness.jsx";
 import CategoryTabs from "../Components/Store/CategoryTabs.jsx";
@@ -35,6 +35,9 @@ function Food({
   const [error, setError] = useState(null);
   const [noMenu, setNoMenu] = useState(false);
 
+  // Estado para evitar conflicto entre click y scroll spy
+  const [isScrollingByClick, setIsScrollingByClick] = useState(false);
+
   // Carrito
   const [cartItems, setCartItems] = useState(
     JSON.parse(localStorage.getItem("cartItems")) || []
@@ -45,8 +48,8 @@ function Food({
   // Favoritos
   const { favoriteIds, toggleFavorite } = useFavorites();
 
-  // Refs
-  const categoryRefs = useRef({});
+  // Refs para las secciones de categorías (para scroll spy)
+  const sectionRefs = useRef({});
 
   // Obtener businessId del negocio seleccionado
   const businessId = selectedBusinessFromMap?.id;
@@ -65,7 +68,6 @@ function Food({
         setError(null);
         setNoMenu(false);
 
-        // Endpoint por negocio con productos incluidos
         const response = await fetch(
           `${API_URL}/api/product-categories/business/${businessId}?populate=products`
         );
@@ -75,8 +77,6 @@ function Food({
         }
 
         const data = await response.json();
-
-        // Soportar múltiples formatos de respuesta
         const categoriesData = data.categories || data.response || data.data || [];
 
         if (!Array.isArray(categoriesData) || categoriesData.length === 0) {
@@ -98,7 +98,6 @@ function Food({
             categoryId: cat._id,
             categoryName: cat.name,
             normalizedCategory: normalizeString(cat.name),
-            // Agregar descuentos aleatorios para demo
             hasDiscount: Math.random() < 0.3,
             discountPercentage: Math.floor(Math.random() * 21) + 10,
             get discountedPrice() {
@@ -109,7 +108,6 @@ function Food({
           }))
         }));
 
-        // Filtrar categorías sin productos
         const categoriesWithProducts = processedCategories.filter(
           cat => cat.products.length > 0
         );
@@ -124,12 +122,11 @@ function Food({
 
         setCategories(categoriesWithProducts);
 
-        // Aplanar todos los productos
         const allProds = categoriesWithProducts.flatMap(cat => cat.products);
         setAllProducts(allProds);
 
         // Establecer primera categoría como activa
-        if (categoriesWithProducts.length > 0 && !activeCategory) {
+        if (categoriesWithProducts.length > 0) {
           setActiveCategory(categoriesWithProducts[0].id);
         }
 
@@ -144,13 +141,82 @@ function Food({
     fetchBusinessMenu();
   }, [businessId]);
 
-  // Crear refs para las categorías
+  // ════════════════════════════════════════════════════════════════════════
+  // SCROLL SPY - Detectar categoría visible al hacer scroll manual
+  // ════════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    categoryRefs.current = {};
-    categories.forEach(cat => {
-      categoryRefs.current[cat.id] = React.createRef();
+    if (categories.length === 0 || searchValue) return;
+
+    const observerOptions = {
+      root: scrollContainerRef?.current || null,
+      rootMargin: '-20% 0px -60% 0px', // Detectar cuando está en la parte superior
+      threshold: 0
+    };
+
+    const observerCallback = (entries) => {
+      // Solo actualizar si no estamos haciendo scroll por click
+      if (isScrollingByClick) return;
+
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const categoryId = entry.target.getAttribute('data-category-id');
+          if (categoryId && categoryId !== activeCategory) {
+            setActiveCategory(categoryId);
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    // Observar cada sección
+    Object.entries(sectionRefs.current).forEach(([id, el]) => {
+      if (el) {
+        observer.observe(el);
+      }
     });
-  }, [categories]);
+
+    return () => observer.disconnect();
+  }, [categories, isScrollingByClick, searchValue, scrollContainerRef]);
+
+  // ════════════════════════════════════════════════════════════════════════
+  // CLICK EN CATEGORÍA - Scroll inmediato a la sección
+  // ════════════════════════════════════════════════════════════════════════
+  const handleCategoryClick = useCallback((categoryId) => {
+    // Marcar que estamos haciendo scroll por click
+    setIsScrollingByClick(true);
+
+    // Actualizar categoría activa inmediatamente
+    setActiveCategory(categoryId);
+
+    // Hacer scroll a la sección
+    const section = sectionRefs.current[categoryId];
+    if (section) {
+      const scrollContainer = scrollContainerRef?.current;
+
+      if (scrollContainer) {
+        // Calcular posición dentro del contenedor
+        const containerTop = scrollContainer.getBoundingClientRect().top;
+        const sectionTop = section.getBoundingClientRect().top;
+        const offset = sectionTop - containerTop + scrollContainer.scrollTop - 80;
+
+        scrollContainer.scrollTo({
+          top: offset,
+          behavior: 'smooth'
+        });
+      } else {
+        // Scroll en window
+        const yOffset = -80;
+        const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+
+    // Re-activar scroll spy después de que termine el scroll
+    setTimeout(() => {
+      setIsScrollingByClick(false);
+    }, 800);
+  }, [scrollContainerRef]);
 
   // Productos filtrados por búsqueda
   const productosFiltrados = useMemo(() => {
@@ -163,28 +229,6 @@ function Food({
       normalizeString(p.description || "").includes(search)
     );
   }, [allProducts, searchValue]);
-
-  // Productos de la categoría activa
-  const productosCategoria = useMemo(() => {
-    if (!activeCategory) return [];
-    const category = categories.find(c => c.id === activeCategory);
-    return category?.products || [];
-  }, [categories, activeCategory]);
-
-  // Manejar click en categoría
-  const handleCategoryClick = (categoryId) => {
-    setActiveCategory(categoryId);
-
-    const el = categoryRefs.current[categoryId]?.current;
-    if (el) {
-      const y = el.offsetTop - 80;
-      if (scrollContainerRef?.current) {
-        scrollContainerRef.current.scrollTo({ top: y, behavior: "smooth" });
-      } else {
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-    }
-  };
 
   // Actualizar contadores del carrito
   useEffect(() => {
@@ -228,10 +272,10 @@ function Food({
             ...product,
             id: productId,
             image: product.image || '',
-            businessId: businessId // Incluir businessId del negocio actual
+            businessId: businessId
           },
           quantity,
-          businessId: businessId // También a nivel de item para fácil acceso
+          businessId: businessId
         });
       }
 
@@ -240,19 +284,6 @@ function Food({
     });
     setSelectedProduct(null);
   };
-
-  // Construir subcategoriesMap para CategoryTabs (compatibilidad)
-  const subcategoriesMap = useMemo(() => {
-    const map = {};
-    categories.forEach(cat => {
-      map[cat.slug] = [{
-        id: cat.id,
-        name: cat.name,
-        label: cat.name
-      }];
-    });
-    return map;
-  }, [categories]);
 
   // Render principal
   if (loading) {
@@ -350,12 +381,14 @@ function Food({
           </div>
         )
       ) : (
-        // Productos por categoría
+        // Productos por categoría con refs para scroll spy
         <div className="pb-24">
           {categories.map(category => (
             <div
               key={category.id}
-              ref={categoryRefs.current[category.id]}
+              ref={el => sectionRefs.current[category.id] = el}
+              data-category-id={category.id}
+              id={`category-section-${category.id}`}
               className="mb-6"
             >
               <h2 className="text-xl font-bold text-gray-700 px-4 mt-6 mb-2">
