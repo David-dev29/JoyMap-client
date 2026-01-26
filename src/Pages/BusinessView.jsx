@@ -52,6 +52,7 @@ export default function BusinessView({ type = "comida" }) {
           // Agregar métodos de pago y color personalizado
           paymentMethods: data.response.paymentMethods,
           brandColor: data.response.brandColor,
+          activeCoupon: data.response.activeCoupon,
         };
 
         setSelectedBusiness(businessData);
@@ -76,13 +77,48 @@ export default function BusinessView({ type = "comida" }) {
     setSelectedCategory(categorySlug);
   };
 
-  const handleBusinessOpen = (business) => {
+  const handleBusinessOpen = async (business) => {
+    // Mostrar inmediatamente con datos básicos del mapa
     setSelectedBusiness(business);
     setMenuOpen(true);
 
     const businessSlug = createSlug(business.name);
     const basePath = type === 'comida' ? 'home' : 'tienda';
     navigate(`/${basePath}/${businessSlug}`, { replace: false });
+
+    // Fetch datos completos del negocio (incluye paymentMethods, brandColor, etc.)
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/businesses/${business.id}`);
+      const data = await res.json();
+
+      if (data.success && data.response) {
+        const fullBusinessData = {
+          id: data.response._id,
+          name: data.response.name,
+          rating: data.response.rating || 4.5,
+          category: data.response.category?.name || 'Sin categoría',
+          categorySlug: data.response.category?.slug,
+          logo: buildImageUrl(data.response.logo),
+          banner: buildImageUrl(data.response.banner),
+          deliveryTime: data.response.deliveryTime || { min: 30, max: 40 },
+          deliveryCost: data.response.deliveryCost || 25,
+          minOrderAmount: data.response.minOrderAmount || 50,
+          isOpen: data.response.isOpen !== false,
+          mapIcon: data.response.mapIcon || '🍽️',
+          emoji: data.response.emoji,
+          paymentMethods: data.response.paymentMethods,
+          brandColor: data.response.brandColor,
+          activeCoupon: data.response.activeCoupon,
+        };
+
+        // Actualizar con datos completos
+        setSelectedBusiness(fullBusinessData);
+        console.log('✅ Business data completa:', fullBusinessData);
+      }
+    } catch (error) {
+      console.error('Error fetching full business data:', error);
+      // Mantener datos básicos si falla el fetch
+    }
   };
 
   const handleMenuClose = () => {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { socket } from "../../sockets/socket.js";
 import ShareButton from "../ShareButton.jsx";
+import { Banknote, CreditCard, Smartphone, Ticket, Copy, Check } from "lucide-react";
 
 // ✅ Helper para normalizar nombres
 const normalizeString = (str) =>
@@ -8,6 +9,105 @@ const normalizeString = (str) =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/\s+/g, "-") || "";
+
+// ✅ Helper para parsear paymentMethods (puede venir como string JSON)
+const parsePaymentMethods = (pm) => {
+  if (!pm) return null;
+  if (typeof pm === 'string') {
+    try {
+      return JSON.parse(pm);
+    } catch {
+      return null;
+    }
+  }
+  return pm;
+};
+
+// 🎟️ Componente CouponBanner
+const CouponBanner = ({ coupon, brandColor, onApply }) => {
+  const [copied, setCopied] = useState(false);
+
+  if (!coupon) return null;
+
+  const themeColor = brandColor || '#F59E0B';
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(coupon.code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Error copying code:', err);
+    }
+  };
+
+  return (
+    <div className="mx-4 mb-3 mt-2">
+      <div
+        className="rounded-xl p-3 shadow-md relative overflow-hidden"
+        style={{
+          background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}dd 100%)`
+        }}
+      >
+        {/* Patrón decorativo */}
+        <div className="absolute top-0 right-0 w-20 h-20 opacity-10">
+          <div className="absolute inset-0 transform rotate-45">
+            <div className="w-full h-full border-4 border-white rounded-lg"></div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-3">
+            {/* Icono de cupón */}
+            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+              <Ticket className="w-5 h-5 text-white" />
+            </div>
+
+            <div>
+              <p className="text-white font-semibold text-sm flex items-center gap-1">
+                <span>🎉</span> ¡Cupón disponible!
+              </p>
+              <p className="text-white/90 text-xs">
+                {coupon.description || `${coupon.discount}% de descuento`}
+              </p>
+              {coupon.minOrder && (
+                <p className="text-white/70 text-[10px] mt-0.5">
+                  Mínimo: ${coupon.minOrder}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Código del cupón */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopyCode}
+              className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-white/30 transition-colors"
+            >
+              <span className="text-white font-mono font-bold text-sm">
+                {coupon.code}
+              </span>
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-white" />
+              ) : (
+                <Copy className="w-3.5 h-3.5 text-white/70" />
+              )}
+            </button>
+            {onApply && (
+              <button
+                onClick={() => onApply(coupon)}
+                className="bg-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors"
+                style={{ color: themeColor }}
+              >
+                Aplicar
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // ✅ Cache de imágenes en memoria
 const imageCache = new Map();
@@ -169,6 +269,9 @@ const CategoryIcons = ({
   useEffect(() => {
     if (selectedBusinessFromMap) {
       console.log("🗺️ Negocio desde mapa:", selectedBusinessFromMap);
+      console.log("💳 Payment methods (raw):", selectedBusinessFromMap?.paymentMethods);
+      console.log("💳 Payment methods (parsed):", parsePaymentMethods(selectedBusinessFromMap?.paymentMethods));
+      console.log("🎨 Brand color:", selectedBusinessFromMap?.brandColor);
       
       const { line1, line2 } = formatCategoryName(selectedBusinessFromMap.name);
       
@@ -486,31 +589,54 @@ const CategoryIcons = ({
                 </span>
                 <span className="text-gray-300">•</span>
                 <span className="text-xs text-gray-500">A domicilio</span>
-              </div>
 
-              {/* Métodos de pago */}
-              {selectedBusinessFromMap?.paymentMethods && (
-                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                  {selectedBusinessFromMap.paymentMethods.cash && (
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 rounded-full">
-                      <span className="text-xs">💵</span>
-                      <span className="text-[10px] text-green-700 font-medium">Efectivo</span>
-                    </div>
-                  )}
-                  {selectedBusinessFromMap.paymentMethods.card && (
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 rounded-full">
-                      <span className="text-xs">💳</span>
-                      <span className="text-[10px] text-blue-700 font-medium">Tarjeta</span>
-                    </div>
-                  )}
-                  {selectedBusinessFromMap.paymentMethods.transfer && (
-                    <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-100 rounded-full">
-                      <span className="text-xs">📱</span>
-                      <span className="text-[10px] text-purple-700 font-medium">Transferencia</span>
-                    </div>
-                  )}
-                </div>
-              )}
+                {/* Métodos de pago - iconos compactos con label sutil */}
+                {(() => {
+                  const paymentMethods = parsePaymentMethods(selectedBusinessFromMap?.paymentMethods);
+                  if (!paymentMethods) return null;
+
+                  const hasAnyMethod = paymentMethods.cash || paymentMethods.card || paymentMethods.transfer;
+                  if (!hasAnyMethod) return null;
+
+                  return (
+                    <>
+                      <span className="text-gray-300">•</span>
+                      <div
+                        className="flex items-center gap-1.5 cursor-help"
+                        title="Métodos de pago aceptados"
+                      >
+                        <span className="text-[10px] text-gray-400">Acepta:</span>
+                        <div className="flex items-center gap-1">
+                          {paymentMethods.cash && (
+                            <div
+                              className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
+                              title="Efectivo"
+                            >
+                              <Banknote className="w-3 h-3 text-green-600" />
+                            </div>
+                          )}
+                          {paymentMethods.card && (
+                            <div
+                              className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center"
+                              title="Tarjeta"
+                            >
+                              <CreditCard className="w-3 h-3 text-blue-600" />
+                            </div>
+                          )}
+                          {paymentMethods.transfer && (
+                            <div
+                              className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center"
+                              title="Transferencia"
+                            >
+                              <Smartphone className="w-3 h-3 text-purple-600" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
           </div>
 
@@ -552,6 +678,16 @@ const CategoryIcons = ({
           </div>
         </div>
       </div>
+
+      {/* Banner de cupón disponible */}
+      <CouponBanner
+        coupon={selectedBusinessFromMap?.activeCoupon}
+        brandColor={selectedBusinessFromMap?.brandColor}
+        onApply={(coupon) => {
+          console.log('Aplicar cupón:', coupon);
+          // TODO: Implementar lógica para aplicar cupón al carrito
+        }}
+      />
     </>
   );
 };
