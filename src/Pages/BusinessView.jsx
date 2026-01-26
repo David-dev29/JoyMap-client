@@ -49,6 +49,9 @@ export default function BusinessView({ type = "comida" }) {
           isOpen: data.response.isOpen !== false,
           mapIcon: data.response.mapIcon || '🍽️',
           emoji: data.response.emoji,
+          // Agregar métodos de pago y color personalizado
+          paymentMethods: data.response.paymentMethods,
+          brandColor: data.response.brandColor,
         };
 
         setSelectedBusiness(businessData);

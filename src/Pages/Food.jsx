@@ -51,8 +51,9 @@ function Food({
   // Refs para las secciones de categorías (para scroll spy)
   const sectionRefs = useRef({});
 
-  // Obtener businessId del negocio seleccionado
+  // Obtener businessId y brandColor del negocio seleccionado
   const businessId = selectedBusinessFromMap?.id;
+  const brandColor = selectedBusinessFromMap?.brandColor;
 
   // Cargar categorías y productos del negocio
   useEffect(() => {
@@ -362,6 +363,7 @@ function Food({
         onCategoryClick={handleCategoryClick}
         searchValue={searchValue}
         setSearchValue={setSearchValue}
+        brandColor={brandColor}
       />
 
       {/* Productos */}
@@ -373,6 +375,7 @@ function Food({
             isTienda={true}
             onProductClick={setSelectedProduct}
             onToggleFavorite={toggleFavorite}
+            brandColor={brandColor}
           />
         ) : (
           <div className="px-4 py-12 text-center">
@@ -400,6 +403,7 @@ function Food({
                   isTienda={true}
                   onProductClick={setSelectedProduct}
                   onToggleFavorite={toggleFavorite}
+                  brandColor={brandColor}
                 />
               ) : (
                 <div className="px-4 py-4 text-gray-400 text-sm">

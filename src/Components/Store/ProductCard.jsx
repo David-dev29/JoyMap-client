@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 
-const ProductCard = ({ product, isTienda, onProductClick }) => {
-  const buttonColorClass = isTienda
-    ? "bg-[#D32F2F] hover:bg-[#C62828]"
-    : "bg-green-600 hover:bg-green-700";
+const ProductCard = ({ product, isTienda, onProductClick, brandColor }) => {
+  // Color del tema - usar brandColor si existe, sino el default
+  const themeColor = brandColor || (isTienda ? '#D32F2F' : '#16a34a');
+  const themeColorHover = brandColor ? brandColor : (isTienda ? '#C62828' : '#15803d');
 
   const { hasDiscount, discountPercentage } = product;
   const [showQualityTag, setShowQualityTag] = useState(false);
@@ -32,11 +32,9 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
   // SVG Placeholder bonito
   const ImagePlaceholder = () => (
     <div className="w-full h-full flex items-center justify-center bg-gray-50 rounded-xl overflow-hidden">
-      <svg class="w-6 h-6 text-gray-800 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-
-<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 12 2.66667-1 2.66666 1L12 11l2.6667 1 2.6666-1L20 12m-1 5H5v1c0 1.1046.89543 2 2 2h10c1.1046 0 2-.8954 2-2v-1ZM5 9.00003h14v-1c0-2.20914-1.7909-4-4-4H9c-2.20914 0-4 1.79086-4 4v1ZM18.5 14h-13c-.82843 0-1.5.6716-1.5 1.5 0 .8285.67157 1.5 1.5 1.5h13c.8284 0 1.5-.6715 1.5-1.5 0-.8284-.6716-1.5-1.5-1.5Z"/>
-
-</svg>
+      <svg className="w-6 h-6 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m4 12 2.66667-1 2.66666 1L12 11l2.6667 1 2.6666-1L20 12m-1 5H5v1c0 1.1046.89543 2 2 2h10c1.1046 0 2-.8954 2-2v-1ZM5 9.00003h14v-1c0-2.20914-1.7909-4-4-4H9c-2.20914 0-4 1.79086-4 4v1ZM18.5 14h-13c-.82843 0-1.5.6716-1.5 1.5 0 .8285.67157 1.5 1.5 1.5h13c.8284 0 1.5-.6715 1.5-1.5 0-.8284-.6716-1.5-1.5-1.5Z"/>
+      </svg>
     </div>
   );
 
@@ -59,17 +57,16 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
           <ImagePlaceholder />
         ) : (
           <img
-          src={
-            product.image.startsWith("http")
-              ? product.image
-              : `https://${product.image}`
-          }
-          alt={product.name}
-          className="w-full h-full object-contain rounded-xl"
-          loading="lazy"
-          onError={handleImageError}
-        />
-        
+            src={
+              product.image.startsWith("http")
+                ? product.image
+                : `https://${product.image}`
+            }
+            alt={product.name}
+            className="w-full h-full object-contain rounded-xl"
+            loading="lazy"
+            onError={handleImageError}
+          />
         )}
 
         {/* Etiqueta descuento - Amber for promotions */}
@@ -115,12 +112,16 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
             MXN ${product.price.toFixed(2)}
           </span>
 
-          {/* Botón agregar */}
+          {/* Botón agregar con color personalizado */}
           <button
             aria-label={`Agregar ${product.name}`}
             onClick={handleButtonClick}
             type="button"
-            className={`${buttonColorClass} w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isTienda ? "focus:ring-[#E53935]" : "focus:ring-green-500"}`}
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all shadow hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2"
+            style={{
+              backgroundColor: themeColor,
+              '--tw-ring-color': themeColor
+            }}
           >
             <Plus
               className="w-4 h-4 text-white"

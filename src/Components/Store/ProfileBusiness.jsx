@@ -487,6 +487,30 @@ const CategoryIcons = ({
                 <span className="text-gray-300">•</span>
                 <span className="text-xs text-gray-500">A domicilio</span>
               </div>
+
+              {/* Métodos de pago */}
+              {selectedBusinessFromMap?.paymentMethods && (
+                <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                  {selectedBusinessFromMap.paymentMethods.cash && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 rounded-full">
+                      <span className="text-xs">💵</span>
+                      <span className="text-[10px] text-green-700 font-medium">Efectivo</span>
+                    </div>
+                  )}
+                  {selectedBusinessFromMap.paymentMethods.card && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 rounded-full">
+                      <span className="text-xs">💳</span>
+                      <span className="text-[10px] text-blue-700 font-medium">Tarjeta</span>
+                    </div>
+                  )}
+                  {selectedBusinessFromMap.paymentMethods.transfer && (
+                    <div className="flex items-center gap-1 px-2 py-0.5 bg-purple-100 rounded-full">
+                      <span className="text-xs">📱</span>
+                      <span className="text-[10px] text-purple-700 font-medium">Transferencia</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 

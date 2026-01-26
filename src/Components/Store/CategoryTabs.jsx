@@ -2,15 +2,18 @@ import React, { useState, useEffect, useRef, memo, useCallback } from "react";
 import { Search, X } from "lucide-react";
 
 // Botón de categoría memoizado
-const CategoryButton = memo(React.forwardRef(({ category, isActive, onClick }, ref) => {
+const CategoryButton = memo(React.forwardRef(({ category, isActive, onClick, brandColor }, ref) => {
+  const themeColor = brandColor || '#D32F2F';
+
   return (
     <button
       ref={ref}
       data-category={category.id}
       onClick={() => onClick(category.id)}
       className={`tab-button relative py-2 px-3 text-sm font-medium focus:outline-none whitespace-nowrap transition-colors ${
-        isActive ? "active text-[#D32F2F]" : "text-gray-700 hover:text-[#E53935]"
+        isActive ? "active" : "text-gray-700"
       }`}
+      style={isActive ? { color: themeColor } : {}}
       role="tab"
       aria-selected={isActive}
     >
@@ -25,7 +28,10 @@ const CategoryTabs = ({
   onCategoryClick,
   searchValue,
   setSearchValue,
+  brandColor,
 }) => {
+  // Color del tema
+  const themeColor = brandColor || '#D32F2F';
   const [scrolled, setScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const markerRef = useRef(null);
@@ -166,14 +172,19 @@ const CategoryTabs = ({
                     category={category}
                     isActive={activeCategory === category.id}
                     onClick={handleTabClick}
+                    brandColor={themeColor}
                   />
                 ))}
 
-                {/* Línea activa */}
+                {/* Línea activa con color personalizado */}
                 {categories.length > 0 && markerStyle.width > 0 && (
                   <div
-                    className="absolute bottom-0 h-0.5 bg-[#D32F2F] transition-all duration-300 ease-out"
-                    style={{ left: markerStyle.left, width: markerStyle.width }}
+                    className="absolute bottom-0 h-0.5 transition-all duration-300 ease-out"
+                    style={{
+                      left: markerStyle.left,
+                      width: markerStyle.width,
+                      backgroundColor: themeColor
+                    }}
                   />
                 )}
               </nav>

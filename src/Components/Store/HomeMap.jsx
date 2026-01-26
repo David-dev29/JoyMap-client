@@ -213,6 +213,8 @@ export default function HomeMap({
           deliveryTime: b.deliveryTime,
           deliveryCost: b.deliveryCost,
           minOrderAmount: b.minOrderAmount,
+          paymentMethods: b.paymentMethods,
+          brandColor: b.brandColor,
         },
         geometry: {
           type: "Point",
@@ -254,6 +256,8 @@ export default function HomeMap({
       minOrderAmount: business.minOrderAmount || 50,
       isOpen: business.isOpen,
       emoji: business.emoji,
+      paymentMethods: business.paymentMethods,
+      brandColor: business.brandColor,
     };
 
     onBusinessOpen?.(businessData);
