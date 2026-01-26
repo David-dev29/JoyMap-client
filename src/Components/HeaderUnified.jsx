@@ -1,72 +1,150 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
-  Bell,
   X,
-  User,
-  MapPin,
-  ChevronDown,
-  ShoppingCart,
+  ChevronRight,
+  ShoppingBag,
   Utensils,
   Store,
   Package,
+  ArrowLeft,
+  Clock,
+  CheckCircle,
+  Gift,
+  Star,
+  Loader2,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { getAllBusinesses } from "../services/businessService";
 
+// ═══════════════════════════════════════════════════════════════════════════
+// NOTIFICATIONS DROPDOWN COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+function NotificationsDropdown({ notifications, onClose, onClear }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+      className="absolute top-full left-4 right-4 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+    >
+      <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+        <h3 className="font-bold text-gray-900">Notificaciones</h3>
+        {notifications.length > 0 && (
+          <button onClick={onClear} className="text-xs text-[#E53935] font-medium">
+            Marcar como leídas
+          </button>
+        )}
+      </div>
+
+      <div className="max-h-[300px] overflow-y-auto">
+        {notifications.length === 0 ? (
+          <div className="py-8 text-center">
+            <div className="w-12 h-12 mx-auto mb-3 bg-gray-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-6 h-6 text-gray-400" />
+            </div>
+            <p className="text-gray-500 text-sm">No tienes notificaciones</p>
+          </div>
+        ) : (
+          notifications.map((notif, i) => (
+            <div
+              key={i}
+              className="px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-50 last:border-0"
+            >
+              <div className="flex gap-3">
+                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                  {notif.type === 'order' && <Clock className="w-5 h-5 text-amber-500" />}
+                  {notif.type === 'promo' && <Gift className="w-5 h-5 text-[#E53935]" />}
+                  {notif.type === 'success' && <CheckCircle className="w-5 h-5 text-green-500" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 text-sm">{notif.title}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{notif.desc}</p>
+                  <p className="text-[10px] text-gray-400 mt-1">{notif.time}</p>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      <button
+        onClick={onClose}
+        className="w-full py-3 text-center text-sm font-medium text-gray-600 hover:bg-gray-50 border-t border-gray-100"
+      >
+        Cerrar
+      </button>
+    </motion.div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN HEADER COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
 export default function HeaderUnified({
-  isMapInteracting = false,
   onSearch,
-  notificationCount = 0,
+  onBusinessSelect,
   cartCount = 0,
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated } = useAuth();
-  const [searchActive, setSearchActive] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [userAddress, setUserAddress] = useState('Seleccionar ubicación...');
+  const searchInputRef = useRef(null);
+
+  // States
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [allBusinesses, setAllBusinesses] = useState([]);
+
+  // App config from backend
   const [appConfig, setAppConfig] = useState({
     appName: 'JoyMap',
     appLogo: null,
     logoText: null,
-    primaryColor: '#E53935',
-    slogan: null,
   });
   const [loadingConfig, setLoadingConfig] = useState(true);
 
-  // Determinar sección activa
+  // Notifications (mock - replace with real data from backend)
+  const [notifications, setNotifications] = useState([
+    { type: 'order', title: 'Tu pedido está en camino', desc: 'El repartidor llegará en 15 min', time: 'Hace 5 min' },
+    { type: 'promo', title: 'Nuevo cupón disponible', desc: '20% de descuento en tu próximo pedido', time: 'Hace 2 horas' },
+  ]);
+
+  const notificationCount = notifications.length;
+
+  // Determine active section
   const isComida = location.pathname === '/home' || location.pathname === '/';
   const isTienda = location.pathname === '/tienda';
   const isEnvios = location.pathname === '/envios';
 
-  // Secciones del switcher
   const sections = [
     { id: 'comida', name: 'Comida', icon: Utensils, path: '/home', active: isComida },
     { id: 'tienda', name: 'Tienda', icon: Store, path: '/tienda', active: isTienda },
     { id: 'envios', name: 'Envíos', icon: Package, path: '/envios', active: isEnvios },
   ];
 
-  // Cargar configuración de la app desde backend (/api/settings)
+  // ═══════════════════════════════════════════════════════════════════════
+  // FETCH APP CONFIG FROM BACKEND
+  // ═══════════════════════════════════════════════════════════════════════
   useEffect(() => {
     const fetchAppConfig = async () => {
       try {
-        // Intentar obtener config de la app desde /api/settings
+        // Try /api/settings first
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/settings`);
         const data = await res.json();
-
         if (data.success && data.settings) {
           setAppConfig({
             appName: data.settings.appName || 'JoyMap',
             appLogo: data.settings.logo || null,
             logoText: data.settings.logoText || null,
-            primaryColor: data.settings.primaryColor || '#E53935',
-            slogan: data.settings.slogan || null,
           });
         }
       } catch (error) {
-        // Fallback: intentar /api/stores como respaldo
+        // Fallback to /api/stores
         try {
           const fallbackRes = await fetch(`${import.meta.env.VITE_API_URL}/api/stores`);
           const fallbackData = await fallbackRes.json();
@@ -74,10 +152,11 @@ export default function HeaderUnified({
             setAppConfig({
               appName: fallbackData.store_data.name || 'JoyMap',
               appLogo: fallbackData.store_data.logoUrl || null,
+              logoText: fallbackData.store_data.logoTextUrl || null,
             });
           }
-        } catch (fallbackError) {
-          console.log('Using default app config');
+        } catch {
+          // Use defaults
         }
       } finally {
         setLoadingConfig(false);
@@ -86,19 +165,24 @@ export default function HeaderUnified({
     fetchAppConfig();
   }, []);
 
-  // Cargar dirección del usuario
+  // ═══════════════════════════════════════════════════════════════════════
+  // LOAD ALL BUSINESSES FOR SEARCH
+  // ═══════════════════════════════════════════════════════════════════════
   useEffect(() => {
-    const stored = localStorage.getItem('userAddresses');
-    if (stored) {
-      const addresses = JSON.parse(stored);
-      if (addresses.length > 0) {
-        const selected = addresses.find(a => a.isSelected) || addresses[0];
-        setUserAddress(selected.street?.substring(0, 22) + '...' || 'Mi ubicación');
+    const loadBusinesses = async () => {
+      try {
+        const businesses = await getAllBusinesses();
+        setAllBusinesses(businesses);
+      } catch (error) {
+        console.error('Error loading businesses for search:', error);
       }
-    }
+    };
+    loadBusinesses();
   }, []);
 
-  // Cargar cantidad del carrito desde localStorage
+  // ═══════════════════════════════════════════════════════════════════════
+  // CART COUNT FROM LOCALSTORAGE
+  // ═══════════════════════════════════════════════════════════════════════
   const [localCartCount, setLocalCartCount] = useState(0);
   useEffect(() => {
     const updateCartCount = () => {
@@ -116,257 +200,375 @@ export default function HeaderUnified({
 
   const displayCartCount = cartCount || localCartCount;
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // SEARCH FUNCTIONALITY WITH DEBOUNCE
+  // ═══════════════════════════════════════════════════════════════════════
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setIsSearching(true);
+
+      // Client-side search (filter local businesses)
+      const query = searchQuery.toLowerCase().trim();
+      const filtered = allBusinesses.filter(business => {
+        const name = (business.name || '').toLowerCase();
+        const category = (business.category?.name || business.category || '').toLowerCase();
+        const description = (business.description || '').toLowerCase();
+
+        return name.includes(query) ||
+               category.includes(query) ||
+               description.includes(query);
+      }).slice(0, 10); // Limit to 10 results
+
+      setSearchResults(filtered);
+      setIsSearching(false);
+    }, 300); // Debounce 300ms
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, allBusinesses]);
+
+  // Focus search input when entering search mode
+  useEffect(() => {
+    if (isSearchMode && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current?.focus(), 100);
+    }
+  }, [isSearchMode]);
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // HANDLERS
+  // ═══════════════════════════════════════════════════════════════════════
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    onSearch?.(query);
+  };
+
+  const handleSelectBusiness = (business) => {
+    setIsSearchMode(false);
+    setSearchQuery('');
+    setSearchResults([]);
+
+    // Notify parent component
+    onBusinessSelect?.(business);
+
+    // Navigate to business
+    const slug = business.slug || createSlug(business.name);
+    const basePath = isTienda ? 'tienda' : 'home';
+    navigate(`/${basePath}/${slug}`);
+  };
+
+  const handleClearNotifications = () => {
+    setNotifications([]);
+    setShowNotifications(false);
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showNotifications && !e.target.closest('.notifications-container')) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showNotifications]);
+
+  // Helper to build image URL
+  const buildImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://')) return url;
+    return `https://${url}`;
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════
   return (
     <>
-      {/* HEADER FLOTANTE */}
-      <div className="fixed top-0 left-0 right-0 z-50 px-4 pt-4">
-        <header className="max-w-lg mx-auto bg-[#E53935] rounded-2xl shadow-lg overflow-hidden">
-          {/* Primera fila: Logo/Ubicación + Iconos */}
-          <div className="px-4 pt-4 pb-2">
-            <div className="flex justify-between items-center">
-              {/* Izquierda: Logo + Ubicación */}
-              <div className="flex items-center gap-2 max-w-[65%]">
-                {/* Logo */}
-                {loadingConfig ? (
-                  <div className="w-8 h-8 rounded-lg bg-white/20 animate-pulse" />
-                ) : appConfig.appLogo ? (
-                  <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex-shrink-0">
-                    <img
-                      src={appConfig.appLogo}
-                      alt={appConfig.appName}
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        e.target.parentElement.innerHTML = '<span class="w-full h-full flex items-center justify-center text-[#E53935] font-bold text-xs">JM</span>';
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#E53935] font-bold text-xs">JM</span>
-                  </div>
-                )}
-
-                {/* Ubicación */}
-                <button
-                  onClick={() => navigate('/address')}
-                  className="flex items-center gap-1 text-white hover:opacity-90 transition-opacity min-w-0"
-                >
-                  <MapPin className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-semibold text-sm truncate">
-                    {userAddress}
-                  </span>
-                  <ChevronDown className="w-4 h-4 flex-shrink-0" />
-                </button>
-              </div>
-
-              {/* Derecha: Iconos */}
-              <div className="flex items-center gap-3">
-                {/* Notificaciones */}
-                <button
-                  onClick={() => setNotificationsOpen(true)}
-                  className="text-white relative hover:opacity-80 transition-opacity"
-                >
-                  <Bell className="w-5 h-5" />
-                  {notificationCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-white text-[#E53935] text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                      {notificationCount}
-                    </span>
-                  )}
-                </button>
-
-                {/* Carrito */}
-                <button
-                  onClick={() => navigate('/cart')}
-                  className="text-white relative hover:opacity-80 transition-opacity"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  {displayCartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-white text-[#E53935] text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                      {displayCartCount > 9 ? '9+' : displayCartCount}
-                    </span>
-                  )}
-                </button>
-
-                {/* Perfil */}
-                <button
-                  onClick={() => navigate(isAuthenticated ? '/profile' : '/new-user-info')}
-                  className="text-white hover:opacity-80 transition-opacity"
-                >
-                  <User className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Segunda fila: Búsqueda */}
-          <div className="px-4 pb-3">
-            <button
-              onClick={() => setSearchActive(true)}
-              className="w-full bg-white rounded-full px-4 py-2.5 flex items-center gap-2 shadow-sm hover:shadow transition-shadow"
-            >
-              <Search className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-400 text-sm">Buscar locales, platos y productos...</span>
-            </button>
-          </div>
-
-          {/* Tercera fila: Section Switcher integrado */}
-          <div className="px-4 pb-4">
-            <div className="flex gap-2">
-              {sections.map((section) => {
-                const Icon = section.icon;
-                return (
-                  <button
-                    key={section.id}
-                    onClick={() => navigate(section.path)}
-                    className={`flex-1 py-2.5 px-3 rounded-full text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                      section.active
-                        ? 'bg-white text-[#E53935] shadow-md'
-                        : 'bg-white/20 text-white hover:bg-white/30'
-                    }`}
-                  >
-                    <Icon
-                      className={`w-4 h-4 ${section.active ? 'animate-bounce-subtle' : ''}`}
-                      strokeWidth={2.5}
-                    />
-                    <span>{section.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </header>
-      </div>
-
-      {/* SEARCH OVERLAY */}
-      <AnimatePresence>
-        {searchActive && (
-          <motion.div
-            className="fixed inset-0 z-[60] bg-white"
+      <AnimatePresence mode="wait">
+        {!isSearchMode ? (
+          /* ═══════════════════════════════════════════════════════════════
+             ESTADO NORMAL - Header con logo, búsqueda, carrito y tabs
+             ═══════════════════════════════════════════════════════════════ */
+          <motion.header
+            key="normal-header"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
+            className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 notifications-container"
           >
-            <div className="max-w-lg mx-auto px-4 py-3">
-              <div className="flex items-center gap-3">
-                <div className="flex-1 flex items-center gap-3 bg-gray-100 rounded-xl px-4 py-3">
-                  <Search className="w-5 h-5 text-gray-400" />
-                  <input
-                    autoFocus
-                    placeholder="Buscar restaurantes, platillos..."
-                    onChange={(e) => onSearch?.(e.target.value)}
-                    className="flex-1 bg-transparent text-base outline-none placeholder-gray-400"
-                  />
-                </div>
+            {/* FONDO SÓLIDO ROJO - SIN GRADIENTE */}
+            <div className="max-w-lg mx-auto bg-[#E53935] rounded-2xl shadow-lg overflow-hidden">
+              {/* Fila principal: Logo + Nombre | Búsqueda + Carrito */}
+              <div className="px-4 py-3 flex items-center justify-between">
+                {/* Izquierda: Logo con notificaciones */}
                 <button
-                  onClick={() => setSearchActive(false)}
-                  className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNotifications(!showNotifications);
+                  }}
+                  className="relative flex items-center gap-2 hover:opacity-90 transition-opacity"
                 >
-                  <X className="w-5 h-5 text-gray-600" />
+                  {/* Logo iconográfico */}
+                  {loadingConfig ? (
+                    <div className="w-8 h-8 rounded-lg bg-white/20 animate-pulse" />
+                  ) : appConfig.appLogo ? (
+                    <img
+                      src={buildImageUrl(appConfig.appLogo)}
+                      alt={appConfig.appName}
+                      className="w-8 h-8 rounded-lg object-contain bg-white"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                      <span className="text-[#E53935] font-bold">JM</span>
+                    </div>
+                  )}
+
+                  {/* Logo tipográfico desde backend O appName como texto */}
+                  {appConfig.logoText ? (
+                    <img
+                      src={buildImageUrl(appConfig.logoText)}
+                      alt={appConfig.appName}
+                      className="h-5 object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <span className="text-white font-bold text-lg">{appConfig.appName || 'JoyMap'}</span>
+                  )}
+
+                  {/* Badge de notificaciones */}
+                  {notificationCount > 0 && (
+                    <span className="absolute -top-1 left-5 bg-yellow-400 text-[#E53935] text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 animate-pulse">
+                      {notificationCount > 9 ? '9+' : notificationCount}
+                    </span>
+                  )}
                 </button>
+
+                {/* Derecha: Búsqueda + Carrito */}
+                <div className="flex items-center gap-4">
+                  {/* Botón búsqueda */}
+                  <button
+                    onClick={() => setIsSearchMode(true)}
+                    className="text-white hover:opacity-80 transition-opacity"
+                  >
+                    <Search className="w-6 h-6" />
+                  </button>
+
+                  {/* Botón carrito */}
+                  <button onClick={() => navigate('/cart')} className="relative text-white hover:opacity-80 transition-opacity">
+                    <ShoppingBag className="w-6 h-6" />
+                    {displayCartCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-white text-[#E53935] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {displayCartCount > 9 ? '9+' : displayCartCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              {/* Sugerencias de búsqueda */}
-              <div className="mt-6">
-                <p className="text-sm font-medium text-gray-500 mb-3">Búsquedas populares</p>
-                <div className="flex flex-wrap gap-2">
-                  {['Pizza', 'Tacos', 'Hamburguesas', 'Sushi', 'Pollo', 'Postres'].map(tag => (
-                    <button
-                      key={tag}
-                      onClick={() => onSearch?.(tag)}
-                      className="px-4 py-2 bg-gray-100 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-                    >
-                      {tag}
-                    </button>
-                  ))}
+              {/* Tabs de sección */}
+              <div className="px-4 pb-4">
+                <div className="flex gap-2">
+                  {sections.map((section) => {
+                    const Icon = section.icon;
+                    return (
+                      <button
+                        key={section.id}
+                        onClick={() => navigate(section.path)}
+                        className={`flex-1 py-2 px-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                          section.active
+                            ? 'bg-white text-[#E53935] shadow-md'
+                            : 'bg-white/20 text-white hover:bg-white/30'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" strokeWidth={2.5} />
+                        <span>{section.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* NOTIFICATIONS MODAL */}
-      <AnimatePresence>
-        {notificationsOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 bg-black/40 z-[70]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setNotificationsOpen(false)}
-            />
+            {/* Dropdown de notificaciones */}
+            <AnimatePresence>
+              {showNotifications && (
+                <NotificationsDropdown
+                  notifications={notifications}
+                  onClose={() => setShowNotifications(false)}
+                  onClear={handleClearNotifications}
+                />
+              )}
+            </AnimatePresence>
+          </motion.header>
+        ) : (
+          /* ═══════════════════════════════════════════════════════════════
+             MODO BÚSQUEDA - Header transformado en barra de búsqueda
+             ═══════════════════════════════════════════════════════════════ */
+          <motion.header
+            key="search-header"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-0 left-0 right-0 z-50 px-4 pt-4"
+          >
+            {/* Search bar */}
+            <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-lg px-4 py-3 flex items-center gap-3">
+              <button
+                onClick={() => {
+                  setIsSearchMode(false);
+                  setSearchQuery('');
+                  setSearchResults([]);
+                  onSearch?.('');
+                }}
+                className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
 
-            <motion.div
-              className="fixed top-0 right-0 bottom-0 w-full max-w-sm bg-white z-[80] shadow-xl"
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            >
-              {/* Header */}
-              <div className="h-14 px-4 flex items-center justify-between border-b border-gray-100">
-                <h2 className="text-lg font-bold text-gray-900">Notificaciones</h2>
-                <button
-                  onClick={() => setNotificationsOpen(false)}
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100"
-                >
-                  <X className="w-5 h-5 text-gray-600" />
-                </button>
+              <div className="flex-1 flex items-center gap-2">
+                <Search className="w-5 h-5 text-gray-400" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  placeholder="Buscar locales, platos, productos..."
+                  className="flex-1 outline-none text-gray-700 text-base placeholder-gray-400"
+                />
               </div>
 
-              {/* Lista */}
-              <div className="overflow-y-auto h-[calc(100vh-56px)]">
-                {notificationCount === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-64 text-center px-6">
-                    <Bell className="w-12 h-12 text-gray-300 mb-3" />
-                    <p className="text-gray-500">No tienes notificaciones</p>
-                  </div>
-                ) : (
-                  <div className="divide-y divide-gray-100">
-                    {[
-                      { title: "Tu pedido está en camino", desc: "El repartidor llegará en 15 min", time: "Hace 5 min", icon: "🚴" },
-                      { title: "Pedido confirmado", desc: "Tu pedido #1234 fue confirmado", time: "Hace 1 hora", icon: "✅" },
-                      { title: "Nuevo cupón disponible", desc: "20% de descuento en tu próximo pedido", time: "Hace 2 horas", icon: "🎉" },
-                    ].map((notif, i) => (
-                      <div key={i} className="px-4 py-4 hover:bg-gray-50 transition-colors cursor-pointer">
-                        <div className="flex gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-xl flex-shrink-0">
-                            {notif.icon}
+              {isSearching && (
+                <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+              )}
+
+              {searchQuery && !isSearching && (
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSearchResults([]);
+                    onSearch?.('');
+                    searchInputRef.current?.focus();
+                  }}
+                  className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              )}
+            </div>
+
+            {/* Search results */}
+            <div className="max-w-lg mx-auto mt-2">
+              {searchResults.length > 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-xl shadow-lg max-h-[300px] overflow-y-auto"
+                >
+                  {searchResults.map((business) => (
+                    <button
+                      key={business._id}
+                      onClick={() => handleSelectBusiness(business)}
+                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 border-b border-gray-50 last:border-0 transition-colors"
+                    >
+                      {/* Business logo */}
+                      <div className="w-12 h-12 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0">
+                        {business.logo ? (
+                          <img
+                            src={buildImageUrl(business.logo)}
+                            alt={business.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-2xl">
+                            {business.mapIcon || business.emoji || '🏪'}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 text-sm">{notif.title}</p>
-                            <p className="text-sm text-gray-500 mt-0.5">{notif.desc}</p>
-                            <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
-                          </div>
+                        )}
+                      </div>
+
+                      {/* Business info */}
+                      <div className="flex-1 text-left min-w-0">
+                        <p className="font-semibold text-gray-900 truncate">{business.name}</p>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs text-gray-500">
+                            {business.category?.name || business.category || 'Restaurante'}
+                          </span>
+                          {business.rating && (
+                            <span className="flex items-center gap-0.5 text-xs text-amber-600">
+                              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                              {business.rating}
+                            </span>
+                          )}
                         </div>
                       </div>
+
+                      <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                    </button>
+                  ))}
+                </motion.div>
+              ) : searchQuery && !isSearching ? (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-xl shadow-lg p-6 text-center"
+                >
+                  <Search className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                  <p className="text-gray-500 text-sm">No se encontraron resultados para "{searchQuery}"</p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-white rounded-xl shadow-lg p-4"
+                >
+                  <p className="text-xs font-medium text-gray-500 mb-3">Búsquedas populares</p>
+                  <div className="flex flex-wrap gap-2">
+                    {['Pizza', 'Tacos', 'Hamburguesas', 'Sushi', 'Pollo', 'Postres', 'Café', 'Helados'].map(tag => (
+                      <button
+                        key={tag}
+                        onClick={() => handleSearch(tag)}
+                        className="px-3 py-1.5 bg-gray-100 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+                      >
+                        {tag}
+                      </button>
                     ))}
                   </div>
-                )}
-              </div>
-            </motion.div>
-          </>
+                </motion.div>
+              )}
+            </div>
+          </motion.header>
         )}
       </AnimatePresence>
 
-      {/* Spacer para el contenido debajo del header flotante */}
-      {/* Header: ~170px, Categories: ~50px adicionales */}
-      <div className="h-[170px]" />
-
-      {/* Animación sutil para el icono activo */}
-      <style>
-        {`
-          @keyframes bounce-subtle {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-2px); }
-          }
-          .animate-bounce-subtle {
-            animation: bounce-subtle 1s ease-in-out infinite;
-          }
-        `}
-      </style>
+      {/* Spacer para el contenido */}
+      <div className={isSearchMode ? 'h-32' : 'h-[130px]'} />
     </>
   );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+function createSlug(name) {
+  if (!name) return '';
+  return name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
