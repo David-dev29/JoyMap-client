@@ -80,38 +80,32 @@ export default function BusinessMenuSheet({ open, onClose, business, activeCoupo
             {/* Contenedor interno */}
             <div className="relative flex flex-col h-[85vh] max-h-[85vh] rounded-t-3xl overflow-hidden">
 
-              {/* SECCIÓN STICKY - No scrollea */}
-              <div className="flex-shrink-0 relative">
-                {/* Handle centrado superpuesto */}
-                <div className="absolute top-0 left-0 right-0 z-30 flex justify-center pt-2 pointer-events-none">
-                  <div className="w-10 h-1 bg-white/60 rounded-full pointer-events-auto cursor-grab active:cursor-grabbing" />
-                </div>
-
-                {/* Botón cerrar superpuesto */}
-                <motion.button
-                  onClick={onClose}
-                  className="absolute top-2 right-3 z-40 w-8 h-8 bg-white/80 backdrop-blur-sm hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
-                  whileTap={{ scale: 0.9 }}
-                >
-                  <X className="w-5 h-5 text-gray-600" />
-                </motion.button>
-
-                {/* Banner de cupón - FIJO, no scrollea */}
-                {activeCoupon && (
-                  <div className="mb-0">
-                    <CouponBanner
-                      coupon={activeCoupon}
-                      brandColor={business?.brandColor}
-                      onApply={handleApplyCoupon}
-                      applied={couponApplied}
-                      businessId={businessId}
-                    />
-                  </div>
-                )}
-
-                {/* Espaciador si no hay cupón */}
-                {!activeCoupon && <div className="h-8"></div>}
+              {/* Handle FLOTANTE - absoluto, sin ocupar espacio */}
+              <div className="absolute top-0 left-0 right-0 z-50 flex justify-center pt-2 pointer-events-none">
+                <div className="w-10 h-1 bg-gray-400/60 rounded-full pointer-events-auto cursor-grab active:cursor-grabbing" />
               </div>
+
+              {/* Botón cerrar FLOTANTE - absoluto */}
+              <motion.button
+                onClick={onClose}
+                className="absolute top-2 right-3 z-50 w-8 h-8 bg-white/80 backdrop-blur-sm hover:bg-white rounded-full flex items-center justify-center shadow-md transition-all hover:scale-110"
+                whileTap={{ scale: 0.9 }}
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </motion.button>
+
+              {/* SECCIÓN STICKY - Banner de cupón */}
+              {activeCoupon && (
+                <div className="flex-shrink-0">
+                  <CouponBanner
+                    coupon={activeCoupon}
+                    brandColor={business?.brandColor}
+                    onApply={handleApplyCoupon}
+                    applied={couponApplied}
+                    businessId={businessId}
+                  />
+                </div>
+              )}
 
               {/* SECCIÓN SCROLLEABLE - Solo esta parte scrollea */}
               <div

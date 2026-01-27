@@ -482,7 +482,7 @@ const BusinessProfile = ({
       )}
 
       {/* Contenido original - Sin animaciones de framer motion */}
-      <div className="px-4 pb-0 pt-3">
+      <div className="px-4 pb-0 pt-6">
         {/* Banner del negocio */}
         {/* Banner del negocio */}
 <div className="relative h-32 overflow-hidden rounded-2xl shadow-md">
@@ -573,56 +573,53 @@ const BusinessProfile = ({
                 {formattedName.line2 && ` ${formattedName.line2}`}
               </h1>
 
-              {/* Estado, servicio y métodos de pago */}
-              <div className="flex flex-col gap-1.5 mt-1.5">
-                {/* Primera línea: Estado y tipo de servicio */}
-                <div className="flex items-center gap-2">
-                  <span className={`flex items-center text-xs font-medium ${
-                    activeCat?.isOpen ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                      activeCat?.isOpen ? 'bg-green-500' : 'bg-red-500'
-                    }`}></span>
-                    {activeCat?.isOpen ? 'Abierto' : 'Cerrado'}
-                  </span>
-                  <span className="text-gray-300">•</span>
-                  <span className="text-xs text-gray-500">A domicilio</span>
-                </div>
-
-                {/* Segunda línea: Métodos de pago como chips */}
-                {(() => {
-                  const paymentMethods = parsePaymentMethods(selectedBusinessFromMap?.paymentMethods);
-                  if (!paymentMethods) return null;
-
-                  const hasAnyMethod = paymentMethods.cash || paymentMethods.card || paymentMethods.transfer;
-                  if (!hasAnyMethod) return null;
-
-                  return (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {paymentMethods.cash && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">
-                          <Banknote className="w-3 h-3" />
-                          Efectivo
-                        </span>
-                      )}
-                      {paymentMethods.card && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">
-                          <CreditCard className="w-3 h-3" />
-                          Tarjeta
-                        </span>
-                      )}
-                      {paymentMethods.transfer && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">
-                          <Smartphone className="w-3 h-3" />
-                          Transferencia
-                        </span>
-                      )}
-                    </div>
-                  );
-                })()}
+              {/* Estado y tipo de servicio */}
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className={`flex items-center text-xs font-medium ${
+                  activeCat?.isOpen ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                    activeCat?.isOpen ? 'bg-green-500' : 'bg-red-500'
+                  }`}></span>
+                  {activeCat?.isOpen ? 'Abierto' : 'Cerrado'}
+                </span>
+                <span className="text-gray-300">•</span>
+                <span className="text-xs text-gray-500">A domicilio</span>
               </div>
             </div>
           </div>
+
+          {/* Métodos de pago - Centrados horizontalmente */}
+          {(() => {
+            const paymentMethods = parsePaymentMethods(selectedBusinessFromMap?.paymentMethods);
+            if (!paymentMethods) return null;
+
+            const hasAnyMethod = paymentMethods.cash || paymentMethods.card || paymentMethods.transfer;
+            if (!hasAnyMethod) return null;
+
+            return (
+              <div className="flex items-center justify-center gap-2 flex-wrap mb-3">
+                {paymentMethods.cash && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                    <Banknote className="w-3.5 h-3.5" />
+                    Efectivo
+                  </span>
+                )}
+                {paymentMethods.card && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                    <CreditCard className="w-3.5 h-3.5" />
+                    Tarjeta
+                  </span>
+                )}
+                {paymentMethods.transfer && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 rounded-full text-xs text-gray-600">
+                    <Smartphone className="w-3.5 h-3.5" />
+                    Transferencia
+                  </span>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Métricas del negocio */}
           <div className="flex items-center justify-between py-3 px-1 border-t border-gray-100">

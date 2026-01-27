@@ -14,6 +14,7 @@ import {
   Gift,
   Star,
   Loader2,
+  Bell,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getAllBusinesses } from "../services/businessService";
@@ -305,62 +306,28 @@ export default function HeaderUnified({
           >
             {/* FONDO SÓLIDO ROJO - SIN GRADIENTE */}
             <div className="max-w-lg mx-auto bg-red-600 rounded-2xl shadow-lg overflow-hidden">
-              {/* Fila principal: Logo + Nombre | Búsqueda + Carrito */}
+              {/* Fila principal: Logo tipográfico | Búsqueda + Notificaciones + Carrito */}
               <div className="px-4 py-3 flex items-center justify-between">
-                {/* Izquierda: Logo - abre menú lateral */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsSideMenuOpen(true);
-                  }}
-                  className="flex items-center gap-2 hover:opacity-90 transition-opacity"
-                >
-                  {/* Logo iconográfico - w-11 h-11, sin padding, llena el contenedor */}
-                  <div className="relative">
-                    {loadingConfig ? (
-                      <div className="w-11 h-11 rounded-xl bg-white/20 animate-pulse" />
-                    ) : appConfig.appLogo ? (
-                      <div className="w-11 h-11 rounded-xl overflow-hidden shadow-sm">
-                        <img
-                          src={buildImageUrl(appConfig.appLogo)}
-                          alt={appConfig.appName}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                          }}
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                        <span className="text-red-600 font-bold text-lg">JM</span>
-                      </div>
-                    )}
-
-                    {/* Badge de notificaciones - círculo con gradiente (estilo moderno) */}
-                    {notificationCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] bg-gradient-to-br from-red-500 to-red-700 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                        {notificationCount > 9 ? '9+' : notificationCount}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Logo tipográfico desde backend O appName como texto */}
-                  {appConfig.logoText ? (
+                {/* Izquierda: Solo logo tipográfico */}
+                <div className="flex items-center">
+                  {loadingConfig ? (
+                    <div className="h-6 w-24 bg-white/20 rounded animate-pulse" />
+                  ) : appConfig.logoText ? (
                     <img
                       src={buildImageUrl(appConfig.logoText)}
                       alt={appConfig.appName}
-                      className="h-5 object-contain"
+                      className="h-6 object-contain"
                       onError={(e) => {
                         e.target.style.display = 'none';
                       }}
                     />
                   ) : (
-                    <span className="text-white font-bold text-lg">{appConfig.appName || 'JoyMap'}</span>
+                    <span className="text-white font-bold text-xl">{appConfig.appName || 'JoyMap'}</span>
                   )}
-                </button>
+                </div>
 
-                {/* Derecha: Búsqueda + Carrito */}
-                <div className="flex items-center gap-4">
+                {/* Derecha: Búsqueda + Notificaciones + Carrito */}
+                <div className="flex items-center gap-3">
                   {/* Botón búsqueda */}
                   <button
                     onClick={() => setIsSearchMode(true)}
@@ -369,11 +336,27 @@ export default function HeaderUnified({
                     <Search className="w-6 h-6" />
                   </button>
 
+                  {/* Botón notificaciones - abre menú lateral */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsSideMenuOpen(true);
+                    }}
+                    className="relative text-white hover:opacity-80 transition-opacity"
+                  >
+                    <Bell className="w-6 h-6" />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-white text-red-600 text-[10px] font-bold rounded-full flex items-center justify-center">
+                        {notificationCount > 9 ? '9+' : notificationCount}
+                      </span>
+                    )}
+                  </button>
+
                   {/* Botón carrito */}
                   <button onClick={() => navigate('/cart')} className="relative text-white hover:opacity-80 transition-opacity">
                     <ShoppingBag className="w-6 h-6" />
                     {displayCartCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-white text-red-600 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-white text-red-600 text-[10px] font-bold rounded-full flex items-center justify-center">
                         {displayCartCount > 9 ? '9+' : displayCartCount}
                       </span>
                     )}
