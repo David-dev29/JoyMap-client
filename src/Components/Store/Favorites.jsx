@@ -40,7 +40,7 @@ const Favorites = ({ allProducts = [] }) => {
               className="bg-white rounded-lg p-4 mb-3 shadow-sm border border-gray-100"
             >
               <div className="flex items-center">
-                <div className="w-16 h-16 bg-[#FFCDD2] rounded-lg flex items-center justify-center mr-4 overflow-hidden">
+                <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mr-4 overflow-hidden">
                   <img
                     src={product.image}
                     alt={product.name}

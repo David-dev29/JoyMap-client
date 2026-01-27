@@ -175,13 +175,13 @@ export default function AddressScreen() {
             onClick={() => setShowData(!showData)}
           >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-[#FFCDD2] rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-[#E53935]" />
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <User className="w-5 h-5 text-red-600" />
               </div>
               <h2 className="text-base font-semibold text-gray-900">Información personal</h2>
             </div>
             {showData ? 
-              <ChevronUp className="w-5 h-5 text-[#E53935]" /> : 
+              <ChevronUp className="w-5 h-5 text-red-600" /> : 
               <ChevronDown className="w-5 h-5 text-gray-400" />
             }
           </div>
@@ -198,7 +198,7 @@ export default function AddressScreen() {
                 </div>
                 <button 
                   onClick={() => navigate('/new-user-info')}
-                  className="text-[#E53935] text-xs font-bold hover:text-[#D32F2F] transition"
+                  className="text-red-600 text-xs font-bold hover:text-red-700 transition"
                 >
                   CAMBIAR
                 </button>
@@ -223,7 +223,7 @@ export default function AddressScreen() {
         {/* Direcciones guardadas */}
         <div>
           <h2 className="text-base font-semibold text-gray-900 mb-3 flex items-center space-x-2">
-            <MapPin className="w-5 h-5 text-[#E53935]" />
+            <MapPin className="w-5 h-5 text-red-600" />
             <span>Tus direcciones</span>
           </h2>
 
@@ -241,7 +241,7 @@ export default function AddressScreen() {
                   onClick={() => setSelectedAddress(addr.id)}
                   className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
                     selectedAddress === addr.id
-                      ? 'border-[#E53935] bg-[#FFEBEE] shadow-md'
+                      ? 'border-red-600 bg-red-50 shadow-md'
                       : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                   }`}
                 >
@@ -249,7 +249,7 @@ export default function AddressScreen() {
                     <div className="flex items-start space-x-3 flex-1">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center mt-1 flex-shrink-0 ${
                         selectedAddress === addr.id 
-                          ? 'bg-[#E53935]' 
+                          ? 'bg-red-600' 
                           : 'bg-gray-100'
                       }`}>
                         {selectedAddress === addr.id ? (
@@ -315,13 +315,13 @@ export default function AddressScreen() {
                   value={newAddress}
                   onChange={(e) => setNewAddress(e.target.value)}
                   placeholder="Ej: Calle Principal 123"
-                  className="flex-1 p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
+                  className="flex-1 p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-600 focus:border-transparent"
                   onKeyPress={(e) => e.key === 'Enter' && handleSearchAddress()}
                 />
                 <button
                   onClick={handleSearchAddress}
                   disabled={searchLoading || newAddress.trim().length < 3}
-                  className="px-4 py-3 bg-[#E53935] hover:bg-[#D32F2F] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all flex items-center justify-center"
+                  className="px-4 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-all flex items-center justify-center"
                 >
                   <Search className="w-4 h-4" />
                 </button>
@@ -345,9 +345,9 @@ export default function AddressScreen() {
                     <button
                       key={idx}
                       onClick={() => handleSelectFromSearch(result)}
-                      className="w-full p-3 text-left bg-gray-50 hover:bg-[#FFEBEE] border border-gray-200 hover:border-[#E57373] rounded-lg transition group"
+                      className="w-full p-3 text-left bg-gray-50 hover:bg-red-50 border border-gray-200 hover:border-red-300 rounded-lg transition group"
                     >
-                      <p className="text-sm font-medium text-gray-900 group-hover:text-[#D32F2F]">
+                      <p className="text-sm font-medium text-gray-900 group-hover:text-red-700">
                         {result.formattedAddress}
                       </p>
                     </button>
@@ -370,7 +370,7 @@ export default function AddressScreen() {
               <button
                 onClick={handleAddAddress}
                 disabled={!newAddress.trim()}
-                className="flex-1 py-3 bg-[#E53935] hover:bg-[#D32F2F] disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition active:scale-95"
+                className="flex-1 py-3 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition active:scale-95"
               >
                 Guardar dirección
               </button>
@@ -385,7 +385,7 @@ export default function AddressScreen() {
           <button
             onClick={handleConfirmAddress}
             disabled={!selectedAddress}
-            className="w-full py-4 bg-[#E53935] hover:bg-[#D32F2F] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all active:scale-95 shadow-md"
+            className="w-full py-4 bg-red-600 hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all active:scale-95 shadow-md"
           >
             Confirmar dirección
           </button>

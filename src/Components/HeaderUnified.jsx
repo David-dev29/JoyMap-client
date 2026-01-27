@@ -33,7 +33,7 @@ function NotificationsDropdown({ notifications, onClose, onClear }) {
       <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
         <h3 className="font-bold text-gray-900">Notificaciones</h3>
         {notifications.length > 0 && (
-          <button onClick={onClear} className="text-xs text-[#E53935] font-medium">
+          <button onClick={onClear} className="text-xs text-red-600 font-medium">
             Marcar como leídas
           </button>
         )}
@@ -56,7 +56,7 @@ function NotificationsDropdown({ notifications, onClose, onClear }) {
               <div className="flex gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
                   {notif.type === 'order' && <Clock className="w-5 h-5 text-amber-500" />}
-                  {notif.type === 'promo' && <Gift className="w-5 h-5 text-[#E53935]" />}
+                  {notif.type === 'promo' && <Gift className="w-5 h-5 text-red-600" />}
                   {notif.type === 'success' && <CheckCircle className="w-5 h-5 text-green-500" />}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -299,10 +299,10 @@ export default function HeaderUnified({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 right-0 z-50 px-4 pt-4 notifications-container"
+            className="fixed top-0 left-0 right-0 z-0 px-4 pt-4 notifications-container"
           >
             {/* FONDO SÓLIDO ROJO - SIN GRADIENTE */}
-            <div className="max-w-lg mx-auto bg-[#E53935] rounded-2xl shadow-lg overflow-hidden">
+            <div className="max-w-lg mx-auto bg-red-600 rounded-2xl shadow-lg overflow-hidden">
               {/* Fila principal: Logo + Nombre | Búsqueda + Carrito */}
               <div className="px-4 py-3 flex items-center justify-between">
                 {/* Izquierda: Logo con notificaciones */}
@@ -311,25 +311,36 @@ export default function HeaderUnified({
                     e.stopPropagation();
                     setShowNotifications(!showNotifications);
                   }}
-                  className="relative flex items-center gap-2 hover:opacity-90 transition-opacity"
+                  className="flex items-center gap-2 hover:opacity-90 transition-opacity"
                 >
-                  {/* Logo iconográfico */}
-                  {loadingConfig ? (
-                    <div className="w-8 h-8 rounded-lg bg-white/20 animate-pulse" />
-                  ) : appConfig.appLogo ? (
-                    <img
-                      src={buildImageUrl(appConfig.appLogo)}
-                      alt={appConfig.appName}
-                      className="w-8 h-8 rounded-lg object-contain bg-white"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                      <span className="text-[#E53935] font-bold">JM</span>
-                    </div>
-                  )}
+                  {/* Logo iconográfico - w-11 h-11, sin padding, llena el contenedor */}
+                  <div className="relative">
+                    {loadingConfig ? (
+                      <div className="w-11 h-11 rounded-xl bg-white/20 animate-pulse" />
+                    ) : appConfig.appLogo ? (
+                      <div className="w-11 h-11 rounded-xl overflow-hidden shadow-sm">
+                        <img
+                          src={buildImageUrl(appConfig.appLogo)}
+                          alt={appConfig.appName}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-11 h-11 bg-white rounded-xl flex items-center justify-center shadow-sm">
+                        <span className="text-red-600 font-bold text-lg">JM</span>
+                      </div>
+                    )}
+
+                    {/* Badge de notificaciones - círculo con gradiente (estilo moderno) */}
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] bg-gradient-to-br from-red-500 to-red-700 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                        {notificationCount > 9 ? '9+' : notificationCount}
+                      </span>
+                    )}
+                  </div>
 
                   {/* Logo tipográfico desde backend O appName como texto */}
                   {appConfig.logoText ? (
@@ -343,13 +354,6 @@ export default function HeaderUnified({
                     />
                   ) : (
                     <span className="text-white font-bold text-lg">{appConfig.appName || 'JoyMap'}</span>
-                  )}
-
-                  {/* Badge de notificaciones */}
-                  {notificationCount > 0 && (
-                    <span className="absolute -top-1 left-5 bg-yellow-400 text-[#E53935] text-xs font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 animate-pulse">
-                      {notificationCount > 9 ? '9+' : notificationCount}
-                    </span>
                   )}
                 </button>
 
@@ -367,7 +371,7 @@ export default function HeaderUnified({
                   <button onClick={() => navigate('/cart')} className="relative text-white hover:opacity-80 transition-opacity">
                     <ShoppingBag className="w-6 h-6" />
                     {displayCartCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-white text-[#E53935] text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="absolute -top-2 -right-2 bg-white text-red-600 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {displayCartCount > 9 ? '9+' : displayCartCount}
                       </span>
                     )}
@@ -386,7 +390,7 @@ export default function HeaderUnified({
                         onClick={() => navigate(section.path)}
                         className={`flex-1 py-2 px-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
                           section.active
-                            ? 'bg-white text-[#E53935] shadow-md'
+                            ? 'bg-white text-red-600 shadow-md'
                             : 'bg-white/20 text-white hover:bg-white/30'
                         }`}
                       >
@@ -420,7 +424,7 @@ export default function HeaderUnified({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 right-0 z-50 px-4 pt-4"
+            className="fixed top-0 left-0 right-0 z-20 px-4 pt-4"
           >
             {/* Search bar */}
             <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-lg px-4 py-3 flex items-center gap-3">

@@ -17,9 +17,9 @@ const SectionSwitcher = () => {
   };
 
   const getBackgroundColor = () => {
-    if (isComida) return 'bg-gradient-to-br from-[#FFCDD2] to-[#EF9A9A]/80';
+    if (isComida) return 'bg-gradient-to-br from-red-100 to-red-200/80';
     if (isTienda) return 'bg-gradient-to-br from-green-100 to-green-200/80';
-    if (isEnvios) return 'bg-gradient-to-br from-[#FFCDD2] to-[#EF9A9A]/80';
+    if (isEnvios) return 'bg-gradient-to-br from-red-100 to-red-200/80';
   };
 
   return (
@@ -39,7 +39,7 @@ const SectionSwitcher = () => {
           onClick={() => navigate('/home')}
           className={`flex-1 relative z-10 font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 text-sm py-2.5 rounded-xl ${
             isComida
-              ? 'text-[#D32F2F] scale-[1.02]'
+              ? 'text-red-700 scale-[1.02]'
               : 'text-gray-600 hover:text-gray-800 active:scale-95'
           }`}
         >
@@ -75,7 +75,7 @@ const SectionSwitcher = () => {
           onClick={() => navigate('/envios')}
           className={`flex-1 relative z-10 font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 text-sm py-2.5 rounded-xl ${
             isEnvios
-              ? 'text-[#D32F2F] scale-[1.02]'
+              ? 'text-red-700 scale-[1.02]'
               : 'text-gray-600 hover:text-gray-800 active:scale-95'
           }`}
         >

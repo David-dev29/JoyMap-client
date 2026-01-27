@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import HeroBannerTienda from "../Components/Store/HeroBanner.jsx";
-import CategoryIcons, { CouponBanner } from "../Components/Store/ProfileBusiness.jsx";
+import BusinessProfile, { CouponBanner } from "../Components/Store/ProfileBusiness.jsx";
 import CategoryTabs from "../Components/Store/CategoryTabs.jsx";
 import ProductGrid from "../Components/Store/ProductGrid.jsx";
 import ProductModal from "../Components/Store/ProductModal.jsx";
@@ -330,7 +330,7 @@ function Food({
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E53935] mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando menú...</p>
         </div>
       </div>
@@ -345,7 +345,7 @@ function Food({
           <p className="text-sm text-gray-500">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-[#E53935] text-white rounded-lg hover:bg-[#D32F2F]"
+            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
           >
             Reintentar
           </button>
@@ -398,8 +398,8 @@ function Food({
         </>
       )}
 
-      {/* STICKY #2: Header con info del negocio (mini perfil) - top-[44px] z-40 */}
-      <CategoryIcons
+      {/* STICKY #2: Header con info del negocio (perfil) - top-[44px] z-40 */}
+      <BusinessProfile
         activeCategory={activeCategory}
         setActiveCategory={handleCategoryClick}
         cartItems={cartItems}

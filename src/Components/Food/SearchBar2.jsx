@@ -35,7 +35,7 @@ export default function SearchBar({ searchQuery, setSearchQuery, handleKeyPress,
         onChange={(e) => setSearchQuery(e.target.value)}
         onKeyDown={handleKeyPress}
         placeholder=""
-        className="w-full bg-gray-100 rounded-2xl px-4 py-3 pr-12 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#E53935] placeholder-transparent"
+        className="w-full bg-gray-100 rounded-2xl px-4 py-3 pr-12 text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-600 placeholder-transparent"
       />
 
       {/* PLACEHOLDER ANIMADO */}

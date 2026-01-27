@@ -18,7 +18,7 @@ const HeroBannerFood = () => {
 
   return (
     <div className="px-4 py-4">
-      <div className="relative rounded-2xl overflow-hidden shadow-md h-24 md:h-40 lg:h-52">
+      <div className="relative rounded-2xl overflow-hidden shadow-md h-24 md:h-28 lg:h-32">
         {slides.map((slide, index) => (
           <img
             key={index}
@@ -37,7 +37,7 @@ const HeroBannerFood = () => {
             key={index}
             onClick={() => setCurrentSlide(index)}
             className={`w-2.5 h-2.5 rounded-full transition-all ${
-              index === currentSlide ? "bg-[#E53935]" : "bg-[#EF9A9A]"
+              index === currentSlide ? "bg-red-600" : "bg-red-200"
             }`}
           />
         ))}

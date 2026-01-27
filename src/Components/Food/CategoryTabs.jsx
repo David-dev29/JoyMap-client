@@ -43,7 +43,7 @@ const CategoryTabs = ({ activeCategory, activeSubcategory, setActiveSubcategory 
           onClick={() => setActiveSubcategory(subcat)}
           className={`relative py-3 px-1 text-sm font-medium transition-colors duration-200 focus:outline-none whitespace-nowrap ${
             activeSubcategory === subcat
-              ? 'text-[#D32F2F]'
+              ? 'text-red-700'
               : 'text-gray-500 hover:text-gray-700'
           }`}
           role="tab"
@@ -51,7 +51,7 @@ const CategoryTabs = ({ activeCategory, activeSubcategory, setActiveSubcategory 
         >
           {subcat}
           {activeSubcategory === subcat && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#D32F2F]"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-red-700"></div>
           )}
         </button>
       ))}

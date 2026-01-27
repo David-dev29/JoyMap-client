@@ -3,8 +3,8 @@ import { Plus } from "lucide-react";
 
 const ProductCard = ({ product, isTienda, onProductClick, brandColor }) => {
   // Color del tema - usar brandColor si existe, sino el default
-  const themeColor = brandColor || (isTienda ? '#D32F2F' : '#16a34a');
-  const themeColorHover = brandColor ? brandColor : (isTienda ? '#C62828' : '#15803d');
+  const themeColor = brandColor || (isTienda ? '#dc2626' : '#16a34a'); // red-600
+  const themeColorHover = brandColor ? brandColor : (isTienda ? '#b91c1c' : '#15803d'); // red-700
 
   const { hasDiscount, discountPercentage } = product;
   const [showQualityTag, setShowQualityTag] = useState(false);

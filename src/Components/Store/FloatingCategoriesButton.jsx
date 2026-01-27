@@ -6,7 +6,7 @@ const CategoryCard = ({ cat, onClick, isExpanded }) => (
   <div
     onClick={() => onClick(cat.id)}
     className={`group relative bg-gradient-to-br from-gray-50 to-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer active:scale-95 border border-gray-100 ${
-      isExpanded ? 'ring-2 ring-[#E53935]' : ''
+      isExpanded ? 'ring-2 ring-red-600' : ''
     }`}
   >
     <div className="p-4 h-28 flex flex-col justify-between">
@@ -22,10 +22,10 @@ const CategoryCard = ({ cat, onClick, isExpanded }) => (
       </div>
 
       <div className="flex items-center justify-between relative z-10">
-        <span className="text-xs text-gray-500 font-medium group-hover:text-[#E53935] transition-colors">
+        <span className="text-xs text-gray-500 font-medium group-hover:text-red-600 transition-colors">
           Ver negocios
         </span>
-        <div className="w-6 h-6 rounded-full bg-[#E53935] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
           <ChevronRight size={14} className="text-white" />
         </div>
       </div>
@@ -46,7 +46,7 @@ const CategoryCard = ({ cat, onClick, isExpanded }) => (
       </div>
     )}
 
-    <div className="absolute inset-0 bg-gradient-to-br from-[#E53935]/0 to-red-500/0 group-hover:from-[#E53935]/5 group-hover:to-red-500/5 transition-all duration-200"></div>
+    <div className="absolute inset-0 bg-gradient-to-br from-red-600/0 to-red-500/0 group-hover:from-red-600/5 group-hover:to-red-500/5 transition-all duration-200"></div>
   </div>
 );
 
@@ -61,7 +61,7 @@ const BusinessCard = ({ business, onClick, index }) => (
     }}
   >
     {/* Banner del negocio */}
-    <div className="relative h-24 bg-gradient-to-br from-[#FFCDD2] to-red-100 overflow-hidden">
+    <div className="relative h-24 bg-gradient-to-br from-red-100 to-red-100 overflow-hidden">
       {business.bannerImage && (
         <img
           src={business.bannerImage}
@@ -83,7 +83,7 @@ const BusinessCard = ({ business, onClick, index }) => (
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full bg-[#FFCDD2] rounded-lg"></div>
+            <div className="w-full h-full bg-red-100 rounded-lg"></div>
           )}
         </div>
       </div>
@@ -307,7 +307,7 @@ export default function FloatingCategoriesButton({ categories, setActiveCategory
 
       <button
         onClick={openModal}
-        className={`fixed right-6 w-16 h-16 bg-gradient-to-tr from-[#E53935] to-red-500 rounded-full flex flex-col items-center justify-center shadow-2xl z-[50] transition-all duration-200 transform hover:scale-110 active:scale-95 ${
+        className={`fixed right-6 w-16 h-16 bg-gradient-to-tr from-red-600 to-red-500 rounded-full flex flex-col items-center justify-center shadow-2xl z-[50] transition-all duration-200 transform hover:scale-110 active:scale-95 ${
           isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'
         }`}
         style={{ 
@@ -383,7 +383,7 @@ export default function FloatingCategoriesButton({ categories, setActiveCategory
             <div className="px-6 pb-4">
               <button
                 onClick={handleBackToCategories}
-                className="flex items-center gap-2 text-[#D32F2F] font-semibold mb-3 hover:gap-3 transition-all"
+                className="flex items-center gap-2 text-red-700 font-semibold mb-3 hover:gap-3 transition-all"
               >
                 <ChevronLeft size={20} />
                 <span>Volver a categorías</span>
@@ -391,7 +391,7 @@ export default function FloatingCategoriesButton({ categories, setActiveCategory
               
               <div className="flex items-center gap-3">
                 {selectedCategory.iconImage && (
-                  <div className="w-14 h-14 bg-gradient-to-br from-[#FFCDD2] to-red-100 rounded-2xl p-2 shadow-md">
+                  <div className="w-14 h-14 bg-gradient-to-br from-red-100 to-red-100 rounded-2xl p-2 shadow-md">
                     <img
                       src={selectedCategory.iconImage}
                       alt={selectedCategory.name}

@@ -23,9 +23,8 @@ const parsePaymentMethods = (pm) => {
   return pm;
 };
 
-// 🎟️ Componente CouponBanner con 3 estados: disponible (naranja), aplicado (verde), usado (gris)
+// 🎟️ Componente CouponBanner COMPACTO con 3 estados
 const CouponBanner = ({ coupon, brandColor, onApply, applied, businessId }) => {
-  const [copied, setCopied] = useState(false);
   const [isUsed, setIsUsed] = useState(false);
 
   // Verificar si el cupón ya fue usado en un pedido anterior
@@ -45,114 +44,59 @@ const CouponBanner = ({ coupon, brandColor, onApply, applied, businessId }) => {
 
   if (!coupon) return null;
 
-  const themeColor = brandColor || '#F59E0B';
-
-  const handleCopyCode = async () => {
-    try {
-      await navigator.clipboard.writeText(coupon.code);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Error copying code:', err);
-    }
-  };
-
-  // ESTADO 3: Cupón ya usado en pedido anterior (GRIS)
+  // ESTADO 3: Cupón ya usado (GRIS)
   if (isUsed) {
     return (
-      <div className="w-full px-4 py-2.5 bg-gray-400">
+      <div className="w-full bg-gray-400 pl-4 pr-3 py-3.5">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <Ticket className="w-5 h-5 text-white/70" />
-            </div>
-            <div>
-              <p className="text-white/90 font-semibold text-sm">Cupón usado</p>
-              <p className="text-white/70 text-xs">Ya utilizaste este cupón</p>
-            </div>
+          <div className="flex items-center gap-2">
+            <Ticket className="w-5 h-5 text-white/70" />
+            <span className="text-white/80 text-sm font-medium line-through">
+              {coupon.code} - Cupón usado
+            </span>
           </div>
-          <span className="bg-white/20 px-3 py-1.5 rounded-lg text-white/70 font-mono text-sm line-through">
-            {coupon.code}
+        </div>
+      </div>
+    );
+  }
+
+  // ESTADO 2: Cupón aplicado (VERDE)
+  if (applied) {
+    return (
+      <div className="w-full bg-gradient-to-r from-green-500 to-green-600 pl-4 pr-3 py-3.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Check className="w-5 h-5 text-white" />
+            <span className="text-white text-sm font-medium">
+              {coupon.code} - {coupon.discount}% OFF aplicado
+            </span>
+          </div>
+          <span className="bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded">
+            Listo
           </span>
         </div>
       </div>
     );
   }
 
-  // ESTADO 2: Cupón aplicado al carrito (VERDE)
-  if (applied) {
-    return (
-      <div className="w-full px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <Check className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-white font-semibold text-sm">✓ Cupón aplicado</p>
-              <p className="text-white/90 text-xs">
-                {coupon.description || `${coupon.discount}% de descuento`}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="bg-white/20 px-3 py-1.5 rounded-lg text-white font-mono font-bold text-sm">
-              {coupon.code}
-            </span>
-            <div className="bg-white/30 px-3 py-1.5 rounded-lg">
-              <span className="text-white text-xs font-semibold">Aplicado</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ESTADO 1: Cupón disponible (NARANJA/tema)
+  // ESTADO 1: Cupón disponible (NARANJA)
   return (
-    <div
-      className="w-full px-4 py-2.5"
-      style={{
-        background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}dd 100%)`
-      }}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-            <Ticket className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <p className="text-white font-semibold text-sm">🎉 ¡Cupón disponible!</p>
-            <p className="text-white/90 text-xs">
-              {coupon.description || `${coupon.discount}% de descuento`}
-            </p>
-          </div>
-        </div>
-
+    <div className="w-full bg-gradient-to-r from-amber-500 to-orange-500 pl-4 pr-15 py-3.5">
+      <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleCopyCode}
-            className="bg-white/20 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-white/30 transition-colors"
-          >
-            <span className="text-white font-mono font-bold text-sm">
-              {coupon.code}
-            </span>
-            {copied ? (
-              <Check className="w-3.5 h-3.5 text-white" />
-            ) : (
-              <Copy className="w-3.5 h-3.5 text-white/70" />
-            )}
-          </button>
-          {onApply && (
-            <button
-              onClick={() => onApply(coupon)}
-              className="bg-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors"
-              style={{ color: themeColor }}
-            >
-              Aplicar
-            </button>
-          )}
+          <Ticket className="w-5 h-5 text-white" />
+          <span className="text-white text-sm font-medium">
+            {coupon.code} - {coupon.discount}% OFF
+          </span>
         </div>
+        {onApply && (
+          <button
+            onClick={() => onApply(coupon)}
+            className="bg-white text-orange-600 px-3 py-1 rounded text-xs font-semibold hover:bg-orange-50 transition-colors flex-shrink-0"
+          >
+            Aplicar
+          </button>
+        )}
       </div>
     </div>
   );
@@ -161,7 +105,7 @@ const CouponBanner = ({ coupon, brandColor, onApply, applied, businessId }) => {
 // ✅ Cache de imágenes en memoria
 const imageCache = new Map();
 
-const CategoryIcons = ({
+const BusinessProfile = ({
   activeCategory,
   setActiveCategory,
   cartItems = [],
@@ -538,7 +482,7 @@ const CategoryIcons = ({
       )}
 
       {/* Contenido original - Sin animaciones de framer motion */}
-      <div className="px-4 pb-0">
+      <div className="px-4 pb-0 pt-3">
         {/* Banner del negocio */}
         {/* Banner del negocio */}
 <div className="relative h-32 overflow-hidden rounded-2xl shadow-md">
@@ -629,20 +573,23 @@ const CategoryIcons = ({
                 {formattedName.line2 && ` ${formattedName.line2}`}
               </h1>
 
-              {/* Estado + Tipo de servicio + Métodos de pago - Todo en línea */}
-              <div className="flex items-center mt-1.5 space-x-2 flex-wrap">
-                <span className={`flex items-center text-xs font-medium ${
-                  activeCat?.isOpen ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                    activeCat?.isOpen ? 'bg-green-500' : 'bg-red-500'
-                  }`}></span>
-                  {activeCat?.isOpen ? 'Abierto' : 'Cerrado'}
-                </span>
-                <span className="text-gray-300">•</span>
-                <span className="text-xs text-gray-500">A domicilio</span>
+              {/* Estado, servicio y métodos de pago */}
+              <div className="flex flex-col gap-1.5 mt-1.5">
+                {/* Primera línea: Estado y tipo de servicio */}
+                <div className="flex items-center gap-2">
+                  <span className={`flex items-center text-xs font-medium ${
+                    activeCat?.isOpen ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                      activeCat?.isOpen ? 'bg-green-500' : 'bg-red-500'
+                    }`}></span>
+                    {activeCat?.isOpen ? 'Abierto' : 'Cerrado'}
+                  </span>
+                  <span className="text-gray-300">•</span>
+                  <span className="text-xs text-gray-500">A domicilio</span>
+                </div>
 
-                {/* Métodos de pago - en línea */}
+                {/* Segunda línea: Métodos de pago como chips */}
                 {(() => {
                   const paymentMethods = parsePaymentMethods(selectedBusinessFromMap?.paymentMethods);
                   if (!paymentMethods) return null;
@@ -651,38 +598,26 @@ const CategoryIcons = ({
                   if (!hasAnyMethod) return null;
 
                   return (
-                    <>
-                      <span className="text-gray-300">•</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-gray-400">Acepta:</span>
-                        <div className="flex items-center gap-1">
-                          {paymentMethods.cash && (
-                            <div
-                              className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center"
-                              title="Efectivo"
-                            >
-                              <Banknote className="w-3 h-3 text-green-600" />
-                            </div>
-                          )}
-                          {paymentMethods.card && (
-                            <div
-                              className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center"
-                              title="Tarjeta"
-                            >
-                              <CreditCard className="w-3 h-3 text-blue-600" />
-                            </div>
-                          )}
-                          {paymentMethods.transfer && (
-                            <div
-                              className="w-5 h-5 bg-purple-100 rounded-full flex items-center justify-center"
-                              title="Transferencia"
-                            >
-                              <Smartphone className="w-3 h-3 text-purple-600" />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {paymentMethods.cash && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">
+                          <Banknote className="w-3 h-3" />
+                          Efectivo
+                        </span>
+                      )}
+                      {paymentMethods.card && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">
+                          <CreditCard className="w-3 h-3" />
+                          Tarjeta
+                        </span>
+                      )}
+                      {paymentMethods.transfer && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 rounded-full text-xs text-gray-600">
+                          <Smartphone className="w-3 h-3" />
+                          Transferencia
+                        </span>
+                      )}
+                    </div>
                   );
                 })()}
               </div>
@@ -734,4 +669,4 @@ const CategoryIcons = ({
 
 // Exportar CouponBanner para uso externo
 export { CouponBanner };
-export default CategoryIcons;
+export default BusinessProfile;

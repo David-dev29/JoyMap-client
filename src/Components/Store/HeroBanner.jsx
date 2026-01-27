@@ -108,7 +108,7 @@ const HeroBannerTienda = () => {
     <div className="py-4">
       {/* Contenedor del carrusel */}
       <div 
-        className="relative h-32 md:h-40 lg:h-48 overflow-hidden px-4"
+        className="relative h-28 md:h-28 lg:h-32 overflow-hidden px-4"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -157,8 +157,8 @@ const HeroBannerTienda = () => {
             disabled={isTransitioning}
             className={`transition-all duration-300 rounded-full disabled:opacity-50 ${
               index === currentSlide 
-                ? "w-8 h-3 bg-[#E53935] shadow-lg" 
-                : "w-3 h-3 bg-[#EF9A9A] hover:bg-[#E57373] hover:scale-110"
+                ? "w-8 h-3 bg-red-600 shadow-lg" 
+                : "w-3 h-3 bg-red-200 hover:bg-red-300 hover:scale-110"
             }`}
           />
         ))}

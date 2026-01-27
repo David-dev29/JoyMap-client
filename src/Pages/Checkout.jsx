@@ -116,7 +116,7 @@ function TipButton({ amount, selected, onClick, label }) {
       onClick={onClick}
       className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
         selected
-          ? 'bg-[#E53935] text-white shadow-md'
+          ? 'bg-red-600 text-white shadow-md'
           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
       }`}
     >
@@ -378,7 +378,7 @@ export default function Checkout() {
         </p>
         <button
           onClick={() => navigate('/')}
-          className="px-8 py-3 bg-[#E53935] text-white rounded-xl font-semibold hover:bg-[#D32F2F] transition-colors shadow-md"
+          className="px-8 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors shadow-md"
         >
           Explorar restaurantes
         </button>
@@ -417,19 +417,19 @@ export default function Checkout() {
                     onClick={() => selectAddress(addr.street)}
                     className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
                       selectedAddress === addr.street
-                        ? 'border-[#E53935] bg-[#FFEBEE]'
+                        ? 'border-red-600 bg-red-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <MapPin className={`w-5 h-5 ${
-                          selectedAddress === addr.street ? 'text-[#E53935]' : 'text-gray-400'
+                          selectedAddress === addr.street ? 'text-red-600' : 'text-gray-400'
                         }`} />
                         <p className="text-sm font-medium text-gray-900">{addr.street}</p>
                       </div>
                       {selectedAddress === addr.street && (
-                        <div className="w-6 h-6 rounded-full bg-[#E53935] flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center">
                           <Check className="w-4 h-4 text-white" />
                         </div>
                       )}
@@ -446,7 +446,7 @@ export default function Checkout() {
             {!showNewAddress ? (
               <button
                 onClick={() => setShowNewAddress(true)}
-                className="w-full p-3 border-2 border-dashed border-gray-300 rounded-xl text-[#D32F2F] font-medium flex items-center justify-center gap-2 hover:bg-[#FFEBEE] transition-colors"
+                className="w-full p-3 border-2 border-dashed border-gray-300 rounded-xl text-red-700 font-medium flex items-center justify-center gap-2 hover:bg-red-50 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Agregar nueva dirección
@@ -459,12 +459,12 @@ export default function Checkout() {
                     placeholder="Buscar dirección..."
                     value={newAddressQuery}
                     onChange={(e) => setNewAddressQuery(e.target.value)}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-600 focus:border-transparent"
                   />
                   <button
                     onClick={handleAddressSearch}
                     disabled={searchLoading}
-                    className="px-4 py-3 bg-[#E53935] text-white rounded-xl"
+                    className="px-4 py-3 bg-red-600 text-white rounded-xl"
                   >
                     <Search className="w-5 h-5" />
                   </button>
@@ -516,7 +516,7 @@ export default function Checkout() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isAuthenticated}
-                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#E53935] focus:border-transparent ${
+                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-600 focus:border-transparent ${
                   isAuthenticated ? 'bg-gray-100 text-gray-600' : 'bg-white'
                 }`}
               />
@@ -535,7 +535,7 @@ export default function Checkout() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                   disabled={isAuthenticated}
-                  className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#E53935] focus:border-transparent ${
+                  className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-600 focus:border-transparent ${
                     isAuthenticated ? 'bg-gray-100 text-gray-600' : 'bg-white'
                   }`}
                 />
@@ -626,15 +626,15 @@ export default function Checkout() {
                 onClick={() => setSelectedPayment(method.value)}
                 className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
                   selectedPayment === method.value
-                    ? 'border-[#E53935] bg-[#FFEBEE]'
+                    ? 'border-red-600 bg-red-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <method.icon className={`w-6 h-6 ${
-                  selectedPayment === method.value ? 'text-[#E53935]' : 'text-gray-500'
+                  selectedPayment === method.value ? 'text-red-600' : 'text-gray-500'
                 }`} />
                 <span className={`text-xs font-medium ${
-                  selectedPayment === method.value ? 'text-[#D32F2F]' : 'text-gray-600'
+                  selectedPayment === method.value ? 'text-red-700' : 'text-gray-600'
                 }`}>
                   {method.label}
                 </span>
@@ -662,7 +662,7 @@ export default function Checkout() {
               />
             ))}
             <div className={`flex items-center border-2 rounded-xl px-3 transition-all ${
-              customTip ? 'border-[#E53935] bg-[#FFEBEE]' : 'border-gray-200'
+              customTip ? 'border-red-600 bg-red-50' : 'border-gray-200'
             }`}>
               <span className="text-sm text-gray-500">$</span>
               <input
@@ -684,7 +684,7 @@ export default function Checkout() {
               placeholder="Instrucciones especiales para tu pedido..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full p-4 border border-gray-300 rounded-xl resize-none text-sm focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
+              className="w-full p-4 border border-gray-300 rounded-xl resize-none text-sm focus:ring-2 focus:ring-red-600 focus:border-transparent"
               rows={3}
             />
 
@@ -726,7 +726,7 @@ export default function Checkout() {
                   placeholder="Cupón de descuento"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-red-600 focus:border-transparent"
                 />
               </div>
             )}
@@ -763,7 +763,7 @@ export default function Checkout() {
 
             <div className="border-t border-gray-200 pt-3 flex justify-between">
               <span className="font-bold text-gray-900 text-base">Total</span>
-              <span className="font-bold text-[#D32F2F] text-xl">${total.toFixed(2)}</span>
+              <span className="font-bold text-red-700 text-xl">${total.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -778,7 +778,7 @@ export default function Checkout() {
             className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
               loading
                 ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-[#E53935] hover:bg-[#D32F2F] active:scale-[0.98]'
+                : 'bg-red-600 hover:bg-red-700 active:scale-[0.98]'
             } text-white shadow-md`}
             whileTap={{ scale: loading ? 1 : 0.98 }}
           >

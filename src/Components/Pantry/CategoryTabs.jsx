@@ -6,7 +6,7 @@ const CategoryTabs = ({ activeCategory, setActiveCategory, isTienda }) => {
         <div className="flex space-x-1 bg-gray-100 rounded-full p-1">
           {tabs.map((tab) => {
             const isActive = activeCategory === tab;
-            const activeTextColor = isTienda ? 'text-[#D32F2F]' : 'text-green-600';
+            const activeTextColor = isTienda ? 'text-red-700' : 'text-green-600';
   
             return (
               <button

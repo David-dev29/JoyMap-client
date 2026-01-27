@@ -244,7 +244,7 @@ export default function CategoriesSlider({
                       onClick={() => onCategorySelect?.(null)}
                       className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
                         selectedCategory === null
-                          ? 'bg-[#E53935] text-white shadow-md'
+                          ? 'bg-red-600 text-white shadow-md'
                           : 'bg-gray-100 text-gray-700'
                       }`}
                     >
@@ -261,7 +261,7 @@ export default function CategoriesSlider({
                           onClick={() => onCategorySelect?.(category.slug)}
                           className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
                             selectedCategory === category._id || selectedCategory === category.slug
-                              ? 'bg-[#E53935] text-white shadow-md'
+                              ? 'bg-red-600 text-white shadow-md'
                               : 'bg-gray-100 text-gray-700'
                           }`}
                         >

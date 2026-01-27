@@ -56,13 +56,13 @@ const NewAddressScreen = () => {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Escribe aquí"
-              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#E53935] focus:border-transparent"
+              className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-lg text-base placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-600 focus:border-transparent"
             />
           </div>
         </div>
 
         {/* Helper Text */}
-        <p className="text-sm text-[#D32F2F] mb-6 leading-relaxed">
+        <p className="text-sm text-red-700 mb-6 leading-relaxed">
           Incluye el número de tu casa o edificio para encontrar tu dirección.
         </p>
 
@@ -71,7 +71,7 @@ const NewAddressScreen = () => {
           <p className="text-sm text-gray-500 mb-3">¿No encuentras tu ubicación?</p>
           <button
             onClick={handleSelectOnMap}
-            className="flex items-center space-x-3 text-[#D32F2F] hover:text-[#C62828] transition-colors group"
+            className="flex items-center space-x-3 text-red-700 hover:text-red-800 transition-colors group"
           >
             <div className="flex items-center justify-center w-6 h-6">
               <Map size={20} className="group-hover:scale-110 transition-transform" />
@@ -79,7 +79,7 @@ const NewAddressScreen = () => {
             <span className="text-base font-medium">Seleccionar en el mapa</span>
             <div className="ml-auto">
               <svg 
-                className="w-5 h-5 text-[#D32F2F]" 
+                className="w-5 h-5 text-red-700" 
                 fill="none" 
                 stroke="currentColor" 
                 viewBox="0 0 24 24"
@@ -98,7 +98,7 @@ const NewAddressScreen = () => {
           disabled={!address.trim()}
           className={`w-full py-4 rounded-lg text-base font-semibold transition-colors ${
             address.trim()
-              ? 'bg-[#D32F2F] text-white hover:bg-[#C62828] active:bg-[#B71C1C]'
+              ? 'bg-red-700 text-white hover:bg-red-800 active:bg-red-900'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
         >
