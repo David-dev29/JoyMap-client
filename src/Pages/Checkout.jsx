@@ -335,6 +335,23 @@ export default function Checkout() {
 
       const result = await createOrder(orderData, authToken);
 
+      // Si había cupón aplicado, marcarlo como usado
+      if (appliedCoupon) {
+        try {
+          const usedCoupons = JSON.parse(localStorage.getItem('usedCoupons') || '[]');
+          usedCoupons.push({
+            code: appliedCoupon.code,
+            businessId: appliedCoupon.businessId,
+            usedAt: new Date().toISOString(),
+            orderId: result?.orderId || result?._id || null
+          });
+          localStorage.setItem('usedCoupons', JSON.stringify(usedCoupons));
+          console.log('🎟️ Cupón marcado como usado:', appliedCoupon.code);
+        } catch (e) {
+          console.error('Error saving used coupon:', e);
+        }
+      }
+
       // Clear cart and applied coupon
       clearCart();
       localStorage.removeItem('appliedCoupon');

@@ -29,6 +29,8 @@ const CategoryTabs = ({
   searchValue,
   setSearchValue,
   brandColor,
+  scrollContainerRef,
+  hasCoupon = false, // 🎟️ Para ajustar posición del sticky
 }) => {
   // Color del tema
   const themeColor = brandColor || '#D32F2F';
@@ -40,18 +42,22 @@ const CategoryTabs = ({
   const searchInputRef = useRef(null);
   const [markerStyle, setMarkerStyle] = useState({ left: 0, width: 0 });
 
-  // Shadow sticky
+  // Shadow sticky - usar el scroll container como root
   useEffect(() => {
     const stickyEl = markerRef.current;
     if (!stickyEl) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => setScrolled(!entry.isIntersecting),
-      { threshold: 0, rootMargin: "-60px 0px 0px 0px" }
+      {
+        root: scrollContainerRef?.current || null,
+        threshold: 0,
+        rootMargin: "-60px 0px 0px 0px"
+      }
     );
     observer.observe(stickyEl);
     return () => observer.disconnect();
-  }, []);
+  }, [scrollContainerRef]);
 
   // ════════════════════════════════════════════════════════════════════════
   // AUTO-CENTRAR TAB ACTIVO cuando cambia activeCategory
@@ -111,7 +117,7 @@ const CategoryTabs = ({
       <div ref={markerRef} style={{ height: 1 }} />
 
       <div
-        className={`sticky top-[68px] z-30 bg-white transition-shadow duration-300 ${
+        className={`sticky ${hasCoupon ? 'top-[120px]' : 'top-[68px]'} z-30 bg-white transition-shadow duration-300 ${
           scrolled ? "shadow-md" : ""
         }`}
       >

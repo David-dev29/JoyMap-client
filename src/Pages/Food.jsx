@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import HeroBannerTienda from "../Components/Store/HeroBanner.jsx";
-import CategoryIcons from "../Components/Store/ProfileBusiness.jsx";
+import CategoryIcons, { CouponBanner } from "../Components/Store/ProfileBusiness.jsx";
 import CategoryTabs from "../Components/Store/CategoryTabs.jsx";
 import ProductGrid from "../Components/Store/ProductGrid.jsx";
 import ProductModal from "../Components/Store/ProductModal.jsx";
@@ -55,6 +55,44 @@ function Food({
   // Obtener businessId y brandColor del negocio seleccionado
   const businessId = selectedBusinessFromMap?.id;
   const brandColor = selectedBusinessFromMap?.brandColor;
+
+  // Estado del cupón aplicado (persistente)
+  const [couponApplied, setCouponApplied] = useState(false);
+
+  // Verificar si el cupón ya está aplicado al cargar
+  useEffect(() => {
+    if (!activeCoupon || !businessId) return;
+
+    const savedCoupon = localStorage.getItem('appliedCoupon');
+    if (savedCoupon) {
+      try {
+        const parsed = JSON.parse(savedCoupon);
+        // Verificar si es el mismo cupón de este negocio
+        if (parsed.code === activeCoupon.code && parsed.businessId === businessId) {
+          setCouponApplied(true);
+        }
+      } catch (e) {
+        console.error('Error parsing saved coupon:', e);
+      }
+    }
+  }, [activeCoupon, businessId]);
+
+  // Función para aplicar cupón
+  const handleApplyCoupon = useCallback((coupon) => {
+    // Guardar el cupón en localStorage para usarlo en el checkout
+    localStorage.setItem('appliedCoupon', JSON.stringify({
+      code: coupon.code,
+      discount: coupon.discount,
+      discountType: coupon.discountType || 'percentage',
+      description: coupon.description,
+      businessId: businessId,
+      minOrder: coupon.minOrder || 0,
+      couponId: coupon._id || coupon.id
+    }));
+
+    setCouponApplied(true);
+    console.log('🎟️ Cupón aplicado:', coupon.code);
+  }, [businessId]);
 
   // Cargar categorías y productos del negocio
   useEffect(() => {
@@ -343,7 +381,24 @@ function Food({
 
   return (
     <div>
-      {/* Header con info del negocio */}
+      {/* STICKY #1: Banner de cupón - top-0 z-50, pegado a los bordes */}
+      {activeCoupon && (
+        <>
+          <div className="sticky top-0 z-50 w-full">
+            <CouponBanner
+              coupon={activeCoupon}
+              brandColor={brandColor}
+              onApply={handleApplyCoupon}
+              applied={couponApplied}
+              businessId={businessId}
+            />
+          </div>
+          {/* Espaciador que scrollea - crea separación inicial entre banner y perfil */}
+          <div className="h-3"></div>
+        </>
+      )}
+
+      {/* STICKY #2: Header con info del negocio (mini perfil) - top-[44px] z-40 */}
       <CategoryIcons
         activeCategory={activeCategory}
         setActiveCategory={handleCategoryClick}
@@ -353,12 +408,12 @@ function Food({
         selectedBusinessFromMap={selectedBusinessFromMap}
         type={type}
         categories={categories}
-        activeCoupon={activeCoupon}
+        hasCoupon={!!activeCoupon}
       />
 
       <HeroBannerTienda business={selectedBusinessFromMap} />
 
-      {/* Tabs de categorías */}
+      {/* STICKY #3: Tabs de categorías - top-[88px] z-30 (debajo del mini perfil) */}
       <CategoryTabs
         categories={categories}
         activeCategory={activeCategory}
@@ -366,6 +421,8 @@ function Food({
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         brandColor={brandColor}
+        scrollContainerRef={scrollContainerRef}
+        hasCoupon={!!activeCoupon}
       />
 
       {/* Productos */}

@@ -23,9 +23,25 @@ const parsePaymentMethods = (pm) => {
   return pm;
 };
 
-// 🎟️ Componente CouponBanner
-const CouponBanner = ({ coupon, brandColor, onApply, applied }) => {
+// 🎟️ Componente CouponBanner con 3 estados: disponible (naranja), aplicado (verde), usado (gris)
+const CouponBanner = ({ coupon, brandColor, onApply, applied, businessId }) => {
   const [copied, setCopied] = useState(false);
+  const [isUsed, setIsUsed] = useState(false);
+
+  // Verificar si el cupón ya fue usado en un pedido anterior
+  useEffect(() => {
+    if (!coupon || !businessId) return;
+
+    try {
+      const usedCoupons = JSON.parse(localStorage.getItem('usedCoupons') || '[]');
+      const used = usedCoupons.some(
+        uc => uc.code === coupon.code && uc.businessId === businessId
+      );
+      setIsUsed(used);
+    } catch (e) {
+      console.error('Error checking used coupons:', e);
+    }
+  }, [coupon, businessId]);
 
   if (!coupon) return null;
 
@@ -41,89 +57,101 @@ const CouponBanner = ({ coupon, brandColor, onApply, applied }) => {
     }
   };
 
-  return (
-    <div className="mx-4 mb-3 mt-2">
-      <div
-        className={`rounded-xl p-3 shadow-md relative overflow-hidden transition-all duration-300 ${
-          applied ? 'ring-2 ring-green-400 ring-offset-2' : ''
-        }`}
-        style={{
-          background: applied
-            ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)'
-            : `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}dd 100%)`
-        }}
-      >
-        {/* Patrón decorativo */}
-        <div className="absolute top-0 right-0 w-20 h-20 opacity-10">
-          <div className="absolute inset-0 transform rotate-45">
-            <div className="w-full h-full border-4 border-white rounded-lg"></div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-3">
-            {/* Icono de cupón */}
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
-              {applied ? (
-                <Check className="w-5 h-5 text-white" />
-              ) : (
-                <Ticket className="w-5 h-5 text-white" />
-              )}
+  // ESTADO 3: Cupón ya usado en pedido anterior (GRIS)
+  if (isUsed) {
+    return (
+      <div className="w-full px-4 py-2.5 bg-gray-400">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+              <Ticket className="w-5 h-5 text-white/70" />
             </div>
-
             <div>
-              <p className="text-white font-semibold text-sm flex items-center gap-1">
-                {applied ? (
-                  <>
-                    <span>✅</span> ¡Cupón aplicado!
-                  </>
-                ) : (
-                  <>
-                    <span>🎉</span> ¡Cupón disponible!
-                  </>
-                )}
-              </p>
+              <p className="text-white/90 font-semibold text-sm">Cupón usado</p>
+              <p className="text-white/70 text-xs">Ya utilizaste este cupón</p>
+            </div>
+          </div>
+          <span className="bg-white/20 px-3 py-1.5 rounded-lg text-white/70 font-mono text-sm line-through">
+            {coupon.code}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // ESTADO 2: Cupón aplicado al carrito (VERDE)
+  if (applied) {
+    return (
+      <div className="w-full px-4 py-2.5 bg-gradient-to-r from-green-500 to-green-600">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+              <Check className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm">✓ Cupón aplicado</p>
               <p className="text-white/90 text-xs">
                 {coupon.description || `${coupon.discount}% de descuento`}
               </p>
-              {coupon.minOrder && !applied && (
-                <p className="text-white/70 text-[10px] mt-0.5">
-                  Mínimo: ${coupon.minOrder}
-                </p>
-              )}
             </div>
           </div>
-
-          {/* Código del cupón */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopyCode}
-              className="bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-white/30 transition-colors"
-            >
-              <span className="text-white font-mono font-bold text-sm">
-                {coupon.code}
-              </span>
-              {copied ? (
-                <Check className="w-3.5 h-3.5 text-white" />
-              ) : (
-                <Copy className="w-3.5 h-3.5 text-white/70" />
-              )}
-            </button>
-            {onApply && !applied && (
-              <button
-                onClick={() => onApply(coupon)}
-                className="bg-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors"
-                style={{ color: themeColor }}
-              >
-                Aplicar
-              </button>
-            )}
-            {applied && (
-              <div className="bg-white/30 px-3 py-1.5 rounded-lg">
-                <span className="text-white text-xs font-semibold">Aplicado</span>
-              </div>
-            )}
+            <span className="bg-white/20 px-3 py-1.5 rounded-lg text-white font-mono font-bold text-sm">
+              {coupon.code}
+            </span>
+            <div className="bg-white/30 px-3 py-1.5 rounded-lg">
+              <span className="text-white text-xs font-semibold">Aplicado</span>
+            </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ESTADO 1: Cupón disponible (NARANJA/tema)
+  return (
+    <div
+      className="w-full px-4 py-2.5"
+      style={{
+        background: `linear-gradient(135deg, ${themeColor} 0%, ${themeColor}dd 100%)`
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+            <Ticket className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="text-white font-semibold text-sm">🎉 ¡Cupón disponible!</p>
+            <p className="text-white/90 text-xs">
+              {coupon.description || `${coupon.discount}% de descuento`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopyCode}
+            className="bg-white/20 px-3 py-1.5 rounded-lg flex items-center gap-1.5 hover:bg-white/30 transition-colors"
+          >
+            <span className="text-white font-mono font-bold text-sm">
+              {coupon.code}
+            </span>
+            {copied ? (
+              <Check className="w-3.5 h-3.5 text-white" />
+            ) : (
+              <Copy className="w-3.5 h-3.5 text-white/70" />
+            )}
+          </button>
+          {onApply && (
+            <button
+              onClick={() => onApply(coupon)}
+              className="bg-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-50 transition-colors"
+              style={{ color: themeColor }}
+            >
+              Aplicar
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -140,36 +168,13 @@ const CategoryIcons = ({
   scrollContainerRef,
   selectedBusinessFromMap, // 🔥 NUEVA PROP desde el mapa
   type = "comida", // ✅ NUEVA PROP
-  activeCoupon // 🎟️ Cupón activo del negocio
+  hasCoupon = false // 🎟️ Para ajustar posición del sticky
 }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
-  const [couponApplied, setCouponApplied] = useState(false);
-
-  // 🎟️ Función para aplicar cupón
-  const handleApplyCoupon = useCallback((coupon) => {
-    const businessId = selectedBusinessFromMap?.id;
-
-    // Guardar el cupón en localStorage para usarlo en el checkout
-    localStorage.setItem('appliedCoupon', JSON.stringify({
-      code: coupon.code,
-      discount: coupon.discount,
-      discountType: coupon.discountType || 'percentage',
-      description: coupon.description,
-      businessId: businessId,
-      minOrder: coupon.minOrder || 0,
-      couponId: coupon._id || coupon.id
-    }));
-
-    setCouponApplied(true);
-    console.log('🎟️ Cupón aplicado:', coupon.code);
-
-    // Resetear el estado después de 3 segundos
-    setTimeout(() => setCouponApplied(false), 3000);
-  }, [selectedBusinessFromMap?.id]);
 
 // ✅ SOCKET: escuchar actualizaciones de negocios
   useEffect(() => {
@@ -461,10 +466,10 @@ const CategoryIcons = ({
 
   return (
     <>
-      {/* Header Sticky - Simple, sin animaciones complejas */}
+      {/* Header Sticky - Mini perfil que aparece al hacer scroll */}
       {showSticky && (
-        <div 
-          className="sticky top-0 left-0 right-0 z-40 border-b border-white/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300"
+        <div
+          className={`sticky ${hasCoupon ? 'top-[52px]' : 'top-0'} left-0 right-0 z-40 border-b border-white/20 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300`}
           style={{
             backgroundImage: activeCat?.bannerImage
               ? `linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.9) 100%), url("${encodeURI(activeCat.bannerImage)}`
@@ -623,7 +628,9 @@ const CategoryIcons = ({
                 {formattedName.line1}
                 {formattedName.line2 && ` ${formattedName.line2}`}
               </h1>
-              <div className="flex items-center mt-1.5 space-x-2">
+
+              {/* Estado + Tipo de servicio + Métodos de pago - Todo en línea */}
+              <div className="flex items-center mt-1.5 space-x-2 flex-wrap">
                 <span className={`flex items-center text-xs font-medium ${
                   activeCat?.isOpen ? 'text-green-600' : 'text-red-600'
                 }`}>
@@ -635,7 +642,7 @@ const CategoryIcons = ({
                 <span className="text-gray-300">•</span>
                 <span className="text-xs text-gray-500">A domicilio</span>
 
-                {/* Métodos de pago - iconos compactos con label sutil */}
+                {/* Métodos de pago - en línea */}
                 {(() => {
                   const paymentMethods = parsePaymentMethods(selectedBusinessFromMap?.paymentMethods);
                   if (!paymentMethods) return null;
@@ -646,10 +653,7 @@ const CategoryIcons = ({
                   return (
                     <>
                       <span className="text-gray-300">•</span>
-                      <div
-                        className="flex items-center gap-1.5 cursor-help"
-                        title="Métodos de pago aceptados"
-                      >
+                      <div className="flex items-center gap-1.5">
                         <span className="text-[10px] text-gray-400">Acepta:</span>
                         <div className="flex items-center gap-1">
                           {paymentMethods.cash && (
@@ -724,15 +728,10 @@ const CategoryIcons = ({
         </div>
       </div>
 
-      {/* Banner de cupón disponible */}
-      <CouponBanner
-        coupon={activeCoupon}
-        brandColor={selectedBusinessFromMap?.brandColor}
-        onApply={handleApplyCoupon}
-        applied={couponApplied}
-      />
     </>
   );
 };
 
+// Exportar CouponBanner para uso externo
+export { CouponBanner };
 export default CategoryIcons;
