@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getAllBusinesses } from "../services/businessService";
+import SideMenu from "./SideMenu";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // NOTIFICATIONS DROPDOWN COMPONENT
@@ -99,6 +100,7 @@ export default function HeaderUnified({
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [allBusinesses, setAllBusinesses] = useState([]);
+  const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
 
   // App config from backend
   const [appConfig, setAppConfig] = useState({
@@ -299,17 +301,17 @@ export default function HeaderUnified({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-0 left-0 right-0 z-0 px-4 pt-4 notifications-container"
+            className="fixed top-0 left-0 right-0 z-20 px-4 pt-4 notifications-container"
           >
             {/* FONDO SÓLIDO ROJO - SIN GRADIENTE */}
             <div className="max-w-lg mx-auto bg-red-600 rounded-2xl shadow-lg overflow-hidden">
               {/* Fila principal: Logo + Nombre | Búsqueda + Carrito */}
               <div className="px-4 py-3 flex items-center justify-between">
-                {/* Izquierda: Logo con notificaciones */}
+                {/* Izquierda: Logo - abre menú lateral */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowNotifications(!showNotifications);
+                    setIsSideMenuOpen(true);
                   }}
                   className="flex items-center gap-2 hover:opacity-90 transition-opacity"
                 >
@@ -403,16 +405,6 @@ export default function HeaderUnified({
               </div>
             </div>
 
-            {/* Dropdown de notificaciones */}
-            <AnimatePresence>
-              {showNotifications && (
-                <NotificationsDropdown
-                  notifications={notifications}
-                  onClose={() => setShowNotifications(false)}
-                  onClear={handleClearNotifications}
-                />
-              )}
-            </AnimatePresence>
           </motion.header>
         ) : (
           /* ═══════════════════════════════════════════════════════════════
@@ -560,6 +552,15 @@ export default function HeaderUnified({
 
       {/* Spacer para el contenido */}
       <div className={isSearchMode ? 'h-32' : 'h-[130px]'} />
+
+      {/* Menú lateral (notificaciones y favoritos) */}
+      <SideMenu
+        isOpen={isSideMenuOpen}
+        onClose={() => setIsSideMenuOpen(false)}
+        notifications={notifications}
+        onClearNotifications={() => setNotifications([])}
+        onBusinessSelect={onBusinessSelect}
+      />
     </>
   );
 }

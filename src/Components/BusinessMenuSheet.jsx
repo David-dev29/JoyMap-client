@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect, useCallback } from "react";
 import Food from "../Pages/Food";
@@ -43,13 +44,14 @@ export default function BusinessMenuSheet({ open, onClose, business, activeCoupo
     console.log('🎟️ Cupón aplicado:', coupon.code);
   }, [businessId]);
 
-  return (
+  // Usar Portal para renderizar fuera del stacking context del padre
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
           {/* Overlay */}
           <motion.div
-            className="fixed inset-0 bg-black/60 z-40"
+            className="fixed inset-0 bg-black/60 z-[100]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -59,7 +61,7 @@ export default function BusinessMenuSheet({ open, onClose, business, activeCoupo
 
           {/* Sheet */}
           <motion.div
-            className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl max-w-2xl mx-auto"
+            className="fixed bottom-0 left-0 right-0 z-[100] bg-white rounded-t-3xl shadow-2xl max-w-2xl mx-auto"
             style={{ maxHeight: '85vh' }}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -148,6 +150,7 @@ export default function BusinessMenuSheet({ open, onClose, business, activeCoupo
           `}</style>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
