@@ -101,16 +101,25 @@ export default function CategoriesSlider({
   collapsed = false,
   searchActive = false,
   selectedCategory = null,
-  type = "comida",
+  type = null, // null = todos los negocios, sin categorías
   onCenterMap, // Nueva prop para centrar el mapa
   showCenterButton = true, // Mostrar botón de centrar
   hasUserLocation = false // Indica si hay ubicación del usuario
 }) {
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
-  const [isSheetOpen, setIsSheetOpen] = useState(true);
+  // Sheet cerrado por defecto cuando no hay tipo seleccionado
+  const [isSheetOpen, setIsSheetOpen] = useState(!!type);
 
   useEffect(() => {
+    // No cargar categorías si no hay tipo seleccionado
+    if (!type) {
+      setCategories([]);
+      setLoadingCategories(false);
+      return;
+    }
+
+    setLoadingCategories(true);
     fetch(`${import.meta.env.VITE_API_URL}/api/business-categories/type/${type}`)
       .then(res => res.json())
       .then(data => {
@@ -133,8 +142,15 @@ export default function CategoriesSlider({
       });
   }, [type]);
 
-  // No mostrar si está colapsado o búsqueda activa
-  if (collapsed || searchActive) return null;
+  // Abrir el sheet cuando se selecciona un tipo
+  useEffect(() => {
+    if (type) {
+      setIsSheetOpen(true);
+    }
+  }, [type]);
+
+  // No mostrar si está colapsado, búsqueda activa, o no hay tipo seleccionado
+  if (collapsed || searchActive || !type) return null;
 
   // Variantes de animación para el sheet
   const sheetVariants = {

@@ -3,7 +3,7 @@ import { getBusinessesByType, getAllBusinesses, getBusinessBySlug } from '../ser
 
 /**
  * Hook para cargar negocios por tipo
- * @param {string} type - Tipo de negocio (comida, tienda, envio)
+ * @param {string} type - Tipo de negocio (comida, tienda, envio) o null/undefined para todos
  */
 export function useBusinesses(type) {
   const [businesses, setBusinesses] = useState([]);
@@ -11,25 +11,22 @@ export function useBusinesses(type) {
   const [error, setError] = useState(null);
 
   const fetchBusinesses = useCallback(async () => {
-    if (!type) {
-      setLoading(false);
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
     try {
-      console.log(`📦 Cargando negocios de tipo: ${type}`);
-      const data = await getBusinessesByType(type);
+      let data;
+
+      // Si no hay tipo o es "all", cargar TODOS los negocios
+      if (!type || type === 'all') {
+        console.log('📦 Cargando TODOS los negocios');
+        data = await getAllBusinesses();
+      } else {
+        console.log(`📦 Cargando negocios de tipo: ${type}`);
+        data = await getBusinessesByType(type);
+      }
 
       console.log(`✅ ${data.length} negocios cargados`);
-
-      // 🔍 DEBUG: Log de iconType de cada negocio
-      console.log('📦 [HOOK] Detalle de negocios:');
-      data.forEach(b => {
-        console.log(`  - "${b.name}": iconType=${b.iconType || 'emoji'}, iconSvg=${b.iconSvg ? 'SÍ (' + b.iconSvg.length + ' chars)' : 'NO'}`);
-      });
 
       // Log de debug para coordenadas
       const withCoords = data.filter(b => b.location?.coordinates);
@@ -37,10 +34,6 @@ export function useBusinesses(type) {
 
       console.log(`📍 Con coordenadas: ${withCoords.length}`);
       console.log(`⚠️ Sin coordenadas: ${withoutCoords.length}`);
-
-      if (withoutCoords.length > 0) {
-        console.log('Negocios sin coordenadas:', withoutCoords.map(b => b.name));
-      }
 
       setBusinesses(data);
     } catch (err) {

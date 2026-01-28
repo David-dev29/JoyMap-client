@@ -383,7 +383,7 @@ const buildImageUrl = (path) => {
 // 🎯 Componente principal (memoizado para evitar re-renders innecesarios)
 const HomeMap = memo(function HomeMap({
   selectedCategory,
-  type = "comida",
+  type = null, // null = todos los negocios
   onBusinessOpen,
   initialBusiness,
   onMapReady,
@@ -445,7 +445,7 @@ const HomeMap = memo(function HomeMap({
         properties: {
           id: b._id,
           name: b.name,
-          emoji: b.mapIcon || b.emoji || DEFAULT_BUSINESS_EMOJI[type] || '🏪',
+          emoji: b.mapIcon || b.emoji || (type ? DEFAULT_BUSINESS_EMOJI[type] : null) || '🏪',
           iconType: b.iconType || 'emoji',
           iconSvg: b.iconSvg || null,
           rating: b.rating || 4.5,

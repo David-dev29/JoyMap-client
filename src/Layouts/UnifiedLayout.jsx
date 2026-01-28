@@ -11,7 +11,7 @@ export default function HeaderUnifiedLayout() {
   const shouldHideHeader = hideHeaderOnRoutes.includes(location.pathname);
 
   return (
-    <div className="bg-white text-black">
+    <div className="min-h-screen text-black">
       {!shouldHideHeader && <HeaderUnified searchComponent={searchComponent} />}
       <main>
         <Outlet context={{ setSearchComponent }} />

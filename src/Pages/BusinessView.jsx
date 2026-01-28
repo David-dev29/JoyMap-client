@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Navigation } from 'lucide-react';
 import HomeMap from '../Components/Store/HomeMap.jsx';
 import CategoriesSlider from '../Components/Store/CategoriesSlider.jsx';
 import BusinessMenuSheet from '../Components/BusinessMenuSheet.jsx';
 
-export default function BusinessView({ type = "comida" }) {
+export default function BusinessView({ type = null }) {
   const { businessSlug } = useParams();
   const navigate = useNavigate();
 
@@ -89,11 +90,19 @@ export default function BusinessView({ type = "comida" }) {
         setSelectedBusiness(businessData);
         setMenuOpen(true);
       } else {
-        navigate(`/${type === 'comida' ? 'home' : 'tienda'}`, { replace: true });
+        navigate(getBasePath(), { replace: true });
       }
     } catch (error) {
-      navigate(`/${type === 'comida' ? 'home' : 'tienda'}`, { replace: true });
+      navigate(getBasePath(), { replace: true });
     }
+  };
+
+  // Helper para obtener la ruta base según el tipo
+  const getBasePath = () => {
+    if (!type) return '/';
+    if (type === 'comida') return '/home';
+    if (type === 'tienda') return '/tienda';
+    return '/';
   };
 
   const buildImageUrl = (path) => {
@@ -114,7 +123,8 @@ export default function BusinessView({ type = "comida" }) {
     setMenuOpen(true);
 
     const businessSlug = createSlug(business.name);
-    const basePath = type === 'comida' ? 'home' : 'tienda';
+    // Usar 'home' como fallback para negocios cuando no hay tipo seleccionado
+    const basePath = type === 'tienda' ? 'tienda' : 'home';
     navigate(`/${basePath}/${businessSlug}`, { replace: false });
 
     // Fetch datos completos del negocio (incluye paymentMethods, brandColor, etc.)
@@ -156,8 +166,9 @@ export default function BusinessView({ type = "comida" }) {
     setMenuOpen(false);
     setSelectedBusiness(null);
 
-    const basePath = type === 'comida' ? 'home' : 'tienda';
-    navigate(`/${basePath}`, { replace: false });
+    // Volver a la ruta base según el tipo
+    const basePath = !type ? '/' : (type === 'tienda' ? '/tienda' : '/home');
+    navigate(basePath, { replace: false });
   };
 
   // Callback cuando el mapa está listo
@@ -173,12 +184,9 @@ export default function BusinessView({ type = "comida" }) {
   }, [mapControls]);
 
   return (
-    <div className="fixed inset-0 overflow-hidden flex flex-col">
-      {/* Spacer para el header */}
-      <div className="h-[130px] flex-shrink-0" />
-
-      {/* Contenedor del mapa */}
-      <div className="flex-1 relative overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden">
+      {/* Contenedor del mapa - ocupa toda la pantalla, el header flota encima */}
+      <div className="absolute inset-0">
         <HomeMap
           selectedCategory={selectedCategory}
           type={type}
@@ -198,6 +206,27 @@ export default function BusinessView({ type = "comida" }) {
         showCenterButton={true}
         hasUserLocation={mapControls.hasUserLocation}
       />
+
+      {/* Botón de centrar mapa independiente cuando no hay categorías (type=null) */}
+      {!type && (
+        <div className="fixed bottom-6 right-4 z-40">
+          <button
+            onClick={handleCenterMap}
+            className="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center
+                       hover:bg-blue-50 transition-all text-gray-700 hover:text-blue-600
+                       active:scale-95 group relative"
+            title="Ir a mi ubicación"
+          >
+            <Navigation
+              className="w-6 h-6 group-hover:scale-110 transition-transform duration-300"
+              fill="currentColor"
+            />
+            {mapControls.hasUserLocation && (
+              <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white" />
+            )}
+          </button>
+        </div>
+      )}
 
       {/* BusinessMenuSheet */}
       <BusinessMenuSheet

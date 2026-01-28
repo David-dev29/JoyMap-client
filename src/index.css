@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+/* Fondo transparente para el body - permite que el mapa se vea */
+html, body, #root {
+  background-color: transparent;
+}

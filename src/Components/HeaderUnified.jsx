@@ -120,9 +120,14 @@ export default function HeaderUnified({
   const notificationCount = notifications.length;
 
   // Determine active section
-  const isComida = location.pathname === '/home' || location.pathname === '/';
-  const isTienda = location.pathname === '/tienda';
-  const isEnvios = location.pathname === '/envios';
+  // "/" (index) = sin sección seleccionada (mostrar todos)
+  // "/home" = comida
+  // "/tienda" = tienda
+  // "/envios" = envíos
+  const isIndex = location.pathname === '/';
+  const isComida = location.pathname === '/home' || location.pathname.startsWith('/home/');
+  const isTienda = location.pathname === '/tienda' || location.pathname.startsWith('/tienda/');
+  const isEnvios = location.pathname === '/envios' || location.pathname.startsWith('/envios/');
 
   const sections = [
     { id: 'comida', name: 'Comida', icon: Utensils, path: '/home', active: isComida },
@@ -136,11 +141,17 @@ export default function HeaderUnified({
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const [indicatorReady, setIndicatorReady] = useState(false);
 
-  // Obtener la sección activa
-  const activeSection = sections.find(s => s.active) || sections[0];
+  // Obtener la sección activa (null si estamos en index "/")
+  const activeSection = isIndex ? null : (sections.find(s => s.active) || null);
 
   // Calcular posición del indicador deslizante
   const updateIndicator = () => {
+    // Si no hay sección activa, ocultar indicador
+    if (!activeSection) {
+      setIndicatorReady(false);
+      return;
+    }
+
     const activeButton = sectionButtonRefs.current[activeSection.id];
     const container = sectionContainerRef.current;
 
@@ -159,13 +170,13 @@ export default function HeaderUnified({
   // Actualizar indicador cuando cambia la sección
   useLayoutEffect(() => {
     updateIndicator();
-  }, [activeSection.id]);
+  }, [activeSection?.id]);
 
   // Actualizar en resize
   useEffect(() => {
     window.addEventListener('resize', updateIndicator);
     return () => window.removeEventListener('resize', updateIndicator);
-  }, [activeSection.id]);
+  }, [activeSection?.id]);
 
   // ═══════════════════════════════════════════════════════════════════════
   // FETCH APP CONFIG FROM BACKEND
@@ -423,6 +434,7 @@ export default function HeaderUnified({
                   {/* Botones de sección */}
                   {sections.map((section) => {
                     const Icon = section.icon;
+                    const isActive = activeSection?.id === section.id;
                     return (
                       <button
                         key={section.id}
@@ -431,7 +443,7 @@ export default function HeaderUnified({
                         className={`
                           relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full
                           font-medium text-sm transition-all duration-200
-                          ${section.active
+                          ${isActive
                             ? 'text-gray-900'
                             : 'text-gray-400 hover:text-gray-600'
                           }
@@ -593,9 +605,6 @@ export default function HeaderUnified({
           </motion.header>
         )}
       </AnimatePresence>
-
-      {/* Spacer para el contenido */}
-      <div className={isSearchMode ? 'h-32' : 'h-[130px]'} />
 
       {/* Menú lateral (notificaciones y favoritos) */}
       <SideMenu
