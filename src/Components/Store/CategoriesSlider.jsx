@@ -205,21 +205,7 @@ export default function CategoriesSlider({
               transition={{ duration: 0.15 }}
               className="px-4 pb-4"
             >
-              {/* Header con título y botón cerrar */}
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-gray-700">Categorías</span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsSheetOpen(false);
-                  }}
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="w-4 h-4 text-gray-500" />
-                </button>
-              </div>
-
-              {/* Categorías con scroll horizontal */}
+              {/* Categorías con scroll horizontal - Sin título */}
               <div
                 className="flex gap-2 overflow-x-auto"
                 style={{

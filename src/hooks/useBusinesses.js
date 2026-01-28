@@ -25,6 +25,12 @@ export function useBusinesses(type) {
 
       console.log(`✅ ${data.length} negocios cargados`);
 
+      // 🔍 DEBUG: Log de iconType de cada negocio
+      console.log('📦 [HOOK] Detalle de negocios:');
+      data.forEach(b => {
+        console.log(`  - "${b.name}": iconType=${b.iconType || 'emoji'}, iconSvg=${b.iconSvg ? 'SÍ (' + b.iconSvg.length + ' chars)' : 'NO'}`);
+      });
+
       // Log de debug para coordenadas
       const withCoords = data.filter(b => b.location?.coordinates);
       const withoutCoords = data.filter(b => !b.location?.coordinates);

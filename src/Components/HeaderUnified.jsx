@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useLayoutEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -129,6 +129,43 @@ export default function HeaderUnified({
     { id: 'tienda', name: 'Tienda', icon: Store, path: '/tienda', active: isTienda },
     { id: 'envios', name: 'Envíos', icon: Package, path: '/envios', active: isEnvios },
   ];
+
+  // Refs para el indicador del section switcher futurista
+  const sectionButtonRefs = useRef({});
+  const sectionContainerRef = useRef(null);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [indicatorReady, setIndicatorReady] = useState(false);
+
+  // Obtener la sección activa
+  const activeSection = sections.find(s => s.active) || sections[0];
+
+  // Calcular posición del indicador deslizante
+  const updateIndicator = () => {
+    const activeButton = sectionButtonRefs.current[activeSection.id];
+    const container = sectionContainerRef.current;
+
+    if (activeButton && container) {
+      const containerRect = container.getBoundingClientRect();
+      const buttonRect = activeButton.getBoundingClientRect();
+
+      setIndicatorStyle({
+        left: buttonRect.left - containerRect.left,
+        width: buttonRect.width,
+      });
+      setIndicatorReady(true);
+    }
+  };
+
+  // Actualizar indicador cuando cambia la sección
+  useLayoutEffect(() => {
+    updateIndicator();
+  }, [activeSection.id]);
+
+  // Actualizar en resize
+  useEffect(() => {
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [activeSection.id]);
 
   // ═══════════════════════════════════════════════════════════════════════
   // FETCH APP CONFIG FROM BACKEND
@@ -364,22 +401,46 @@ export default function HeaderUnified({
                 </div>
               </div>
 
-              {/* Tabs de sección */}
-              <div className="px-4 pb-4">
-                <div className="flex gap-2">
+              {/* Section Switcher - Tema claro, indicador neutro */}
+              <div className="px-3 pb-3">
+                <div
+                  ref={sectionContainerRef}
+                  className="relative inline-flex items-center w-full bg-white/90 backdrop-blur-sm rounded-full p-1"
+                >
+                  {/* Indicador deslizante - neutro (blanco con sombra) */}
+                  <div
+                    className={`
+                      absolute top-1 bottom-1 bg-white rounded-full shadow-md
+                      transition-all duration-300 ease-out
+                      ${indicatorReady ? 'opacity-100' : 'opacity-0'}
+                    `}
+                    style={{
+                      left: indicatorStyle.left,
+                      width: indicatorStyle.width,
+                    }}
+                  />
+
+                  {/* Botones de sección */}
                   {sections.map((section) => {
                     const Icon = section.icon;
                     return (
                       <button
                         key={section.id}
+                        ref={el => sectionButtonRefs.current[section.id] = el}
                         onClick={() => navigate(section.path)}
-                        className={`flex-1 py-2 px-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
-                          section.active
-                            ? 'bg-white text-red-600 shadow-md'
-                            : 'bg-white/20 text-white hover:bg-white/30'
-                        }`}
+                        className={`
+                          relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full
+                          font-medium text-sm transition-all duration-200
+                          ${section.active
+                            ? 'text-gray-900'
+                            : 'text-gray-400 hover:text-gray-600'
+                          }
+                        `}
                       >
-                        <Icon className="w-4 h-4" strokeWidth={2.5} />
+                        <Icon
+                          className="w-4 h-4 transition-transform duration-200"
+                          strokeWidth={2.5}
+                        />
                         <span>{section.name}</span>
                       </button>
                     );

@@ -341,17 +341,14 @@ export default function FloatingCategoriesButton({ categories, setActiveCategory
         {/* Vista de categorías */}
         {!expandedCategory && (
           <>
-            <div className="flex items-center justify-between px-6 pb-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Categorías</h2>
-                <p className="text-sm text-gray-500 mt-0.5">¿Qué se te antoja hoy?</p>
-              </div>
-              <button 
-                onClick={closeModal} 
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors active:scale-95"
+            {/* Botón cerrar alineado a la derecha */}
+            <div className="flex justify-end px-4 pb-2">
+              <button
+                onClick={closeModal}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors active:scale-95"
                 aria-label="Cerrar"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 

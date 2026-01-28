@@ -1,105 +1,111 @@
-import React from 'react';
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Store, Utensils, Package } from 'lucide-react';
+
+// Configuración de secciones
+const SECTIONS = [
+  { id: 'comida', name: 'Comida', path: '/home', altPaths: ['/'], icon: Utensils },
+  { id: 'tienda', name: 'Tienda', path: '/tienda', icon: Store },
+  { id: 'envios', name: 'Envíos', path: '/envios', icon: Package },
+];
 
 const SectionSwitcher = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const containerRef = useRef(null);
+  const buttonRefs = useRef({});
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const [isReady, setIsReady] = useState(false);
 
-  const isComida = location.pathname === '/home' || location.pathname === '/';
-  const isTienda = location.pathname === '/tienda';
-  const isEnvios = location.pathname === '/envios';
+  // Determinar sección activa
+  const activeSection = SECTIONS.find(
+    s => s.path === location.pathname || s.altPaths?.includes(location.pathname)
+  ) || SECTIONS[0];
 
-  const getTranslate = () => {
-    if (isComida) return 'translateX(0%)';
-    if (isTienda) return 'translateX(100%)';
-    if (isEnvios) return 'translateX(200%)';
+  // Calcular posición del indicador
+  const updateIndicator = () => {
+    const activeButton = buttonRefs.current[activeSection.id];
+    const container = containerRef.current;
+
+    if (activeButton && container) {
+      const containerRect = container.getBoundingClientRect();
+      const buttonRect = activeButton.getBoundingClientRect();
+
+      setIndicatorStyle({
+        left: buttonRect.left - containerRect.left,
+        width: buttonRect.width,
+      });
+      setIsReady(true);
+    }
   };
 
-  const getBackgroundColor = () => {
-    if (isComida) return 'bg-gradient-to-br from-red-100 to-red-200/80';
-    if (isTienda) return 'bg-gradient-to-br from-green-100 to-green-200/80';
-    if (isEnvios) return 'bg-gradient-to-br from-red-100 to-red-200/80';
-  };
+  // Actualizar indicador cuando cambia la sección activa
+  useLayoutEffect(() => {
+    updateIndicator();
+  }, [activeSection.id]);
+
+  // Actualizar en resize
+  useEffect(() => {
+    window.addEventListener('resize', updateIndicator);
+    return () => window.removeEventListener('resize', updateIndicator);
+  }, [activeSection.id]);
 
   return (
-    <div className="w-full">
-      <div className="relative flex bg-white rounded-xl overflow-hidden p-0.5 shadow-sm border border-gray-200/50 backdrop-blur-sm">
-
-        {/* Fondo animado con gradiente y sombra */}
+    <div className="flex justify-center w-full">
+      {/* Contenedor principal - Estilo futurista oscuro */}
+      <div
+        ref={containerRef}
+        className="relative inline-flex items-center bg-gray-900/95 backdrop-blur-xl rounded-full p-1 shadow-2xl shadow-black/20 border border-white/5"
+      >
+        {/* Indicador deslizante con glow */}
         <div
-          className={`absolute top-0.5 left-0.5 bottom-0.5 w-[calc(33.333%-0.25rem)] rounded-[14px] transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] shadow-lg ${getBackgroundColor()}`}
+          className={`
+            absolute top-1 bottom-1 bg-gradient-to-r from-red-500 to-red-600 rounded-full
+            shadow-lg shadow-red-500/40
+            transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]
+            ${isReady ? 'opacity-100' : 'opacity-0'}
+          `}
           style={{
-            transform: getTranslate(),
+            left: indicatorStyle.left,
+            width: indicatorStyle.width,
           }}
-        />
-
-        {/* Botón Comida */}
-        <button
-          onClick={() => navigate('/home')}
-          className={`flex-1 relative z-10 font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 text-sm py-2.5 rounded-xl ${
-            isComida
-              ? 'text-red-700 scale-[1.02]'
-              : 'text-gray-600 hover:text-gray-800 active:scale-95'
-          }`}
         >
-          <Utensils 
-            className={`w-[18px] h-[18px] transition-transform duration-300 ${
-              isComida ? 'animate-float' : ''
-            }`} 
-            strokeWidth={2.5}
-          />
-          <span>Comida</span>
-        </button>
+          {/* Efecto glow interno */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-t from-transparent via-white/10 to-white/20" />
+        </div>
 
-        {/* Botón Tienda */}
-        <button
-          onClick={() => navigate('/tienda')}
-          className={`flex-1 relative z-10 font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 text-sm py-2.5 rounded-xl ${
-            isTienda 
-              ? 'text-green-600 scale-[1.02]' 
-              : 'text-gray-600 hover:text-gray-800 active:scale-95'
-          }`}
-        >
-          <Store 
-            className={`w-[18px] h-[18px] transition-transform duration-300 ${
-              isTienda ? 'animate-float' : ''
-            }`}
-            strokeWidth={2.5}
-          />
-          <span>Tienda</span>
-        </button>
+        {/* Botones de sección */}
+        {SECTIONS.map((section) => {
+          const Icon = section.icon;
+          const isActive = section.id === activeSection.id;
 
-        {/* Botón Envíos */}
-        <button
-          onClick={() => navigate('/envios')}
-          className={`flex-1 relative z-10 font-semibold flex items-center justify-center gap-1.5 transition-all duration-300 text-sm py-2.5 rounded-xl ${
-            isEnvios
-              ? 'text-red-700 scale-[1.02]'
-              : 'text-gray-600 hover:text-gray-800 active:scale-95'
-          }`}
-        >
-          <Package 
-            className={`w-[18px] h-[18px] transition-transform duration-300 ${
-              isEnvios ? 'animate-float' : ''
-            }`}
-            strokeWidth={2.5}
-          />
-          <span>Envíos</span>
-        </button>
+          return (
+            <button
+              key={section.id}
+              ref={el => buttonRefs.current[section.id] = el}
+              onClick={() => navigate(section.path)}
+              className={`
+                relative z-10 flex items-center gap-2 px-5 py-2.5 rounded-full
+                font-medium text-sm transition-all duration-300
+                ${isActive
+                  ? 'text-white'
+                  : 'text-gray-400 hover:text-gray-200'
+                }
+              `}
+            >
+              <Icon
+                className={`w-[18px] h-[18px] transition-all duration-300 ${
+                  isActive ? 'scale-110' : ''
+                }`}
+                strokeWidth={isActive ? 2.5 : 2}
+              />
+              <span className={`transition-all duration-300 ${isActive ? 'font-semibold' : ''}`}>
+                {section.name}
+              </span>
+            </button>
+          );
+        })}
       </div>
-
-      <style>
-        {`
-          @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
-          }
-          .animate-float {
-            animation: float 2s ease-in-out infinite;
-          }
-        `}
-      </style>
     </div>
   );
 };
