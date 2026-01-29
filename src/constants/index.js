@@ -37,7 +37,7 @@ export const DELIVERY_FEE = 15;
 
 // Configuración del mapa
 export const MAP_CONFIG = {
-  defaultZoom: 14,
+  defaultZoom: 12,
   maxZoom: 18,
   minZoom: 10,
   clusterRadius: 60,

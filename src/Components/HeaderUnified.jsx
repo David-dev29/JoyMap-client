@@ -412,16 +412,16 @@ export default function HeaderUnified({
                 </div>
               </div>
 
-              {/* Section Switcher - Tema claro, indicador neutro */}
+              {/* Section Switcher - Tema claro, bordes menos redondeados */}
               <div className="px-3 pb-3">
                 <div
                   ref={sectionContainerRef}
-                  className="relative inline-flex items-center w-full bg-white/90 backdrop-blur-sm rounded-full p-1"
+                  className="relative inline-flex items-center w-full bg-white rounded-xl p-1"
                 >
-                  {/* Indicador deslizante - neutro (blanco con sombra) */}
+                  {/* Indicador deslizante - sólido con sombra */}
                   <div
                     className={`
-                      absolute top-1 bottom-1 bg-white rounded-full shadow-md
+                      absolute top-1 bottom-1 bg-white rounded-lg shadow-md
                       transition-all duration-300 ease-out
                       ${indicatorReady ? 'opacity-100' : 'opacity-0'}
                     `}
@@ -441,7 +441,7 @@ export default function HeaderUnified({
                         ref={el => sectionButtonRefs.current[section.id] = el}
                         onClick={() => navigate(section.path)}
                         className={`
-                          relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full
+                          relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg
                           font-medium text-sm transition-all duration-200
                           ${isActive
                             ? 'text-gray-900'

@@ -411,7 +411,7 @@ function Food({
         hasCoupon={!!activeCoupon}
       />
 
-      <HeroBannerTienda business={selectedBusinessFromMap} />
+      {/* <HeroBannerTienda business={selectedBusinessFromMap} /> */}
 
       {/* STICKY #3: Tabs de categorías - top-[88px] z-30 (debajo del mini perfil) */}
       <CategoryTabs
