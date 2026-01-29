@@ -96,6 +96,21 @@ const getEmojiFromIcon = (iconName) => {
   return ICON_TO_EMOJI[lowerIcon] || null;
 };
 
+// Orden de prioridad para categorías
+const CATEGORY_PRIORITY = [
+  'pizzerias', 'pizza',
+  'hamburguesas', 'burgers',
+  'tacos',
+  'pollo', 'chicken',
+  'mexicana', 'comida-mexicana',
+  'sushi', 'japonesa',
+  'cafe', 'cafeteria',
+  'postres',
+  'mariscos',
+  'china', 'comida-china',
+  'saludable'
+];
+
 export default function CategoriesSlider({
   onCategorySelect,
   collapsed = false,
@@ -132,7 +147,32 @@ export default function CategoriesSlider({
             isActive: cat.isActive
           }));
 
-          setCategories(sanitized);
+          // DEBUG: Ver categorías del API
+          console.log('🔍 DEBUG CATEGORÍAS');
+          console.log('Categorías del API (raw):', data.response);
+          console.log('Nombres:', sanitized.map(c => c.name));
+          console.log('Slugs:', sanitized.map(c => c.slug));
+
+          // Ordenar por prioridad
+          const sorted = [...sanitized].sort((a, b) => {
+            const indexA = CATEGORY_PRIORITY.findIndex(p =>
+              a.name?.toLowerCase().includes(p) || a.slug?.includes(p)
+            );
+            const indexB = CATEGORY_PRIORITY.findIndex(p =>
+              b.name?.toLowerCase().includes(p) || b.slug?.includes(p)
+            );
+            const priorityA = indexA === -1 ? 999 : indexA;
+            const priorityB = indexB === -1 ? 999 : indexB;
+
+            // DEBUG: Ver prioridades asignadas
+            console.log(`${a.name}: indexA=${indexA}, priorityA=${priorityA}`);
+
+            return priorityA - priorityB;
+          });
+
+          console.log('Categorías ORDENADAS:', sorted.map(c => c.name));
+
+          setCategories(sorted);
         }
         setLoadingCategories(false);
       })
@@ -168,17 +208,6 @@ export default function CategoriesSlider({
       animate={isSheetOpen ? 'open' : 'closed'}
       variants={sheetVariants}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      drag="y"
-      dragConstraints={{ top: 0, bottom: 0 }}
-      dragElastic={0.2}
-      onDragEnd={(event, info) => {
-        if (info.offset.y > 50) {
-          setIsSheetOpen(false);
-        }
-        if (info.offset.y < -30) {
-          setIsSheetOpen(true);
-        }
-      }}
     >
       {/* Botón de centrar mapa - se mueve junto con el sheet */}
       {showCenterButton && onCenterMap && (
@@ -203,9 +232,9 @@ export default function CategoriesSlider({
 
       {/* Sheet content */}
       <div className="bg-white rounded-t-[28px] shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-        {/* Handle - área de arrastre */}
+        {/* Handle - toca para abrir/cerrar */}
         <div
-          className="w-full flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
+          className="w-full flex justify-center pt-3 pb-2 cursor-pointer"
           onClick={() => setIsSheetOpen(!isSheetOpen)}
         >
           <div className="w-10 h-1 bg-gray-300 rounded-full"></div>
