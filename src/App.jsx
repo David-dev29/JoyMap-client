@@ -1,7 +1,7 @@
 // App.jsx
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { Toaster } from "sonner";
-import HeaderUnifiedLayout from "../src/Layouts/UnifiedLayout.jsx";
+import HeaderUnifiedLayout from "./Layouts/UnifiedLayout.jsx";
 import Home from "./Pages/Home.jsx";
 import Tienda from "./Pages/Store.jsx";
 import CartScreen from "./Components/Store/CartScreen.jsx";
@@ -28,7 +28,7 @@ const router = createBrowserRouter([
         path: "home",
         element: <Home />,
       },
-      // ✅ RUTA DINÁMICA PARA NEGOCIOS EN HOME
+      // RUTA DINÁMICA PARA NEGOCIOS EN HOME
       {
         path: "home/:businessSlug",
         element: <Home />,
@@ -37,7 +37,7 @@ const router = createBrowserRouter([
         path: "tienda",
         element: <Tienda />,
       },
-      // ✅ RUTA DINÁMICA PARA NEGOCIOS EN TIENDA
+      // RUTA DINÁMICA PARA NEGOCIOS EN TIENDA
       {
         path: "tienda/:businessSlug",
         element: <Tienda />,
