@@ -383,7 +383,7 @@ export default function Checkout() {
           onClick={() => navigate('/')}
           className="px-8 py-3 bg-rose-600 text-white rounded-xl font-semibold hover:bg-rose-700 transition-colors shadow-md"
         >
-          Explorar restaurantes
+          Explorar negocios
         </button>
       </div>
     );
@@ -791,7 +791,7 @@ export default function Checkout() {
                 <span>Procesando...</span>
               </div>
             ) : (
-              `Confirmar pedido - $${total.toFixed(2)}`
+              'Hacer pedido'
             )}
           </motion.button>
         </div>

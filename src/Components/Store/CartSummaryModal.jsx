@@ -39,7 +39,7 @@ const CartSummaryModal = ({ cartItems }) => {
           className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-6 py-2 rounded-xl transition-colors shadow-md"
           onClick={() => navigate("/cart", { state: { cartItems } })}
         >
-          Ver mi pedido
+          Ver carrito
         </button>
       </div>
     </div>

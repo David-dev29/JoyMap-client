@@ -4,14 +4,12 @@ import {
   Search,
   X,
   ChevronRight,
-  ShoppingBag,
   ArrowLeft,
   Clock,
   CheckCircle,
   Gift,
   Star,
   Loader2,
-  Bell,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getAllBusinesses } from "../services/businessService";
@@ -19,7 +17,9 @@ import SideMenu from "./SideMenu";
 
 // Flowbite Icons para el Section Switcher
 import { Burger, Store } from "flowbite-react-icons/solid";
+// React Icons - Material Design para envíos, Phosphor para header (modernos estilo Apple)
 import { MdDeliveryDining } from "react-icons/md";
+import { PiBellBold, PiShoppingCartBold } from "react-icons/pi";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // NOTIFICATIONS DROPDOWN COMPONENT
@@ -103,6 +103,10 @@ export default function HeaderUnified({
   const [isSearching, setIsSearching] = useState(false);
   const [allBusinesses, setAllBusinesses] = useState([]);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+
+  // Palabras rotativas para el placeholder del buscador
+  const palabrasRotativas = ['cemitas', 'pizza', 'hamburguesas', 'tacos', 'sushi', 'café', 'pollo', 'helados'];
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
 
   // App config from backend
   const [appConfig, setAppConfig] = useState({
@@ -302,6 +306,14 @@ export default function HeaderUnified({
     }
   }, [isSearchMode]);
 
+  // Rotar palabras del placeholder cada 2 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWordIndex((prev) => (prev + 1) % palabrasRotativas.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
   // ═══════════════════════════════════════════════════════════════════════
   // HANDLERS
   // ═══════════════════════════════════════════════════════════════════════
@@ -405,9 +417,9 @@ export default function HeaderUnified({
                     }}
                     className="relative text-white hover:opacity-80 transition-opacity"
                   >
-                    <Bell className="w-6 h-6" />
+                    <PiBellBold className="w-6 h-6" />
                     {notificationCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-white text-rose-600 text-[10px] font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-rose-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white/30">
                         {notificationCount > 9 ? '9+' : notificationCount}
                       </span>
                     )}
@@ -415,9 +427,9 @@ export default function HeaderUnified({
 
                   {/* Botón carrito */}
                   <button onClick={() => navigate('/cart')} className="relative text-white hover:opacity-80 transition-opacity">
-                    <ShoppingBag className="w-6 h-6" />
+                    <PiShoppingCartBold className="w-6 h-6" />
                     {displayCartCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-white text-rose-600 text-[10px] font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-rose-600 text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white/30">
                         {displayCartCount > 9 ? '9+' : displayCartCount}
                       </span>
                     )}
@@ -511,16 +523,35 @@ export default function HeaderUnified({
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
               </button>
 
-              <div className="flex-1 flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2 relative">
                 <Search className="w-5 h-5 text-gray-400" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  placeholder="Buscar locales, platos, productos..."
-                  className="flex-1 outline-none text-gray-700 text-base placeholder-gray-400"
-                />
+                <div className="flex-1 relative">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="w-full outline-none text-gray-700 text-base bg-transparent"
+                  />
+                  {/* Placeholder animado con palabras rotativas */}
+                  {!searchQuery && (
+                    <div className="absolute inset-0 flex items-center pointer-events-none">
+                      <span className="text-gray-400">Buscar&nbsp;</span>
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={currentWordIndex}
+                          initial={{ y: 10, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -10, opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                          className="text-gray-400"
+                        >
+                          {palabrasRotativas[currentWordIndex]}
+                        </motion.span>
+                      </AnimatePresence>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {isSearching && (

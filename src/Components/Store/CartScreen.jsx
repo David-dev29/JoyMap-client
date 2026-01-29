@@ -204,7 +204,7 @@ export default function CartScreen() {
               onClick={handleBack}
               className="mt-6 px-6 py-3 bg-rose-700 text-white rounded-lg font-semibold hover:bg-rose-800 transition-colors"
             >
-              Explorar productos
+              Explorar negocios
             </button>
           </div>
         ) : (
@@ -234,7 +234,7 @@ export default function CartScreen() {
               className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-rose-700 text-white text-sm font-semibold shadow-md hover:bg-rose-800 active:scale-95 transition-all w-full sm:w-auto"
             >
               <CheckCircle className="w-5 h-5" />
-              Continuar
+              Pagar
             </button>
           </div>
           <p className="mt-4 text-[10px] text-gray-400 text-center leading-snug">
