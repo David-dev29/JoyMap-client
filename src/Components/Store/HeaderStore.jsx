@@ -5,7 +5,7 @@ const HeaderStore = () => {
     const navigate = useNavigate();
   
     return (
-      <header className="px-5 py-7 rounded-b-3xl shadow-xl select-none bg-red-500 text-white">
+      <header className="px-5 py-7 rounded-b-3xl shadow-xl select-none bg-rose-500 text-white">
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-3xl font-extrabold tracking-wide">EN•CORTO</h1>
           <Search className="w-6 h-6 cursor-pointer hover:text-white/80 transition-colors" />
@@ -13,13 +13,13 @@ const HeaderStore = () => {
   
         <div className="relative flex bg-white rounded-full overflow-hidden shadow-inner h-14">
           <div
-            className="absolute top-0 h-full w-1/2 bg-red-100 rounded-full transition-transform duration-500 ease-in-out"
+            className="absolute top-0 h-full w-1/2 bg-rose-100 rounded-full transition-transform duration-500 ease-in-out"
             style={{ transform: 'translateX(0%)' }}
           />
   
           <button
             onClick={() => navigate('/tienda')}
-            className="flex-1 text-center font-medium flex items-center justify-center gap-2 text-red-700 z-10"
+            className="flex-1 text-center font-medium flex items-center justify-center gap-2 text-rose-700 z-10"
           >
             <Store className="w-5 h-5 animate-bounce" />
             Tienda

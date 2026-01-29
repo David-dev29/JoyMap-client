@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 
 const ProductCard = ({ product, isTienda, onProductClick }) => {
   const buttonColorClass = isTienda
-    ? "bg-red-700 hover:bg-red-800"
+    ? "bg-rose-700 hover:bg-rose-800"
     : "bg-green-600 hover:bg-green-700";
 
   const handleRowClick = () => {
@@ -73,7 +73,7 @@ const ProductCard = ({ product, isTienda, onProductClick }) => {
 
           <button
             aria-label={`Agregar ${product.name}`}
-            className={`${buttonColorClass} w-9 h-9 rounded-lg flex items-center justify-center transition-colors shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isTienda ? "focus:ring-red-600" : "focus:ring-green-500"}`}
+            className={`${buttonColorClass} w-9 h-9 rounded-lg flex items-center justify-center transition-colors shadow-sm hover:shadow-md active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isTienda ? "focus:ring-rose-600" : "focus:ring-green-500"}`}
             onClick={handleButtonClick}
             type="button"
           >

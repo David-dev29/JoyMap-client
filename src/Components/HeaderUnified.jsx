@@ -5,9 +5,6 @@ import {
   X,
   ChevronRight,
   ShoppingBag,
-  Utensils,
-  Store,
-  Package,
   ArrowLeft,
   Clock,
   CheckCircle,
@@ -19,6 +16,10 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { getAllBusinesses } from "../services/businessService";
 import SideMenu from "./SideMenu";
+
+// Flowbite Icons para el Section Switcher
+import { Burger, Store } from "flowbite-react-icons/solid";
+import { MdDeliveryDining } from "react-icons/md";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // NOTIFICATIONS DROPDOWN COMPONENT
@@ -35,7 +36,7 @@ function NotificationsDropdown({ notifications, onClose, onClear }) {
       <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
         <h3 className="font-bold text-gray-900">Notificaciones</h3>
         {notifications.length > 0 && (
-          <button onClick={onClear} className="text-xs text-red-600 font-medium">
+          <button onClick={onClear} className="text-xs text-rose-600 font-medium">
             Marcar como leídas
           </button>
         )}
@@ -58,7 +59,7 @@ function NotificationsDropdown({ notifications, onClose, onClear }) {
               <div className="flex gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
                   {notif.type === 'order' && <Clock className="w-5 h-5 text-amber-500" />}
-                  {notif.type === 'promo' && <Gift className="w-5 h-5 text-red-600" />}
+                  {notif.type === 'promo' && <Gift className="w-5 h-5 text-rose-600" />}
                   {notif.type === 'success' && <CheckCircle className="w-5 h-5 text-green-500" />}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -130,9 +131,9 @@ export default function HeaderUnified({
   const isEnvios = location.pathname === '/envios' || location.pathname.startsWith('/envios/');
 
   const sections = [
-    { id: 'comida', name: 'Comida', icon: Utensils, path: '/home', active: isComida },
+    { id: 'comida', name: 'Comida', icon: Burger, path: '/home', active: isComida },
     { id: 'tienda', name: 'Tienda', icon: Store, path: '/tienda', active: isTienda },
-    { id: 'envios', name: 'Envíos', icon: Package, path: '/envios', active: isEnvios },
+    { id: 'envios', name: 'Envíos', icon: MdDeliveryDining, path: '/envios', active: isEnvios },
   ];
 
   // Refs para el indicador del section switcher futurista
@@ -365,7 +366,7 @@ export default function HeaderUnified({
             className="fixed top-0 left-0 right-0 z-20 px-4 pt-4 notifications-container"
           >
             {/* FONDO SÓLIDO ROJO - SIN GRADIENTE */}
-            <div className="max-w-lg mx-auto bg-red-600 rounded-2xl shadow-lg overflow-hidden">
+            <div className="max-w-lg mx-auto bg-amber-500 rounded-2xl shadow-lg overflow-hidden">
               {/* Fila principal: Logo tipográfico | Búsqueda + Notificaciones + Carrito */}
               <div className="px-4 py-3 flex items-center justify-between">
                 {/* Izquierda: Solo logo tipográfico */}
@@ -406,7 +407,7 @@ export default function HeaderUnified({
                   >
                     <Bell className="w-6 h-6" />
                     {notificationCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-white text-red-600 text-[10px] font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-white text-rose-600 text-[10px] font-bold rounded-full flex items-center justify-center">
                         {notificationCount > 9 ? '9+' : notificationCount}
                       </span>
                     )}
@@ -416,7 +417,7 @@ export default function HeaderUnified({
                   <button onClick={() => navigate('/cart')} className="relative text-white hover:opacity-80 transition-opacity">
                     <ShoppingBag className="w-6 h-6" />
                     {displayCartCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-white text-red-600 text-[10px] font-bold rounded-full flex items-center justify-center">
+                      <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] bg-white text-rose-600 text-[10px] font-bold rounded-full flex items-center justify-center">
                         {displayCartCount > 9 ? '9+' : displayCartCount}
                       </span>
                     )}
@@ -424,16 +425,16 @@ export default function HeaderUnified({
                 </div>
               </div>
 
-              {/* Section Switcher - Tema claro, bordes menos redondeados */}
+              {/* Section Switcher - Fondo gris, seleccionado blanco */}
               <div className="px-3 pb-3">
                 <div
                   ref={sectionContainerRef}
-                  className="relative inline-flex items-center w-full bg-white rounded-xl p-1"
+                  className="relative inline-flex items-center w-full bg-transparent rounded-2xl"
                 >
-                  {/* Indicador deslizante - sólido con sombra */}
+                  {/* Indicador deslizante - blanco */}
                   <div
                     className={`
-                      absolute top-1 bottom-1 bg-white rounded-lg shadow-md
+                      absolute top-0 bottom-0 bg-rose-600 rounded-2xl shadow-sm
                       transition-all duration-300 ease-out
                       ${indicatorReady ? 'opacity-100' : 'opacity-0'}
                     `}
@@ -453,18 +454,28 @@ export default function HeaderUnified({
                         ref={el => sectionButtonRefs.current[section.id] = el}
                         onClick={() => navigate(section.path)}
                         className={`
-                          relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg
+                          relative z-10 flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-2xl
                           font-medium text-sm transition-all duration-200
                           ${isActive
-                            ? 'text-gray-900'
-                            : 'text-gray-400 hover:text-gray-600'
+                            ? 'text-white'
+                            : 'text-white hover:text-gray-600'
                           }
                         `}
                       >
-                        <Icon
-                          className="w-4 h-4 transition-transform duration-200"
-                          strokeWidth={2.5}
-                        />
+                        {isActive ? (
+                          <motion.div
+                            animate={{ y: [0, -3, 0] }}
+                            transition={{
+                              duration: 1.5,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          >
+                            <Icon className="w-5 h-5" />
+                          </motion.div>
+                        ) : (
+                          <Icon className="w-5 h-5" />
+                        )}
                         <span>{section.name}</span>
                       </button>
                     );

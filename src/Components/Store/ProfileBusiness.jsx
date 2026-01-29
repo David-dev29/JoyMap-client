@@ -399,15 +399,15 @@ const BusinessProfile = ({
 
   if (error) {
     return (
-      <div className="bg-red-50 border-b border-red-100">
+      <div className="bg-rose-50 border-b border-rose-100">
         <div className="px-4 py-3">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-              <span className="text-red-600 font-bold">!</span>
+            <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center">
+              <span className="text-rose-600 font-bold">!</span>
             </div>
             <div className="flex-1">
-              <p className="text-red-800 font-semibold text-sm">Error al cargar negocios</p>
-              <p className="text-red-600 text-xs">{error}</p>
+              <p className="text-rose-800 font-semibold text-sm">Error al cargar negocios</p>
+              <p className="text-rose-600 text-xs">{error}</p>
             </div>
           </div>
         </div>
@@ -594,10 +594,10 @@ const BusinessProfile = ({
               {/* Estado y tipo de servicio */}
               <div className="flex items-center gap-2 mt-1.5">
                 <span className={`flex items-center text-xs font-medium ${
-                  activeCat?.isOpen ? 'text-green-600' : 'text-red-600'
+                  activeCat?.isOpen ? 'text-green-600' : 'text-rose-600'
                 }`}>
                   <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                    activeCat?.isOpen ? 'bg-green-500' : 'bg-red-500'
+                    activeCat?.isOpen ? 'bg-green-500' : 'bg-rose-500'
                   }`}></span>
                   {activeCat?.isOpen ? 'Abierto' : 'Cerrado'}
                 </span>

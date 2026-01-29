@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
-import { MapContainer, TileLayer, Marker, useMap, useMapEvents, Circle } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { renderToStaticMarkup } from 'react-dom/server';
 import Supercluster from "supercluster";
@@ -105,7 +105,7 @@ const createMarkerIcon = (business) => {
         {/* Burbuja blanca rectangular redondeada */}
         <div className="bg-white rounded-2xl px-1.5 py-1 flex items-center gap-1.5 border border-gray-200">
           {/* Círculo rojo con icono (emoji o SVG) - con indicador de abierto */}
-          <div className="relative w-7 h-7 bg-red-600 rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="relative w-7 h-7 bg-rose-600 rounded-full flex items-center justify-center flex-shrink-0">
             {hasSvgIcon && svgDataUrl ? (
               <img
                 src={svgDataUrl}
@@ -197,7 +197,7 @@ const createClusterIcon = (count) => {
       />
       {/* Círculo del cluster */}
       <div
-        className="bg-red-600 rounded-full shadow-lg flex items-center justify-center border-2 border-white"
+        className="bg-rose-600 rounded-full shadow-lg flex items-center justify-center border-2 border-white"
         style={{ width: size, height: size }}
       >
         <span className="text-white font-bold" style={{ fontSize: size / 2.5 }}>
@@ -565,24 +565,11 @@ const HomeMap = memo(function HomeMap({
 
         {/* Marker de ubicación del usuario */}
         {userLocation && (
-          <>
-            <Marker
-              position={[userLocation.lat, userLocation.lng]}
-              icon={createUserLocationIcon()}
-              zIndexOffset={1000}
-            />
-            <Circle
-              center={[userLocation.lat, userLocation.lng]}
-              radius={300}
-              pathOptions={{
-                color: '#3B82F6',
-                fillColor: '#3B82F6',
-                fillOpacity: 0.05,
-                weight: 1,
-                opacity: 0.3,
-              }}
-            />
-          </>
+          <Marker
+            position={[userLocation.lat, userLocation.lng]}
+            icon={createUserLocationIcon()}
+            zIndexOffset={1000}
+          />
         )}
 
         <MapMarkers

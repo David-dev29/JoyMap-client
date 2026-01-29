@@ -307,7 +307,7 @@ export default function DeliveryTrackingScreen() {
                     </div>
                     <div className="flex justify-between font-bold pt-2 border-t border-gray-100">
                       <span>Total</span>
-                      <span className="text-red-600">${orderData.total.toFixed(2)}</span>
+                      <span className="text-rose-600">${orderData.total.toFixed(2)}</span>
                     </div>
                   </div>
 
@@ -328,7 +328,7 @@ export default function DeliveryTrackingScreen() {
         </div>
 
         {/* Help Button - Red as CTA */}
-        <button className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center justify-center gap-2 text-red-600 font-semibold hover:bg-gray-50 transition-colors">
+        <button className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center justify-center gap-2 text-rose-600 font-semibold hover:bg-gray-50 transition-colors">
           <HelpCircle className="w-5 h-5" />
           ¿Necesitas ayuda con tu pedido?
         </button>
@@ -353,7 +353,7 @@ export default function DeliveryTrackingScreen() {
                   </button>
                 ))}
               </div>
-              <button className="text-red-600 font-medium text-sm">
+              <button className="text-rose-600 font-medium text-sm">
                 Escribir reseña
               </button>
             </motion.div>

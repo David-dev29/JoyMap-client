@@ -65,14 +65,14 @@ const SideMenu = memo(({ isOpen, onClose, notifications = [], onClearNotificatio
             onClick={() => setActiveTab('notifications')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
               activeTab === 'notifications'
-                ? 'bg-white text-red-600 shadow-sm'
+                ? 'bg-white text-rose-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <Bell className="w-4 h-4" />
             Notificaciones
             {notifications.length > 0 && (
-              <span className="bg-red-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="bg-rose-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                 {notifications.length > 9 ? '9+' : notifications.length}
               </span>
             )}
@@ -81,14 +81,14 @@ const SideMenu = memo(({ isOpen, onClose, notifications = [], onClearNotificatio
             onClick={() => setActiveTab('favorites')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
               activeTab === 'favorites'
-                ? 'bg-white text-red-600 shadow-sm'
+                ? 'bg-white text-rose-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <Heart className="w-4 h-4" />
             Favoritos
             {favorites?.length > 0 && (
-              <span className="bg-red-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="bg-rose-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
                 {favorites.length > 9 ? '9+' : favorites.length}
               </span>
             )}
@@ -114,7 +114,7 @@ const SideMenu = memo(({ isOpen, onClose, notifications = [], onClearNotificatio
                   <div className="flex justify-end mb-3">
                     <button
                       onClick={onClearNotifications}
-                      className="text-xs text-red-600 font-medium hover:text-red-700"
+                      className="text-xs text-rose-600 font-medium hover:text-rose-700"
                     >
                       Marcar como leídas
                     </button>
@@ -131,11 +131,11 @@ const SideMenu = memo(({ isOpen, onClose, notifications = [], onClearNotificatio
                         <div className="flex gap-3">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                             notif.type === 'order' ? 'bg-amber-100' :
-                            notif.type === 'promo' ? 'bg-red-100' :
+                            notif.type === 'promo' ? 'bg-rose-100' :
                             'bg-green-100'
                           }`}>
                             {notif.type === 'order' && <Clock className="w-5 h-5 text-amber-600" />}
-                            {notif.type === 'promo' && <Gift className="w-5 h-5 text-red-600" />}
+                            {notif.type === 'promo' && <Gift className="w-5 h-5 text-rose-600" />}
                             {notif.type === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -186,8 +186,8 @@ const SideMenu = memo(({ isOpen, onClose, notifications = [], onClearNotificatio
                             }}
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-red-100 to-red-200 flex items-center justify-center">
-                            <span className="text-xl font-bold text-red-600">
+                          <div className="w-full h-full bg-gradient-to-br from-rose-100 to-rose-200 flex items-center justify-center">
+                            <span className="text-xl font-bold text-rose-600">
                               {business.name?.[0]?.toUpperCase() || '?'}
                             </span>
                           </div>
@@ -217,13 +217,13 @@ const SideMenu = memo(({ isOpen, onClose, notifications = [], onClearNotificatio
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                           onClick={() => handleBusinessClick(business)}
-                          className="w-9 h-9 flex items-center justify-center rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition-colors"
+                          className="w-9 h-9 flex items-center justify-center rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors"
                         >
                           <ChevronRight className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => removeFavorite(business.id || business._id)}
-                          className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-red-100 hover:text-red-500 transition-colors"
+                          className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-200 text-gray-500 hover:bg-rose-100 hover:text-rose-500 transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>

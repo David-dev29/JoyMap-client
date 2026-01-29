@@ -144,7 +144,7 @@ export default function CartScreen() {
                 }
                 
                   
-                  className="w-8 h-8 flex items-center justify-center text-red-600 hover:text-red-800"
+                  className="w-8 h-8 flex items-center justify-center text-rose-600 hover:text-rose-800"
                   aria-label="Aumentar cantidad"
                 >
                   <Plus className="w-4 h-4" />
@@ -161,7 +161,7 @@ export default function CartScreen() {
           {/* Total destacado */}
           <div className="flex-1 sm:text-left text-center">
             <div className="text-xs text-gray-500 mb-1">Total del pedido</div>
-            <div className={`text-2xl font-extrabold text-red-700 transition-transform ${animateTotal ? 'animate-bounce' : ''}`}>
+            <div className={`text-2xl font-extrabold text-rose-700 transition-transform ${animateTotal ? 'animate-bounce' : ''}`}>
               MXN {totalPrice}
             </div>
           </div>
@@ -169,7 +169,7 @@ export default function CartScreen() {
           {/* Botón */}
           <button
             onClick={() => navigate("/address", { replace: true })}
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-red-700 text-white text-sm font-semibold shadow-md hover:bg-red-900 transition-all w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-rose-700 text-white text-sm font-semibold shadow-md hover:bg-rose-900 transition-all w-full sm:w-auto"
           >
             <CheckCircle className="w-5 h-5" />
             Continuar

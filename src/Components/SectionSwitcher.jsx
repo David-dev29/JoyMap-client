@@ -60,8 +60,8 @@ const SectionSwitcher = () => {
         {/* Indicador deslizante con glow */}
         <div
           className={`
-            absolute top-1 bottom-1 bg-gradient-to-r from-red-500 to-red-600 rounded-full
-            shadow-lg shadow-red-500/40
+            absolute top-1 bottom-1 bg-gradient-to-r from-rose-500 to-rose-600 rounded-full
+            shadow-lg shadow-rose-500/40
             transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]
             ${isReady ? 'opacity-100' : 'opacity-0'}
           `}

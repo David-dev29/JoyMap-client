@@ -28,7 +28,7 @@ const CategoryIcons = ({ activeCategory, setActiveCategory, isTienda }) => {
           {categories.map((category) => {
             const isActive = activeCategory === category.id;
             const borderColor = isActive
-              ? (isTienda ? 'border-red-700' : 'border-green-600')
+              ? (isTienda ? 'border-rose-700' : 'border-green-600')
               : '';
   
             return (
@@ -42,7 +42,7 @@ const CategoryIcons = ({ activeCategory, setActiveCategory, isTienda }) => {
                   alt={category.name}
                   className="w-15 h-10 mx-auto mb-2 object-cover"
                 />
-                {/* <div className={`text-sm font-semibold ${isActive ? (isTienda ? 'text-red-600' : 'text-green-600') : 'text-gray-700'}`}>
+                {/* <div className={`text-sm font-semibold ${isActive ? (isTienda ? 'text-rose-600' : 'text-green-600') : 'text-gray-700'}`}>
                   {category.name}
                 </div> */}
               </button>

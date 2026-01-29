@@ -337,7 +337,7 @@ function Food({
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Cargando menú...</p>
         </div>
       </div>
@@ -347,12 +347,12 @@ function Food({
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="text-center text-red-600">
+        <div className="text-center text-rose-600">
           <p className="text-xl mb-2">Error al cargar el menú</p>
           <p className="text-sm text-gray-500">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            className="mt-4 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700"
           >
             Reintentar
           </button>

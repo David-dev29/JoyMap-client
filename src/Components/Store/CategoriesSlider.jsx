@@ -244,36 +244,29 @@ export default function CategoriesSlider({
                     {/* Botón "Todos" */}
                     <button
                       onClick={() => onCategorySelect?.(null)}
-                      className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
+                      className={`flex-shrink-0 px-4 py-2 rounded-full transition-all text-sm font-medium whitespace-nowrap ${
                         selectedCategory === null
-                          ? 'bg-red-600 text-white shadow-md'
-                          : 'bg-gray-100 text-gray-700'
+                          ? 'bg-black text-white'
+                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                       }`}
                     >
-                      <span className="text-sm">{defaultEmoji}</span>
-                      <span className="text-xs font-medium whitespace-nowrap">Todos</span>
+                      Todos
                     </button>
 
                     {/* Categorías del backend */}
-                    {categories.map((category) => {
-                      const emoji = getEmojiFromIcon(category.icon);
-                      return (
-                        <button
-                          key={category._id}
-                          onClick={() => onCategorySelect?.(category.slug)}
-                          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
-                            selectedCategory === category._id || selectedCategory === category.slug
-                              ? 'bg-red-600 text-white shadow-md'
-                              : 'bg-gray-100 text-gray-700'
-                          }`}
-                        >
-                          {emoji && <span className="text-sm">{emoji}</span>}
-                          <span className="text-xs font-medium whitespace-nowrap">
-                            {category.name}
-                          </span>
-                        </button>
-                      );
-                    })}
+                    {categories.map((category) => (
+                      <button
+                        key={category._id}
+                        onClick={() => onCategorySelect?.(category.slug)}
+                        className={`flex-shrink-0 px-4 py-2 rounded-full transition-all text-sm font-medium whitespace-nowrap ${
+                          selectedCategory === category._id || selectedCategory === category.slug
+                            ? 'bg-black text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                      >
+                        {category.name}
+                      </button>
+                    ))}
                   </>
                 )}
               </div>

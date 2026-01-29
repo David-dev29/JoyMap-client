@@ -79,7 +79,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
         {isMinimum ? (
           <button
             onClick={() => onRemove(item.product.id)}
-            className="text-gray-400 hover:text-red-600 p-1 transition-colors"
+            className="text-gray-400 hover:text-rose-600 p-1 transition-colors"
             aria-label="Eliminar producto"
           >
             <Trash2 className="w-5 h-5" />
@@ -114,7 +114,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
               isFruit ? item.quantity + 250 : item.quantity + 1
             )
           }
-          className="w-8 h-8 flex items-center justify-center text-red-600 hover:text-red-800 transition-colors"
+          className="w-8 h-8 flex items-center justify-center text-rose-600 hover:text-rose-800 transition-colors"
           aria-label="Aumentar cantidad"
         >
           <Plus className="w-4 h-4" />
@@ -202,7 +202,7 @@ export default function CartScreen() {
             </p>
             <button
               onClick={handleBack}
-              className="mt-6 px-6 py-3 bg-red-700 text-white rounded-lg font-semibold hover:bg-red-800 transition-colors"
+              className="mt-6 px-6 py-3 bg-rose-700 text-white rounded-lg font-semibold hover:bg-rose-800 transition-colors"
             >
               Explorar productos
             </button>
@@ -225,13 +225,13 @@ export default function CartScreen() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex-1 sm:text-left text-center">
               <div className="text-xs text-gray-500 mb-1">Total del pedido</div>
-              <div className={`text-2xl font-extrabold text-red-700 transition-transform ${animateTotal ? 'scale-110' : ''}`}>
+              <div className={`text-2xl font-extrabold text-rose-700 transition-transform ${animateTotal ? 'scale-110' : ''}`}>
                 MXN {totalPrice}
               </div>
             </div>
             <button
               onClick={() => navigate("/checkout", { replace: true })}
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-red-700 text-white text-sm font-semibold shadow-md hover:bg-red-800 active:scale-95 transition-all w-full sm:w-auto"
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-rose-700 text-white text-sm font-semibold shadow-md hover:bg-rose-800 active:scale-95 transition-all w-full sm:w-auto"
             >
               <CheckCircle className="w-5 h-5" />
               Continuar

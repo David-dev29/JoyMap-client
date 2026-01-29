@@ -132,7 +132,7 @@ const CategoryTabs = ({
                 placeholder="Buscar en el menú..."
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[red-600]/20 focus:bg-white transition-all"
+                className="w-full pl-10 pr-10 py-3 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[rose-600]/20 focus:bg-white transition-all"
               />
               <button
                 onClick={() => {
@@ -161,7 +161,7 @@ const CategoryTabs = ({
                 {/* Botón de búsqueda */}
                 <button
                   onClick={() => setIsSearchOpen(true)}
-                  className="p-2 text-gray-600 hover:text-[red-600] hover:bg-gray-100 rounded-lg flex-shrink-0 transition-colors"
+                  className="p-2 text-gray-600 hover:text-[rose-600] hover:bg-gray-100 rounded-lg flex-shrink-0 transition-colors"
                   aria-label="Buscar productos"
                 >
                   <Search className="w-5 h-5" />
@@ -213,7 +213,7 @@ const CategoryTabs = ({
           transition: color 0.15s ease;
         }
         .tab-button.active {
-          color: red-600;
+          color: rose-600;
         }
       `}</style>
     </>

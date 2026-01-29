@@ -63,7 +63,7 @@ export default function Profile() {
         </p>
         <button
           onClick={() => navigate('/')}
-          className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+          className="px-6 py-3 bg-rose-600 text-white rounded-lg font-medium hover:bg-rose-700 transition-colors"
         >
           Explorar negocios
         </button>
@@ -83,14 +83,14 @@ export default function Profile() {
 
       {/* User Info Card */}
       <div className="bg-white m-4 rounded-xl shadow-sm overflow-hidden">
-        <div className="bg-gradient-to-r from-red-600 to-red-700 p-6">
+        <div className="bg-gradient-to-r from-rose-600 to-rose-700 p-6">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
               <User className="w-8 h-8 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">{user.name}</h2>
-              <p className="text-red-100 flex items-center gap-1 mt-1">
+              <p className="text-rose-100 flex items-center gap-1 mt-1">
                 <Phone className="w-4 h-4" />
                 +52 {user.phone}
               </p>
@@ -103,7 +103,7 @@ export default function Profile() {
       <div className="bg-white mx-4 mb-4 rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-100">
           <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-red-600" />
+            <MapPin className="w-5 h-5 text-rose-600" />
             Mis Direcciones
           </h3>
         </div>
@@ -130,7 +130,7 @@ export default function Profile() {
 
         <button
           onClick={() => navigate('/new-address')}
-          className="w-full p-4 text-red-700 font-medium hover:bg-red-50 transition-colors border-t border-gray-100"
+          className="w-full p-4 text-rose-700 font-medium hover:bg-rose-50 transition-colors border-t border-gray-100"
         >
           + Agregar nueva dirección
         </button>
@@ -140,14 +140,14 @@ export default function Profile() {
       <div className="bg-white mx-4 mb-4 rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 border-b border-gray-100">
           <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-            <Package className="w-5 h-5 text-red-600" />
+            <Package className="w-5 h-5 text-rose-600" />
             Mis Pedidos
           </h3>
         </div>
 
         {loadingOrders ? (
           <div className="p-8 text-center">
-            <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-8 h-8 border-2 border-rose-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="text-gray-500 mt-2">Cargando pedidos...</p>
           </div>
         ) : orders.length > 0 ? (
@@ -162,7 +162,7 @@ export default function Profile() {
                     order.status === 'delivered'
                       ? 'bg-green-100 text-green-700'
                       : order.status === 'cancelled'
-                      ? 'bg-red-100 text-red-700'
+                      ? 'bg-rose-100 text-rose-700'
                       : 'bg-yellow-100 text-yellow-700'
                   }`}>
                     {order.status === 'delivered' ? 'Entregado' :
@@ -195,7 +195,7 @@ export default function Profile() {
       <div className="mx-4 mb-8">
         <button
           onClick={handleLogout}
-          className="w-full p-4 bg-white rounded-xl shadow-sm text-red-600 font-medium flex items-center justify-center gap-2 hover:bg-red-50 transition-colors"
+          className="w-full p-4 bg-white rounded-xl shadow-sm text-rose-600 font-medium flex items-center justify-center gap-2 hover:bg-rose-50 transition-colors"
         >
           <LogOut className="w-5 h-5" />
           Cerrar sesión

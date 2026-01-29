@@ -30,7 +30,7 @@ export default function BackToTopButton() {
       {isVisible && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-6 right-6 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center gap-2 z-50"
+          className="fixed bottom-6 right-6 bg-rose-600 hover:bg-rose-700 text-white px-4 py-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center gap-2 z-50"
           aria-label="Volver arriba"
         >
           <ChevronUp className="w-5 h-5" />
