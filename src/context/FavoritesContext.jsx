@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { toast } from "sonner";
 
 const FavoritesContext = createContext();
 
@@ -19,19 +20,29 @@ export const FavoritesProvider = ({ children }) => {
   }, [favoriteIds]);
 
   const toggleFavorite = (product) => {
+    const productId = product.id || product._id;
+    const wasAlreadyFavorite = favoriteIds.has(productId);
+
     setFavoriteIds((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(product.id)) {
-        newSet.delete(product.id);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
       } else {
-        newSet.add(product.id);
+        newSet.add(productId);
       }
       return newSet;
     });
+
+    // Mostrar toast según la acción
+    if (wasAlreadyFavorite) {
+      toast.error('Eliminado de favoritos');
+    } else {
+      toast.success('Agregado a favoritos');
+    }
   };
 
   const isFavorite = (productId) => {
-    return favoriteIds.has(productId);
+    return favoriteIds.has(productId) || favoriteIds.has(String(productId));
   };
 
   const clearFavorites = () => {

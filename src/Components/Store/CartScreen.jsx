@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, Trash2, Plus, Minus, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 // ✅ Componente para cada item del carrito
 const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
@@ -135,6 +136,8 @@ export default function CartScreen() {
 
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    // Disparar evento custom para sincronizar con el header
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
   }, [cartItems]);
 
   const totalPrice = cartItems.reduce((acc, item) => {
@@ -153,8 +156,10 @@ export default function CartScreen() {
 
   const handleBack = () => navigate(-1);
 
-  const handleRemoveItem = (id) =>
+  const handleRemoveItem = (id) => {
     setCartItems(cartItems.filter(item => item.product.id !== id));
+    toast.error('Producto eliminado del carrito');
+  };
 
   const handleUpdateQuantity = (id, newQuantity) => {
     setCartItems(cartItems.map(item => {

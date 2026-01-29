@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import Food from "../Pages/Food";
 import { X } from "lucide-react";
 import { CouponBanner } from "./Store/ProfileBusiness";
+import { toast } from "sonner";
 
 export default function BusinessMenuSheet({ open, onClose, business, activeCoupon }) {
   const scrollRef = useRef(null);
@@ -41,6 +42,7 @@ export default function BusinessMenuSheet({ open, onClose, business, activeCoupo
       couponId: coupon._id || coupon.id
     }));
     setCouponApplied(true);
+    toast.success(`¡Cupón ${coupon.code} aplicado! ${coupon.discount}% de descuento`);
     console.log('🎟️ Cupón aplicado:', coupon.code);
   }, [businessId]);
 

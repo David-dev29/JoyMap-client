@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { toast } from "sonner";
 import HeroBannerTienda from "../Components/Store/HeroBanner.jsx";
 import BusinessProfile, { CouponBanner } from "../Components/Store/ProfileBusiness.jsx";
 import CategoryTabs from "../Components/Store/CategoryTabs.jsx";
@@ -91,6 +92,7 @@ function Food({
     }));
 
     setCouponApplied(true);
+    toast.success(`¡Cupón ${coupon.code} aplicado! ${coupon.discount}% de descuento`);
     console.log('🎟️ Cupón aplicado:', coupon.code);
   }, [businessId]);
 
@@ -320,8 +322,13 @@ function Food({
       }
 
       localStorage.setItem("cartItems", JSON.stringify(updated));
+      // Disparar evento custom para sincronizar con el header
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
       return updated;
     });
+
+    // Toast de confirmación
+    toast.success('Producto agregado al carrito');
     setSelectedProduct(null);
   };
 

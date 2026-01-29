@@ -4,3 +4,20 @@
 html, body, #root {
   background-color: transparent;
 }
+
+/* Sonner toasts - asegurar z-index alto y visibilidad */
+[data-sonner-toaster],
+.sonner-toaster {
+  z-index: 99999 !important;
+  position: fixed !important;
+}
+
+[data-sonner-toast],
+.sonner-toast {
+  z-index: 99999 !important;
+}
+
+/* Asegurar que el contenedor de toasts no esté oculto */
+section[data-sonner-toaster] {
+  pointer-events: auto !important;
+}

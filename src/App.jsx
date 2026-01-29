@@ -1,5 +1,6 @@
 // App.jsx
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Toaster } from "sonner";
 import HeaderUnifiedLayout from "../src/Layouts/UnifiedLayout.jsx";
 import Home from "./Pages/Home.jsx";
 import Tienda from "./Pages/Store.jsx";
@@ -86,5 +87,21 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster
+        position="top-center"
+        richColors
+        expand={false}
+        duration={3000}
+        toastOptions={{
+          className: 'sonner-toast',
+          style: {
+            borderRadius: '12px',
+          },
+        }}
+      />
+    </>
+  );
 }

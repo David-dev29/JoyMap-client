@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { socket } from "../../sockets/socket.js";
 import ShareButton from "../ShareButton.jsx";
 import { Banknote, CreditCard, Smartphone, Ticket, Copy, Check } from "lucide-react";
+import { toast } from "sonner";
 
 // ✅ Helper para normalizar nombres
 const normalizeString = (str) =>
@@ -42,6 +43,16 @@ const CouponBanner = ({ coupon, brandColor, onApply, applied, businessId }) => {
     }
   }, [coupon, businessId]);
 
+  // Copiar código al portapapeles
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(coupon.code);
+      toast('Código copiado al portapapeles');
+    } catch (err) {
+      console.error('Error copying code:', err);
+    }
+  };
+
   if (!coupon) return null;
 
   // ESTADO 3: Cupón ya usado (GRIS)
@@ -81,12 +92,19 @@ const CouponBanner = ({ coupon, brandColor, onApply, applied, businessId }) => {
 
   // ESTADO 1: Cupón disponible (NARANJA)
   return (
-    <div className="w-full bg-gradient-to-r from-amber-500 to-orange-500 pl-4 pr-15 py-3.5">
+    <div className="w-full bg-gradient-to-r from-amber-500 to-orange-500 pl-4 pr-3 py-3.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Ticket className="w-5 h-5 text-white" />
+          <button
+            onClick={handleCopyCode}
+            className="flex items-center gap-1.5 text-white text-sm font-medium hover:opacity-80 transition-opacity"
+          >
+            <span>{coupon.code}</span>
+            <Copy className="w-3.5 h-3.5" />
+          </button>
           <span className="text-white text-sm font-medium">
-            {coupon.code} - {coupon.discount}% OFF
+            - {coupon.discount}% OFF
           </span>
         </div>
         {onApply && (

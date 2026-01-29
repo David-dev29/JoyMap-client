@@ -239,14 +239,26 @@ export default function HeaderUnified({
     const updateCartCount = () => {
       const stored = localStorage.getItem('cartItems');
       if (stored) {
-        const items = JSON.parse(stored);
-        const count = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
-        setLocalCartCount(count);
+        try {
+          const items = JSON.parse(stored);
+          const count = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+          setLocalCartCount(count);
+        } catch {
+          setLocalCartCount(0);
+        }
+      } else {
+        setLocalCartCount(0);
       }
     };
     updateCartCount();
+    // Escuchar evento storage (para otras pestañas)
     window.addEventListener('storage', updateCartCount);
-    return () => window.removeEventListener('storage', updateCartCount);
+    // Escuchar evento custom (para la misma pestaña)
+    window.addEventListener('cartUpdated', updateCartCount);
+    return () => {
+      window.removeEventListener('storage', updateCartCount);
+      window.removeEventListener('cartUpdated', updateCartCount);
+    };
   }, []);
 
   const displayCartCount = cartCount || localCartCount;

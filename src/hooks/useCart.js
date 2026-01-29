@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { toast } from 'sonner';
 
 const CART_STORAGE_KEY = 'cartItems';
 
@@ -18,6 +19,8 @@ export function useCart() {
   // Persistir en localStorage cuando cambie
   useEffect(() => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    // Disparar evento custom para sincronizar con el header
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
   }, [items]);
 
   /**
@@ -25,8 +28,9 @@ export function useCart() {
    * @param {Object} product - Producto a agregar (debe incluir businessId)
    * @param {number} quantity - Cantidad
    * @param {string} businessId - ID del negocio (opcional si ya está en product)
+   * @param {boolean} showToast - Mostrar notificación (default: true)
    */
-  const addItem = useCallback((product, quantity = 1, businessId = null) => {
+  const addItem = useCallback((product, quantity = 1, businessId = null, showToast = true) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex(
         (item) => (item.product.id || item.product._id) === (product.id || product._id)
@@ -52,15 +56,26 @@ export function useCart() {
         businessId: itemBusinessId
       }];
     });
+
+    // Mostrar toast de confirmación
+    if (showToast) {
+      toast.success('Producto agregado al carrito');
+    }
   }, []);
 
   /**
    * Eliminar producto del carrito
+   * @param {string} productId - ID del producto
+   * @param {boolean} showToast - Mostrar notificación (default: true)
    */
-  const removeItem = useCallback((productId) => {
+  const removeItem = useCallback((productId, showToast = true) => {
     setItems((prev) =>
       prev.filter((item) => (item.product.id || item.product._id) !== productId)
     );
+
+    if (showToast) {
+      toast.error('Producto eliminado del carrito');
+    }
   }, []);
 
   /**
@@ -68,7 +83,7 @@ export function useCart() {
    */
   const updateQuantity = useCallback((productId, quantity) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      removeItem(productId, true); // Mostrar toast al eliminar
       return;
     }
 
@@ -79,6 +94,7 @@ export function useCart() {
           : item
       )
     );
+    // No mostrar toast para cambios de cantidad (sería muy repetitivo)
   }, [removeItem]);
 
   /**
@@ -111,9 +127,13 @@ export function useCart() {
 
   /**
    * Limpiar carrito
+   * @param {boolean} showToast - Mostrar notificación (default: false para no duplicar con otros toasts)
    */
-  const clearCart = useCallback(() => {
+  const clearCart = useCallback((showToast = false) => {
     setItems([]);
+    if (showToast) {
+      toast.error('Carrito vaciado');
+    }
   }, []);
 
   /**

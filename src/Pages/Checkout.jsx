@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks/useCart';
@@ -208,6 +209,7 @@ export default function Checkout() {
     setAppliedCoupon(null);
     setCouponCode('');
     localStorage.removeItem('appliedCoupon');
+    toast('Cupón eliminado');
   };
 
   // Calculations
@@ -258,22 +260,22 @@ export default function Checkout() {
   // Confirm order
   const handleConfirmOrder = async () => {
     if (!name.trim() || !phone.trim()) {
-      alert('Por favor completa tus datos (nombre y teléfono)');
+      toast.error('Por favor completa tus datos (nombre y teléfono)');
       return;
     }
 
     if (phone.length < 10) {
-      alert('El teléfono debe tener al menos 10 dígitos');
+      toast.error('El teléfono debe tener al menos 10 dígitos');
       return;
     }
 
     if (!selectedAddress && addresses.length === 0) {
-      alert('Por favor agrega una dirección de entrega');
+      toast.error('Por favor agrega una dirección de entrega');
       return;
     }
 
     if (isEmpty) {
-      alert('Tu carrito está vacío');
+      toast.error('Tu carrito está vacío');
       navigate('/cart');
       return;
     }
@@ -355,11 +357,12 @@ export default function Checkout() {
       // Clear cart and applied coupon
       clearCart();
       localStorage.removeItem('appliedCoupon');
+      toast.success('¡Pedido confirmado! Te avisaremos cuando esté en camino');
       navigate('/deliveryScreen', { replace: true });
 
     } catch (error) {
       console.error('Error creando orden:', error);
-      alert(`Error al crear la orden: ${error.message}`);
+      toast.error(`Error al crear la orden: ${error.message}`);
     } finally {
       setLoading(false);
     }

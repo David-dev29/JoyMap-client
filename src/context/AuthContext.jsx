@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 
 const AuthContext = createContext();
 
@@ -88,12 +89,17 @@ export const AuthProvider = ({ children }) => {
           phone: result.user.phone
         }));
 
+        // Toast de bienvenida
+        toast.success(result.isNewUser ? '¡Bienvenido!' : '¡Hola de nuevo!');
+
         return { success: true, user: result.user, token: result.token, isNewUser: result.isNewUser };
       } else {
+        toast.error(result.message || 'Error en registro');
         throw new Error(result.message || 'Error en registro');
       }
     } catch (error) {
       console.error("Error en quickRegister:", error);
+      toast.error('Error de conexión. Intenta de nuevo.');
       return { success: false, error: error.message };
     }
   }, []);
@@ -107,6 +113,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("cartItems");
     localStorage.removeItem("userAddress");
     localStorage.removeItem("userAddresses");
+    // Disparar evento para actualizar el contador del carrito en el header
+    window.dispatchEvent(new CustomEvent('cartUpdated'));
   }, []);
 
   // Verificar si está autenticado (tiene token válido)
