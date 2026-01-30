@@ -370,18 +370,16 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-36">
-      {/* Header - z-50 más alto */}
-      <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-lg mx-auto flex items-center h-14 px-4">
-          <button
-            onClick={() => navigate(-1)}
-            className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 -ml-2"
-          >
-            <PiCaretLeftBold className="w-6 h-6 text-gray-700" />
-          </button>
-          <h1 className="ml-2 text-lg font-bold text-gray-900">Último paso</h1>
-        </div>
+    <div className="min-h-screen bg-gray-50 pb-32">
+      {/* Header sticky - DEBE estar fuera de cualquier overflow para funcionar */}
+      <header className="sticky top-0 z-50 bg-white px-4 h-14 flex items-center gap-3 border-b border-gray-100 shadow-sm">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 flex items-center justify-center -ml-2 rounded-full hover:bg-gray-100"
+        >
+          <PiCaretLeftBold className="w-6 h-6 text-gray-900" />
+        </button>
+        <h1 className="text-lg font-semibold text-gray-900">Último paso</h1>
       </header>
 
       {/* Banner sticky de método de pago - z-40, solo cuando la sección no es visible */}
@@ -395,33 +393,35 @@ export default function Checkout() {
             className="fixed top-14 left-0 right-0 z-40 px-4 py-2 bg-white shadow-md touch-none"
             onTouchMove={(e) => e.stopPropagation()}
           >
-            {selectedPayment ? (
-              <div className={`py-2 px-4 flex items-center justify-center gap-2 rounded-xl ${
-                selectedPayment === 'cash' ? 'bg-green-600' :
-                selectedPayment === 'transfer' ? 'bg-purple-600' :
-                'bg-cyan-600'
-              }`}>
-                {selectedPayment === 'cash' && <HiBanknotes className="w-5 h-5 text-white" />}
-                {selectedPayment === 'transfer' && <HiBuildingLibrary className="w-5 h-5 text-white" />}
-                {selectedPayment === 'card' && <PiCreditCardBold className="w-5 h-5 text-white" />}
-                <span className="text-white font-medium text-sm">
-                  {selectedPayment === 'cash' && 'Pagarás en efectivo'}
-                  {selectedPayment === 'transfer' && 'Pagarás por transferencia'}
-                  {selectedPayment === 'card' && 'Pagarás con tarjeta'}
-                </span>
-              </div>
-            ) : (
-              <div className="py-2 px-4 flex items-center justify-center gap-2 rounded-xl bg-gray-100">
-                <PiCreditCardBold className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-600 text-sm">Selecciona un método de pago</span>
-              </div>
-            )}
+            <div className="max-w-lg mx-auto w-full">
+              {selectedPayment ? (
+                <div className={`py-2 px-4 flex items-center justify-center gap-2 rounded-xl ${
+                  selectedPayment === 'cash' ? 'bg-green-600' :
+                  selectedPayment === 'transfer' ? 'bg-purple-600' :
+                  'bg-cyan-600'
+                }`}>
+                  {selectedPayment === 'cash' && <HiBanknotes className="w-5 h-5 text-white" />}
+                  {selectedPayment === 'transfer' && <HiBuildingLibrary className="w-5 h-5 text-white" />}
+                  {selectedPayment === 'card' && <PiCreditCardBold className="w-5 h-5 text-white" />}
+                  <span className="text-white font-medium text-sm">
+                    {selectedPayment === 'cash' && 'Pagarás en efectivo'}
+                    {selectedPayment === 'transfer' && 'Pagarás por transferencia'}
+                    {selectedPayment === 'card' && 'Pagarás con tarjeta'}
+                  </span>
+                </div>
+              ) : (
+                <div className="py-2 px-4 flex items-center justify-center gap-2 rounded-xl bg-gray-100">
+                  <PiCreditCardBold className="w-5 h-5 text-gray-500" />
+                  <span className="text-gray-600 text-sm">Selecciona un método de pago</span>
+                </div>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* SECCIÓN 1: ¿Cómo quieres pagar? - Full width, overflow-hidden */}
-      <section ref={paymentSectionRef} className="pt-4 pb-2 relative z-10 overflow-hidden">
+      {/* SECCIÓN 1: ¿Cómo quieres pagar? */}
+      <section ref={paymentSectionRef} className="pt-4 pb-2 relative overflow-x-hidden">
         <h2 className="text-lg font-bold text-gray-900 mb-3 px-4">¿Cómo quieres pagar?</h2>
 
         {/* Carrusel horizontal - borde a borde */}
@@ -591,17 +591,18 @@ export default function Checkout() {
                 isAuthenticated ? 'bg-gray-100' : 'bg-white'
               }`}
             />
-            <div className="flex gap-2">
-              <div className="flex items-center px-3 py-3 border border-gray-300 rounded-xl bg-gray-50">
-                <span className="text-sm">🇲🇽 +52</span>
+            <div className="flex gap-2 items-stretch">
+              <div className="flex items-center px-3 border border-gray-300 rounded-xl bg-gray-50 flex-shrink-0">
+                <span className="text-sm whitespace-nowrap">🇲🇽 +52</span>
               </div>
               <input
                 type="tel"
+                inputMode="numeric"
                 placeholder="Teléfono (10 dígitos)"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 disabled={isAuthenticated}
-                className={`flex-1 px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
+                className={`flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
                   isAuthenticated ? 'bg-gray-100' : 'bg-white'
                 }`}
               />
@@ -796,12 +797,12 @@ export default function Checkout() {
       </div>
 
       {/* FOOTER FIJO */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
-        <div className="max-w-lg mx-auto">
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 p-4 shadow-lg">
+        <div className="max-w-lg mx-auto w-full">
           <motion.button
             onClick={handleConfirmOrder}
             disabled={loading || !canProceed}
-            className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
+            className={`w-full py-4 rounded-full font-semibold text-base transition-all ${
               loading || !canProceed
                 ? 'bg-rose-300 cursor-not-allowed'
                 : 'bg-rose-600 hover:bg-rose-700 active:scale-[0.98]'
@@ -825,7 +826,7 @@ export default function Checkout() {
             </p>
           )}
         </div>
-      </div>
+      </footer>
 
       {/* Modal de dirección - Sin drag, scroll interno */}
       <AnimatePresence>

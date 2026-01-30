@@ -173,21 +173,24 @@ export default function CartScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center sticky top-0 z-10 shadow-sm">
-        <button className="mr-2 p-1 hover:bg-gray-100 rounded-full transition-colors" onClick={handleBack}>
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
+    <div className="h-[100dvh] bg-gray-50 flex flex-col overflow-hidden">
+      {/* Header estandarizado */}
+      <header className="flex-shrink-0 z-50 bg-white px-4 h-14 flex items-center gap-3 border-b border-gray-100 shadow-sm">
+        <button
+          onClick={handleBack}
+          className="w-10 h-10 flex items-center justify-center -ml-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
-        <span className="text-sm font-bold text-gray-800">Atrás</span>  
+        <h1 className="text-lg font-semibold text-gray-900">Mi carrito</h1>
         {cartItems.length > 0 && (
           <span className="ml-auto text-xs text-gray-500 font-medium">
             {cartItems.length} {cartItems.length === 1 ? 'producto' : 'productos'}
           </span>
         )}
-      </div>
+      </header>
 
-      {/* Cart Items */}
+      {/* Cart Items - área con scroll */}
       <div className="flex-1 overflow-y-auto">
         {cartItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full px-4 py-20">
@@ -219,29 +222,24 @@ export default function CartScreen() {
         )}
       </div>
 
-      {/* Total y botón */}
+      {/* Footer fijo con Total y botón - siempre visible */}
       {cartItems.length > 0 && (
-        <div className="bg-white border-t border-gray-200 px-5 py-4 sticky bottom-0 shadow-lg">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex-1 sm:text-left text-center">
-              <div className="text-xs text-gray-500 mb-1">Total del pedido</div>
-              <div className={`text-2xl font-extrabold text-rose-700 transition-transform ${animateTotal ? 'scale-110' : ''}`}>
+        <div className="flex-shrink-0 bg-white border-t border-gray-200 px-5 py-4 shadow-up">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="text-xs text-gray-500 mb-0.5">Total</div>
+              <div className={`text-xl font-extrabold text-rose-700 transition-transform ${animateTotal ? 'scale-105' : ''}`}>
                 MXN {totalPrice}
               </div>
             </div>
             <button
               onClick={() => navigate("/checkout", { replace: true })}
-              className="flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-rose-700 text-white text-sm font-semibold shadow-md hover:bg-rose-800 active:scale-95 transition-all w-full sm:w-auto"
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-rose-600 text-white text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all"
             >
               <CheckCircle className="w-5 h-5" />
               Pagar
             </button>
           </div>
-          <p className="mt-4 text-[10px] text-gray-400 text-center leading-snug">
-            Al hacer clic en continuar, aceptas nuestros{' '}
-            <span className="underline cursor-pointer hover:text-gray-600">términos de uso</span> y{' '}
-            <span className="underline cursor-pointer hover:text-gray-600">política de privacidad</span>.
-          </p>
         </div>
       )}
     </div>

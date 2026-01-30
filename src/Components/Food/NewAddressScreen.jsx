@@ -25,18 +25,16 @@ const NewAddressScreen = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-white px-4 py-4 border-b border-gray-200">
-        <div className="flex items-center space-x-4">
-          <button 
-            onClick={handleBack}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft size={24} className="text-gray-700" />
-          </button>
-          <h1 className="text-lg font-semibold text-gray-900">Nueva dirección</h1>
-        </div>
-      </div>
+      {/* Header estandarizado */}
+      <header className="sticky top-0 z-50 bg-white px-4 h-14 flex items-center gap-3 border-b border-gray-100 shadow-sm">
+        <button
+          onClick={handleBack}
+          className="w-10 h-10 flex items-center justify-center -ml-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <ArrowLeft className="w-6 h-6 text-gray-900" />
+        </button>
+        <h1 className="text-lg font-semibold text-gray-900">Nueva dirección</h1>
+      </header>
 
       {/* Content */}
       <div className="flex-1 px-4 py-6">

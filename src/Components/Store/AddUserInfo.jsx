@@ -42,15 +42,16 @@ export default function AddUserInfo() {
 
   return (
     <div className="bg-white min-h-screen max-w-sm mx-auto flex flex-col">
-      {/* Header */}
-      <div className="flex items-center p-4 border-b border-gray-100">
-        <button onClick={() => navigate(-1)}>
-          <ChevronLeft className="w-6 h-6 text-gray-600" />
+      {/* Header estandarizado */}
+      <header className="sticky top-0 z-50 bg-white px-4 h-14 flex items-center gap-3 border-b border-gray-100 shadow-sm">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 flex items-center justify-center -ml-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
-        <h1 className="ml-4 text-lg font-bold text-gray-900">
-          Agrega tu nombre y teléfono
-        </h1>
-      </div>
+        <h1 className="text-lg font-semibold text-gray-900">Tus datos</h1>
+      </header>
 
       {/* Content */}
       <div className="flex-1 p-4">

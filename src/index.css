@@ -4,10 +4,19 @@
 /* Tipografía global - Poppins */
 * {
   font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
 }
 
-body {
+/*
+ * IMPORTANTE: NO usar overflow-x: hidden en html/body
+ * porque ROMPE position: sticky en todos los componentes.
+ * Usar overflow-x: clip que hace lo mismo pero NO rompe sticky.
+ */
+html, body {
   font-family: 'Poppins', sans-serif;
+  overflow-x: clip; /* clip previene scroll horizontal SIN romper sticky */
+  width: 100%;
+  max-width: 100vw;
 }
 
 /* Fondo transparente para el body - permite que el mapa se vea */

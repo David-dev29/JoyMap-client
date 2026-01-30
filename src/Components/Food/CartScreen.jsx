@@ -55,19 +55,24 @@ export default function CartScreen() {
   
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Volver */}
-      <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center">
-        <button className="mr-2" onClick={handleBack}>
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
+    <div className="h-[100dvh] bg-gray-50 flex flex-col overflow-hidden">
+      {/* Header estandarizado */}
+      <header className="flex-shrink-0 z-50 bg-white px-4 h-14 flex items-center gap-3 border-b border-gray-100 shadow-sm">
+        <button
+          onClick={handleBack}
+          className="w-10 h-10 flex items-center justify-center -ml-2 rounded-full hover:bg-gray-100 transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
-        <span className="text-sm font-bold text-gray-800">Atrás</span>
-      </div>
+        <h1 className="text-lg font-semibold text-gray-900">Mi carrito</h1>
+      </header>
 
-      {/* Cart Items */}
+      {/* Cart Items - área con scroll */}
       <div className="flex-1 overflow-y-auto">
         {cartItems.length === 0 ? (
-          <p className="text-center text-gray-500 mt-10">Tu carrito está vacío</p>
+          <div className="flex flex-col items-center justify-center h-full px-4">
+            <p className="text-center text-gray-500">Tu carrito está vacío</p>
+          </div>
         ) : (
           cartItems.map((item) => (
             <div
@@ -85,20 +90,17 @@ export default function CartScreen() {
                     {item.product.name}
                   </h3>
                   <p className="text-xs font-semibold text-gray-500">
-  MXN {item.product.price.toFixed(2)} ×{" "}
-  {item.product.category === "Frutas"
-    ? `${item.quantity}g`
-    : `${item.quantity}`
-  }
-</p>
-
+                    MXN {item.product.price.toFixed(2)} ×{" "}
+                    {item.product.category === "Frutas"
+                      ? `${item.quantity}g`
+                      : `${item.quantity}`}
+                  </p>
                 </div>
               </div>
 
               <div className="flex items-center">
-              {(item.product.category === "Frutas" && item.quantity === 250) ||
- (item.product.category !== "Frutas" && item.quantity === 1) ? (
-
+                {(item.product.category === "Frutas" && item.quantity === 250) ||
+                 (item.product.category !== "Frutas" && item.quantity === 1) ? (
                   <button
                     onClick={() => handleRemoveItem(item.product.id)}
                     className="text-gray-400 hover:text-gray-600 p-1"
@@ -108,15 +110,14 @@ export default function CartScreen() {
                   </button>
                 ) : (
                   <button
-                  onClick={() =>
-                    handleUpdateQuantity(
-                      item.product.id,
-                      item.product.category === "Frutas"
-                        ? item.quantity - 250
-                        : item.quantity - 1
-                    )
-                  }
-                  
+                    onClick={() =>
+                      handleUpdateQuantity(
+                        item.product.id,
+                        item.product.category === "Frutas"
+                          ? item.quantity - 250
+                          : item.quantity - 1
+                      )
+                    }
                     className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-gray-800"
                     aria-label="Disminuir cantidad"
                   >
@@ -124,26 +125,23 @@ export default function CartScreen() {
                   </button>
                 )}
 
-<span className="text-sm font-bold text-gray-800 w-14 text-center">
-  {item.product.category === "Frutas"
-    ? item.quantity >= 1000
-      ? `${(item.quantity / 1000).toFixed(1)}kg`
-      : `${item.quantity} g`
-    : item.quantity}
-</span>
-
+                <span className="text-sm font-bold text-gray-800 w-14 text-center">
+                  {item.product.category === "Frutas"
+                    ? item.quantity >= 1000
+                      ? `${(item.quantity / 1000).toFixed(1)}kg`
+                      : `${item.quantity} g`
+                    : item.quantity}
+                </span>
 
                 <button
-                 onClick={() =>
-                  handleUpdateQuantity(
-                    item.product.id,
-                    item.product.category === "Frutas"
-                      ? item.quantity + 250
-                      : item.quantity + 1
-                  )
-                }
-                
-                  
+                  onClick={() =>
+                    handleUpdateQuantity(
+                      item.product.id,
+                      item.product.category === "Frutas"
+                        ? item.quantity + 250
+                        : item.quantity + 1
+                    )
+                  }
                   className="w-8 h-8 flex items-center justify-center text-rose-600 hover:text-rose-800"
                   aria-label="Aumentar cantidad"
                 >
@@ -155,33 +153,26 @@ export default function CartScreen() {
         )}
       </div>
 
-      {/* Total y botón */}
-      <div className="bg-white border-t border-gray-200 px-5 py-4 sticky bottom-0">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          {/* Total destacado */}
-          <div className="flex-1 sm:text-left text-center">
-            <div className="text-xs text-gray-500 mb-1">Total del pedido</div>
-            <div className={`text-2xl font-extrabold text-rose-700 transition-transform ${animateTotal ? 'animate-bounce' : ''}`}>
-              MXN {totalPrice}
+      {/* Footer fijo con Total y botón - siempre visible */}
+      {cartItems.length > 0 && (
+        <div className="flex-shrink-0 bg-white border-t border-gray-200 px-5 py-4 shadow-up">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="text-xs text-gray-500 mb-0.5">Total</div>
+              <div className={`text-xl font-extrabold text-rose-700 transition-transform ${animateTotal ? 'scale-105' : ''}`}>
+                MXN {totalPrice}
+              </div>
             </div>
+            <button
+              onClick={() => navigate("/address", { replace: true })}
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-rose-600 text-white text-sm font-semibold shadow-md hover:bg-rose-700 active:scale-95 transition-all"
+            >
+              <CheckCircle className="w-5 h-5" />
+              Continuar
+            </button>
           </div>
-
-          {/* Botón */}
-          <button
-            onClick={() => navigate("/address", { replace: true })}
-            className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-rose-700 text-white text-sm font-semibold shadow-md hover:bg-rose-900 transition-all w-full sm:w-auto"
-          >
-            <CheckCircle className="w-5 h-5" />
-            Continuar
-          </button>
         </div>
-
-        <p className="mt-4 text-[10px] text-gray-400 text-center leading-snug">
-          Al hacer clic en continuar, aceptas nuestros{' '}
-          <span className="underline">términos de uso</span> y{' '}
-          <span className="underline">política de privacidad</span>.
-        </p>
-      </div>
+      )}
     </div>
   );
 }
