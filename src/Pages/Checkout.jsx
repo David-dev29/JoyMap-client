@@ -1,25 +1,19 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  ChevronLeft,
-  ChevronDown,
-  ShoppingBag,
-  User,
-  Phone,
-  MapPin,
-  CreditCard,
-  Plus,
-  Minus,
-  Trash2,
-  Check,
-  Search,
-  Banknote,
-  Smartphone,
-  MessageSquare,
-  Tag,
-  Heart,
-  Ticket,
-  X,
-} from 'lucide-react';
+  PiCaretLeftBold,
+  PiCreditCardBold,
+  PiPlusBold,
+  PiMagnifyingGlassBold,
+  PiTicketBold,
+  PiXBold,
+  PiMapPinBold,
+  PiMinusBold,
+  PiTrashBold,
+  PiShoppingBagBold,
+  PiHeartBold,
+  PiCaretDownBold,
+} from 'react-icons/pi';
+import { HiBanknotes, HiBuildingLibrary } from 'react-icons/hi2';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +21,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../hooks/useCart';
 import { useAddresses } from '../hooks/useAddresses';
 import { createOrder } from '../services/orderService';
-import { PAYMENT_METHODS, DELIVERY_FEE } from '../constants';
+import { DELIVERY_FEE } from '../constants';
 
 // Helper para normalizar URLs de imágenes
 const normalizeImageUrl = (url) => {
@@ -39,107 +33,6 @@ const normalizeImageUrl = (url) => {
   return url;
 };
 
-// Card Section Component
-function Section({ title, icon: Icon, children, defaultOpen = true, badge, badgeType = 'default', onToggle }) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
-  const handleToggle = () => {
-    setIsOpen(!isOpen);
-    onToggle?.(!isOpen);
-  };
-
-  // Badge colors based on type
-  const getBadgeClass = () => {
-    switch (badgeType) {
-      case 'success':
-        return 'bg-green-100 text-green-700';
-      case 'warning':
-        return 'bg-amber-100 text-amber-700';
-      default:
-        return 'bg-gray-100 text-gray-600';
-    }
-  };
-
-  return (
-    <motion.div
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-    >
-      <button
-        onClick={handleToggle}
-        className="w-full px-4 py-4 flex items-center justify-between"
-      >
-        <div className="flex items-center gap-3">
-          {Icon && (
-            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center">
-              <Icon className="w-5 h-5 text-gray-600" />
-            </div>
-          )}
-          <div className="text-left">
-            <span className="font-semibold text-gray-900">{title}</span>
-            {badge && (
-              <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${getBadgeClass()}`}>
-                {badge}
-              </span>
-            )}
-          </div>
-        </div>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <ChevronDown className="w-5 h-5 text-gray-400" />
-        </motion.div>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="px-4 pb-4">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-}
-
-// Tip Button Component
-function TipButton({ amount, selected, onClick, label }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-        selected
-          ? 'bg-rose-600 text-white shadow-md'
-          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-      }`}
-    >
-      {label || `$${amount}`}
-    </button>
-  );
-}
-
-// Payment Method Icon
-function PaymentIcon({ method }) {
-  switch (method) {
-    case 'cash':
-      return <Banknote className="w-5 h-5" />;
-    case 'card':
-      return <CreditCard className="w-5 h-5" />;
-    case 'transfer':
-      return <Smartphone className="w-5 h-5" />;
-    default:
-      return <CreditCard className="w-5 h-5" />;
-  }
-}
-
 export default function Checkout() {
   const navigate = useNavigate();
   const { user, isAuthenticated, quickRegister } = useAuth();
@@ -149,7 +42,6 @@ export default function Checkout() {
     selectedAddress,
     selectAddress,
     addAddress,
-    removeAddress,
     search,
     searchResults,
     searchLoading,
@@ -159,19 +51,39 @@ export default function Checkout() {
   // Form states
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
-  const [selectedPayment, setSelectedPayment] = useState('cash');
+  const [selectedPayment, setSelectedPayment] = useState(null);
   const [selectedTip, setSelectedTip] = useState(10);
   const [customTip, setCustomTip] = useState('');
   const [comment, setComment] = useState('');
-  const [couponCode, setCouponCode] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Address states
-  const [showNewAddress, setShowNewAddress] = useState(false);
+  // UI states
+  const [isOrderExpanded, setIsOrderExpanded] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
   const [newAddressQuery, setNewAddressQuery] = useState('');
 
-  // Applied coupon state
+  // Coupon states
+  const [showCouponInput, setShowCouponInput] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
   const [appliedCoupon, setAppliedCoupon] = useState(null);
+
+  // Card modal states
+  const [showCardModal, setShowCardModal] = useState(false);
+  const [cardData, setCardData] = useState({
+    number: '',
+    name: '',
+    expiry: '',
+    cvv: ''
+  });
+
+  // Payment carousel ref for scroll snap
+  const paymentCarouselRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
+  const paymentSectionRef = useRef(null);
+  const paymentMethods = ['card', 'cash', 'transfer'];
+
+  // Sticky banner visibility
+  const [showStickyBanner, setShowStickyBanner] = useState(false);
 
   // Pre-fill user data
   useEffect(() => {
@@ -188,14 +100,10 @@ export default function Checkout() {
       try {
         const coupon = JSON.parse(savedCoupon);
         const currentBusinessId = cartItems[0]?.businessId || cartItems[0]?.product?.businessId;
-
-        // Verify coupon is for current business
         if (coupon.businessId === currentBusinessId) {
           setAppliedCoupon(coupon);
           setCouponCode(coupon.code);
-          console.log('🎟️ Cupón cargado:', coupon);
         } else {
-          // Coupon is for different business, remove it
           localStorage.removeItem('appliedCoupon');
         }
       } catch (e) {
@@ -203,6 +111,84 @@ export default function Checkout() {
       }
     }
   }, [cartItems]);
+
+  // Scroll snap auto-selection for payment methods (with debounce)
+  useEffect(() => {
+    const carousel = paymentCarouselRef.current;
+    if (!carousel) return;
+
+    const handleScroll = () => {
+      // Clear previous timeout to debounce
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      // Wait for scroll to settle before selecting
+      scrollTimeoutRef.current = setTimeout(() => {
+        const scrollLeft = carousel.scrollLeft;
+        const cardWidth = 224 + 12; // w-56 (224px) + gap-3 (12px)
+        const index = Math.round(scrollLeft / cardWidth);
+        const method = paymentMethods[index];
+
+        if (method) {
+          setSelectedPayment(method);
+        }
+      }, 150); // Wait 150ms after scroll stops
+    };
+
+    carousel.addEventListener('scroll', handleScroll);
+    return () => {
+      carousel.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Intersection Observer for sticky banner
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Show sticky banner when payment section is NOT visible
+        setShowStickyBanner(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    if (paymentSectionRef.current) {
+      observer.observe(paymentSectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Block background scroll when modals are open
+  useEffect(() => {
+    if (showCardModal || showAddressModal) {
+      // Save current scroll position and lock body
+      const scrollY = window.scrollY;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${scrollY}px`;
+    } else {
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+    };
+  }, [showCardModal, showAddressModal]);
 
   // Remove applied coupon
   const handleRemoveCoupon = () => {
@@ -212,7 +198,7 @@ export default function Checkout() {
     toast('Cupón eliminado');
   };
 
-  // Calculations
+  // Calculate tip amount
   const tipAmount = useMemo(() => {
     if (customTip && !isNaN(parseFloat(customTip))) {
       return parseFloat(customTip);
@@ -223,25 +209,26 @@ export default function Checkout() {
   // Calculate coupon discount
   const couponDiscount = useMemo(() => {
     if (!appliedCoupon) return 0;
-
-    // Check minimum order
-    if (appliedCoupon.minOrder && subtotal < appliedCoupon.minOrder) {
-      return 0;
-    }
-
+    if (appliedCoupon.minOrder && subtotal < appliedCoupon.minOrder) return 0;
     if (appliedCoupon.discountType === 'percentage') {
       return (subtotal * appliedCoupon.discount) / 100;
     }
-    // Fixed amount discount
     return Math.min(appliedCoupon.discount, subtotal);
   }, [appliedCoupon, subtotal]);
 
   const total = subtotal + DELIVERY_FEE + tipAmount - couponDiscount;
 
-  // Search addresses
+  // Check if can proceed
+  const hasAddress = selectedAddress || addresses.length > 0;
+  const hasPayment = selectedPayment !== null;
+  const canProceed = hasAddress && hasPayment && name.trim() && phone.trim();
+
+  // Search addresses - limitado a zona Cholula
   const handleAddressSearch = async () => {
     if (newAddressQuery.length >= 3) {
-      await search(newAddressQuery);
+      // Agregar "Cholula, Puebla" al query para limitar resultados
+      const searchQuery = `${newAddressQuery} Cholula, Puebla, México`;
+      await search(searchQuery);
     }
   };
 
@@ -252,25 +239,26 @@ export default function Checkout() {
       coordinates: result.coordinates
     });
     selectAddress(newAddr.street);
-    setShowNewAddress(false);
+    setShowAddressModal(false);
     setNewAddressQuery('');
     clearSearch();
   };
 
   // Confirm order
   const handleConfirmOrder = async () => {
-    if (!name.trim() || !phone.trim()) {
-      toast.error('Por favor completa tus datos (nombre y teléfono)');
+    if (!canProceed) {
+      if (!hasAddress) {
+        toast.error('Por favor agrega una dirección de entrega');
+      } else if (!hasPayment) {
+        toast.error('Por favor selecciona un método de pago');
+      } else {
+        toast.error('Por favor completa tus datos');
+      }
       return;
     }
 
     if (phone.length < 10) {
       toast.error('El teléfono debe tener al menos 10 dígitos');
-      return;
-    }
-
-    if (!selectedAddress && addresses.length === 0) {
-      toast.error('Por favor agrega una dirección de entrega');
       return;
     }
 
@@ -288,11 +276,9 @@ export default function Checkout() {
 
       if (!isAuthenticated) {
         const registerResult = await quickRegister(name.trim(), phone.trim(), selectedAddress);
-
         if (!registerResult.success) {
           throw new Error(registerResult.error || 'Error al registrar usuario');
         }
-
         currentUser = registerResult.user;
         authToken = registerResult.token;
       }
@@ -311,20 +297,20 @@ export default function Checkout() {
       }
 
       const orderData = {
-        businessId: businessId,
+        businessId,
         customerId: currentUser._id,
         customer: {
           name: currentUser.name || name,
           phone: currentUser.phone || phone
         },
         items: orderItems,
-        subtotal: subtotal,
+        subtotal,
         deliveryFee: DELIVERY_FEE,
         tip: tipAmount,
         couponCode: appliedCoupon?.code || null,
-        couponDiscount: couponDiscount,
+        couponDiscount,
         couponId: appliedCoupon?.couponId || null,
-        total: total,
+        total,
         deliveryAddress: {
           street: selectedAddress || addresses[0]?.street || 'Dirección no especificada',
           reference: comment || '',
@@ -335,26 +321,22 @@ export default function Checkout() {
         notes: comment
       };
 
-      const result = await createOrder(orderData, authToken);
+      await createOrder(orderData, authToken);
 
-      // Si había cupón aplicado, marcarlo como usado
       if (appliedCoupon) {
         try {
           const usedCoupons = JSON.parse(localStorage.getItem('usedCoupons') || '[]');
           usedCoupons.push({
             code: appliedCoupon.code,
             businessId: appliedCoupon.businessId,
-            usedAt: new Date().toISOString(),
-            orderId: result?.orderId || result?._id || null
+            usedAt: new Date().toISOString()
           });
           localStorage.setItem('usedCoupons', JSON.stringify(usedCoupons));
-          console.log('🎟️ Cupón marcado como usado:', appliedCoupon.code);
         } catch (e) {
           console.error('Error saving used coupon:', e);
         }
       }
 
-      // Clear cart and applied coupon
       clearCart();
       localStorage.removeItem('appliedCoupon');
       toast.success('¡Pedido confirmado! Te avisaremos cuando esté en camino');
@@ -373,15 +355,13 @@ export default function Checkout() {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
         <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-          <ShoppingBag className="w-10 h-10 text-gray-400" />
+          <PiShoppingBagBold className="w-10 h-10 text-gray-400" />
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-2">Tu carrito está vacío</h2>
-        <p className="text-gray-500 text-center mb-6">
-          Agrega productos para continuar
-        </p>
+        <p className="text-gray-500 text-center mb-6">Agrega productos para continuar</p>
         <button
           onClick={() => navigate('/')}
-          className="px-8 py-3 bg-rose-600 text-white rounded-xl font-semibold hover:bg-rose-700 transition-colors shadow-md"
+          className="px-8 py-3 bg-rose-600 text-white rounded-full font-semibold hover:bg-rose-700 transition-colors shadow-md"
         >
           Explorar negocios
         </button>
@@ -390,279 +370,378 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
-      {/* Header */}
-      <div className="bg-white sticky top-0 z-10 shadow-soft">
+    <div className="min-h-screen bg-gray-50 pb-36">
+      {/* Header - z-50 más alto */}
+      <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-lg mx-auto flex items-center h-14 px-4">
           <button
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 -ml-2"
           >
-            <ChevronLeft className="w-6 h-6 text-gray-700" />
+            <PiCaretLeftBold className="w-6 h-6 text-gray-700" />
           </button>
-          <h1 className="ml-2 text-lg font-bold text-gray-900">Checkout</h1>
+          <h1 className="ml-2 text-lg font-bold text-gray-900">Último paso</h1>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-lg mx-auto p-4 space-y-4">
-        {/* 1. DELIVERY ADDRESS */}
-        <Section
-          title="Dirección de entrega"
-          icon={MapPin}
-          defaultOpen={addresses.length === 0}
-        >
-          <div className="space-y-3">
-            {addresses.length > 0 ? (
-              <div className="space-y-2">
-                {addresses.map((addr) => (
-                  <div
-                    key={addr.id}
-                    onClick={() => selectAddress(addr.street)}
-                    className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                      selectedAddress === addr.street
-                        ? 'border-rose-600 bg-rose-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <MapPin className={`w-5 h-5 ${
-                          selectedAddress === addr.street ? 'text-rose-600' : 'text-gray-400'
-                        }`} />
-                        <p className="text-sm font-medium text-gray-900">{addr.street}</p>
-                      </div>
-                      {selectedAddress === addr.street && (
-                        <div className="w-6 h-6 rounded-full bg-rose-600 flex items-center justify-center">
-                          <Check className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+      {/* Banner sticky de método de pago - z-40, solo cuando la sección no es visible */}
+      <AnimatePresence>
+        {showStickyBanner && (
+          <motion.div
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed top-14 left-0 right-0 z-40 px-4 py-2 bg-white shadow-md touch-none"
+            onTouchMove={(e) => e.stopPropagation()}
+          >
+            {selectedPayment ? (
+              <div className={`py-2 px-4 flex items-center justify-center gap-2 rounded-xl ${
+                selectedPayment === 'cash' ? 'bg-green-600' :
+                selectedPayment === 'transfer' ? 'bg-purple-600' :
+                'bg-cyan-600'
+              }`}>
+                {selectedPayment === 'cash' && <HiBanknotes className="w-5 h-5 text-white" />}
+                {selectedPayment === 'transfer' && <HiBuildingLibrary className="w-5 h-5 text-white" />}
+                {selectedPayment === 'card' && <PiCreditCardBold className="w-5 h-5 text-white" />}
+                <span className="text-white font-medium text-sm">
+                  {selectedPayment === 'cash' && 'Pagarás en efectivo'}
+                  {selectedPayment === 'transfer' && 'Pagarás por transferencia'}
+                  {selectedPayment === 'card' && 'Pagarás con tarjeta'}
+                </span>
               </div>
             ) : (
-              <p className="text-sm text-gray-500 text-center py-4">
-                No tienes direcciones guardadas
-              </p>
-            )}
-
-            {!showNewAddress ? (
-              <button
-                onClick={() => setShowNewAddress(true)}
-                className="w-full p-3 border-2 border-dashed border-gray-300 rounded-xl text-rose-700 font-medium flex items-center justify-center gap-2 hover:bg-rose-50 transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-                Agregar nueva dirección
-              </button>
-            ) : (
-              <div className="space-y-3 p-4 bg-gray-50 rounded-xl">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Buscar dirección..."
-                    value={newAddressQuery}
-                    onChange={(e) => setNewAddressQuery(e.target.value)}
-                    className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-rose-600 focus:border-transparent"
-                  />
-                  <button
-                    onClick={handleAddressSearch}
-                    disabled={searchLoading}
-                    className="px-4 py-3 bg-rose-600 text-white rounded-xl"
-                  >
-                    <Search className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {searchResults.length > 0 && (
-                  <div className="max-h-40 overflow-y-auto space-y-1 bg-white rounded-xl border border-gray-200">
-                    {searchResults.map((result, i) => (
-                      <button
-                        key={i}
-                        onClick={() => handleSelectSearchResult(result)}
-                        className="w-full text-left p-3 text-sm hover:bg-gray-50 border-b last:border-0"
-                      >
-                        {result.formatted}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <button
-                  onClick={() => {
-                    setShowNewAddress(false);
-                    setNewAddressQuery('');
-                    clearSearch();
-                  }}
-                  className="w-full py-2 text-gray-600 text-sm"
-                >
-                  Cancelar
-                </button>
+              <div className="py-2 px-4 flex items-center justify-center gap-2 rounded-xl bg-gray-100">
+                <PiCreditCardBold className="w-5 h-5 text-gray-500" />
+                <span className="text-gray-600 text-sm">Selecciona un método de pago</span>
               </div>
             )}
-          </div>
-        </Section>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* 2. CONTACT INFO */}
-        <Section
-          title="Datos de contacto"
-          icon={User}
-          badge={isAuthenticated ? 'Verificado' : null}
-          badgeType={isAuthenticated ? 'success' : 'default'}
-          defaultOpen={!isAuthenticated}
+      {/* SECCIÓN 1: ¿Cómo quieres pagar? - Full width, overflow-hidden */}
+      <section ref={paymentSectionRef} className="pt-4 pb-2 relative z-10 overflow-hidden">
+        <h2 className="text-lg font-bold text-gray-900 mb-3 px-4">¿Cómo quieres pagar?</h2>
+
+        {/* Carrusel horizontal - borde a borde */}
+        <div
+          ref={paymentCarouselRef}
+          className="flex gap-3 overflow-x-auto py-4 px-4 snap-x snap-mandatory scroll-smooth overscroll-x-contain"
+          style={{ scrollbarWidth: 'none' }}
         >
-          <div className="space-y-3">
+          {/* Opción 1: Tarjeta */}
+          <button
+            onClick={() => {
+              setSelectedPayment('card');
+              setShowCardModal(true);
+            }}
+            className={`snap-center [scroll-snap-stop:always] flex-shrink-0 w-56 h-20 border-2 border-dashed rounded-2xl p-4 flex items-center gap-3 transition-all duration-300 ease-out ${
+              selectedPayment === 'card'
+                ? 'border-cyan-500 bg-cyan-50 scale-110 shadow-lg z-20'
+                : 'border-gray-300 bg-cyan-50/50 scale-95 opacity-70 z-10'
+            }`}
+          >
             <div className="relative">
-              <User className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center">
+                <PiCreditCardBold className="w-7 h-7 text-cyan-600" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-cyan-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-bold">+</span>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="font-semibold text-gray-900">Agregar tarjeta</p>
+              <p className="text-sm text-gray-500">Débito o crédito</p>
+            </div>
+          </button>
+
+          {/* Opción 2: Efectivo */}
+          <button
+            onClick={() => setSelectedPayment('cash')}
+            className={`snap-center [scroll-snap-stop:always] flex-shrink-0 w-56 h-20 rounded-2xl p-4 flex items-center gap-3 transition-all duration-300 ease-out bg-green-600 ${
+              selectedPayment === 'cash'
+                ? 'scale-110 shadow-lg z-20'
+                : 'scale-95 opacity-70 z-10'
+            }`}
+          >
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <HiBanknotes className="w-7 h-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="font-semibold text-white">Efectivo</p>
+              <p className="text-sm text-white/80">Paga al recibir</p>
+            </div>
+          </button>
+
+          {/* Opción 3: Transferencia */}
+          <button
+            onClick={() => setSelectedPayment('transfer')}
+            className={`snap-center [scroll-snap-stop:always] flex-shrink-0 w-56 h-20 rounded-2xl p-4 flex items-center gap-3 transition-all duration-300 ease-out bg-purple-600 ${
+              selectedPayment === 'transfer'
+                ? 'scale-110 shadow-lg z-20'
+                : 'scale-95 opacity-70 z-10'
+            }`}
+          >
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <HiBuildingLibrary className="w-7 h-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="font-semibold text-white">Transferencia</p>
+              <p className="text-sm text-white/80">SPEI o depósito</p>
+            </div>
+          </button>
+        </div>
+      </section>
+
+      <div className="max-w-lg mx-auto px-4 space-y-4">
+
+        {/* SECCIÓN 2: Cupón - Fila separada */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+          {appliedCoupon ? (
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <PiTicketBold className="w-6 h-6 text-green-600" />
+                <div>
+                  <span className="text-green-800 font-semibold">{appliedCoupon.code}</span>
+                  <p className="text-xs text-green-600">
+                    {appliedCoupon.discountType === 'percentage'
+                      ? `${appliedCoupon.discount}% de descuento`
+                      : `-$${appliedCoupon.discount}`}
+                  </p>
+                </div>
+              </div>
+              <button onClick={handleRemoveCoupon} className="p-2 hover:bg-gray-100 rounded-full">
+                <PiXBold className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+          ) : showCouponInput ? (
+            <div className="flex gap-2 p-4">
               <input
                 type="text"
-                placeholder="Nombre completo"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                placeholder="Código del cupón"
+                value={couponCode}
+                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                autoFocus
+              />
+              <button
+                onClick={() => {
+                  setShowCouponInput(false);
+                  setCouponCode('');
+                }}
+                className="px-4 py-3 text-gray-500 font-medium"
+              >
+                Cancelar
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowCouponInput(true)}
+              className="flex items-center justify-between w-full p-4"
+            >
+              <div className="flex items-center gap-3">
+                <PiTicketBold className="w-6 h-6 text-gray-600" />
+                <span className="text-gray-900">¿Tienes un cupón?</span>
+              </div>
+              <span className="font-semibold text-rose-600">Agregar</span>
+            </button>
+          )}
+        </div>
+
+        {/* SECCIÓN 3: Dirección */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+          <button
+            onClick={() => setShowAddressModal(true)}
+            className="flex items-center justify-between w-full"
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                hasAddress ? 'bg-green-100' : 'bg-rose-100'
+              }`}>
+                <PiMapPinBold className={`w-5 h-5 ${hasAddress ? 'text-green-600' : 'text-rose-600'}`} />
+              </div>
+              <div className="text-left min-w-0 flex-1">
+                <p className={`font-medium ${hasAddress ? 'text-gray-900' : 'text-rose-600'}`}>
+                  Lo recibes en
+                </p>
+                {hasAddress ? (
+                  <p className="text-sm text-gray-500 line-clamp-2">
+                    {selectedAddress || addresses[0]?.street}
+                  </p>
+                ) : (
+                  <p className="text-sm text-rose-500">⚠️ Agrega tu dirección</p>
+                )}
+              </div>
+            </div>
+            <span className="text-rose-600 font-semibold flex-shrink-0 ml-2">
+              {hasAddress ? 'Cambiar' : 'Agregar'}
+            </span>
+          </button>
+
+          {/* Datos de contacto */}
+          <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+            <input
+              type="text"
+              placeholder="Tu nombre"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isAuthenticated}
+              className={`w-full px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
+                isAuthenticated ? 'bg-gray-100' : 'bg-white'
+              }`}
+            />
+            <div className="flex gap-2">
+              <div className="flex items-center px-3 py-3 border border-gray-300 rounded-xl bg-gray-50">
+                <span className="text-sm">🇲🇽 +52</span>
+              </div>
+              <input
+                type="tel"
+                placeholder="Teléfono (10 dígitos)"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
                 disabled={isAuthenticated}
-                className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent ${
-                  isAuthenticated ? 'bg-gray-100 text-gray-600' : 'bg-white'
+                className={`flex-1 px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
+                  isAuthenticated ? 'bg-gray-100' : 'bg-white'
                 }`}
               />
             </div>
+            <textarea
+              placeholder="Notas para el repartidor (opcional)"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent resize-none"
+              rows={2}
+            />
+          </div>
+        </div>
 
-            <div className="flex gap-2">
-              <div className="flex items-center px-4 py-3 border border-gray-300 rounded-xl bg-gray-50">
-                <span className="text-base mr-1">🇲🇽</span>
-                <span className="text-sm text-gray-600">+52</span>
-              </div>
-              <div className="relative flex-1">
-                <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="tel"
-                  placeholder="Teléfono"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  disabled={isAuthenticated}
-                  className={`w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-rose-600 focus:border-transparent ${
-                    isAuthenticated ? 'bg-gray-100 text-gray-600' : 'bg-white'
-                  }`}
-                />
-              </div>
+        {/* SECCIÓN 4: Tu pedido - Expandible/Contraíble */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Header clickeable */}
+          <button
+            onClick={() => setIsOrderExpanded(!isOrderExpanded)}
+            className="flex items-center justify-between w-full p-4"
+          >
+            <div className="flex items-center gap-2">
+              <PiShoppingBagBold className="w-5 h-5 text-gray-700" />
+              <span className="font-semibold text-gray-900">Tu pedido</span>
+              <span className="text-gray-500 text-sm">({cartItems.length} productos)</span>
             </div>
-          </div>
-        </Section>
+            <PiCaretDownBold
+              className={`w-5 h-5 text-gray-500 transition-transform duration-200 ${
+                isOrderExpanded ? 'rotate-180' : ''
+              }`}
+            />
+          </button>
 
-        {/* 3. ORDER SUMMARY */}
-        <Section
-          title="Tu pedido"
-          icon={ShoppingBag}
-          badge={`${cartItems.length} items`}
-          defaultOpen={false}
-        >
-          <div className="space-y-3">
-            {cartItems.map((item) => {
-              const imageUrl = normalizeImageUrl(item.product.image || item.product.imageUrl);
-              return (
-                <div
-                  key={item.product.id || item.product._id}
-                  className="flex gap-3 py-3 border-b border-gray-100 last:border-0"
-                >
-                  {/* Image */}
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                    {imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        alt={item.product.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-2xl">
-                        🍽️
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 text-sm truncate">{item.product.name}</p>
-                    <p className="text-gray-700 font-semibold text-sm mt-1">
-                      ${(item.product.price * item.quantity).toFixed(2)}
-                    </p>
-
-                    {/* Quantity controls */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <button
-                        onClick={() => updateQuantity(item.product.id || item.product._id, item.quantity - 1)}
-                        className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200"
-                      >
-                        <Minus className="w-4 h-4 text-gray-600" />
-                      </button>
-                      <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.product.id || item.product._id, item.quantity + 1)}
-                        className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200"
-                      >
-                        <Plus className="w-4 h-4 text-gray-600" />
-                      </button>
-                      <button
-                        onClick={() => removeItem(item.product.id || item.product._id)}
-                        className="ml-auto text-rose-500 hover:text-rose-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Section>
-
-        {/* 4. PAYMENT METHOD */}
-        <Section title="Método de pago" icon={CreditCard} defaultOpen={true}>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { value: 'cash', label: 'Efectivo', icon: Banknote },
-              { value: 'card', label: 'Tarjeta', icon: CreditCard },
-              { value: 'transfer', label: 'Transferencia', icon: Smartphone },
-            ].map((method) => (
-              <button
-                key={method.value}
-                onClick={() => setSelectedPayment(method.value)}
-                className={`p-3 rounded-xl border-2 flex flex-col items-center gap-2 transition-all ${
-                  selectedPayment === method.value
-                    ? 'border-rose-600 bg-rose-50'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
+          {/* Contenido expandible */}
+          <AnimatePresence>
+            {isOrderExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
               >
-                <method.icon className={`w-6 h-6 ${
-                  selectedPayment === method.value ? 'text-rose-600' : 'text-gray-500'
-                }`} />
-                <span className={`text-xs font-medium ${
-                  selectedPayment === method.value ? 'text-rose-700' : 'text-gray-600'
-                }`}>
-                  {method.label}
-                </span>
-              </button>
-            ))}
-          </div>
-        </Section>
+                <div className="px-4 pb-4 space-y-3">
+                  {cartItems.map((item) => {
+                    const imageUrl = normalizeImageUrl(item.product.image || item.product.imageUrl);
+                    return (
+                      <div
+                        key={item.product.id || item.product._id}
+                        className="flex gap-3 py-3 border-t border-gray-100"
+                      >
+                        {/* Image */}
+                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+                          {imageUrl ? (
+                            <img
+                              src={imageUrl}
+                              alt={item.product.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-2xl">
+                              🍽️
+                            </div>
+                          )}
+                        </div>
 
-        {/* 5. TIP */}
-        <Section title="Propina para el repartidor" icon={Heart} defaultOpen={true}>
-          <p className="text-xs text-gray-500 mb-3">
-            Tu propina ayuda a nuestros repartidores
-          </p>
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-gray-900 text-sm truncate">{item.product.name}</p>
+                          <p className="text-gray-700 font-semibold text-sm mt-1">
+                            ${(item.product.price * item.quantity).toFixed(2)}
+                          </p>
+
+                          {/* Quantity controls */}
+                          <div className="flex items-center gap-2 mt-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(item.product.id || item.product._id, item.quantity - 1);
+                              }}
+                              className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                            >
+                              <PiMinusBold className="w-4 h-4 text-gray-600" />
+                            </button>
+                            <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                updateQuantity(item.product.id || item.product._id, item.quantity + 1);
+                              }}
+                              className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-gray-200"
+                            >
+                              <PiPlusBold className="w-4 h-4 text-gray-600" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeItem(item.product.id || item.product._id);
+                              }}
+                              className="ml-auto text-rose-500 hover:text-rose-600"
+                            >
+                              <PiTrashBold className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* SECCIÓN 5: Propina para el repartidor */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+          <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <PiHeartBold className="w-5 h-5 text-rose-500" />
+            Propina para el repartidor
+          </h3>
+          <p className="text-xs text-gray-500 mb-4">Tu propina ayuda a nuestros repartidores</p>
+
           <div className="flex flex-wrap gap-2">
             {[0, 10, 15, 20, 25].map((tip) => (
-              <TipButton
+              <button
                 key={tip}
-                amount={tip}
-                label={tip === 0 ? 'Sin propina' : `$${tip}`}
-                selected={selectedTip === tip && !customTip}
                 onClick={() => {
                   setSelectedTip(tip);
                   setCustomTip('');
                 }}
-              />
+                className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  selectedTip === tip && !customTip
+                    ? 'bg-rose-600 text-white shadow-md'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {tip === 0 ? 'Sin propina' : `$${tip}`}
+              </button>
             ))}
             <div className={`flex items-center border-2 rounded-xl px-3 transition-all ${
               customTip ? 'border-rose-600 bg-rose-50' : 'border-gray-200'
@@ -678,66 +757,10 @@ export default function Checkout() {
               />
             </div>
           </div>
-        </Section>
+        </div>
 
-        {/* 6. NOTES & COUPON */}
-        <Section title="Notas adicionales" icon={MessageSquare} defaultOpen={false}>
-          <div className="space-y-4">
-            <textarea
-              placeholder="Instrucciones especiales para tu pedido..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="w-full p-4 border border-gray-300 rounded-xl resize-none text-sm focus:ring-2 focus:ring-rose-600 focus:border-transparent"
-              rows={3}
-            />
-
-            {/* Applied Coupon Display */}
-            {appliedCoupon ? (
-              <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                    <Ticket className="w-5 h-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-green-800">
-                      {appliedCoupon.code}
-                    </p>
-                    <p className="text-xs text-green-600">
-                      {appliedCoupon.discountType === 'percentage'
-                        ? `${appliedCoupon.discount}% de descuento`
-                        : `$${appliedCoupon.discount} de descuento`}
-                    </p>
-                    {appliedCoupon.minOrder > 0 && subtotal < appliedCoupon.minOrder && (
-                      <p className="text-xs text-amber-600 mt-0.5">
-                        ⚠️ Mínimo: ${appliedCoupon.minOrder} (faltan ${(appliedCoupon.minOrder - subtotal).toFixed(2)})
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={handleRemoveCoupon}
-                  className="p-2 hover:bg-green-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-green-700" />
-                </button>
-              </div>
-            ) : (
-              <div className="relative">
-                <Tag className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Cupón de descuento"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-rose-600 focus:border-transparent"
-                />
-              </div>
-            )}
-          </div>
-        </Section>
-
-        {/* 7. COST SUMMARY */}
-        <div className="bg-white rounded-2xl shadow-soft p-4">
+        {/* SECCIÓN 6: Resumen de pago */}
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
           <h3 className="font-bold text-gray-900 mb-4">Resumen de pago</h3>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
@@ -757,7 +780,7 @@ export default function Checkout() {
             {appliedCoupon && couponDiscount > 0 && (
               <div className="flex justify-between text-green-600">
                 <span className="flex items-center gap-1">
-                  <Ticket className="w-4 h-4" />
+                  <PiTicketBold className="w-4 h-4" />
                   Descuento ({appliedCoupon.code})
                 </span>
                 <span className="font-medium">-${couponDiscount.toFixed(2)}</span>
@@ -772,18 +795,18 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* Fixed Bottom Button */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-up">
+      {/* FOOTER FIJO */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg">
         <div className="max-w-lg mx-auto">
           <motion.button
             onClick={handleConfirmOrder}
-            disabled={loading}
-            className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
-              loading
-                ? 'bg-gray-300 cursor-not-allowed'
+            disabled={loading || !canProceed}
+            className={`w-full py-4 rounded-full font-bold text-lg transition-all ${
+              loading || !canProceed
+                ? 'bg-rose-300 cursor-not-allowed'
                 : 'bg-rose-600 hover:bg-rose-700 active:scale-[0.98]'
             } text-white shadow-md`}
-            whileTap={{ scale: loading ? 1 : 0.98 }}
+            whileTap={{ scale: loading || !canProceed ? 1 : 0.98 }}
           >
             {loading ? (
               <div className="flex items-center justify-center gap-2">
@@ -794,8 +817,228 @@ export default function Checkout() {
               'Hacer pedido'
             )}
           </motion.button>
+          {!canProceed && (
+            <p className="text-center text-xs text-gray-500 mt-2">
+              {!hasPayment && 'Selecciona un método de pago'}
+              {hasPayment && !hasAddress && 'Agrega tu dirección'}
+              {hasPayment && hasAddress && (!name.trim() || !phone.trim()) && 'Completa tus datos'}
+            </p>
+          )}
         </div>
       </div>
+
+      {/* Modal de dirección - Sin drag, scroll interno */}
+      <AnimatePresence>
+        {showAddressModal && (
+          <div
+            className="fixed inset-0 z-50 bg-black/50"
+            onClick={() => {
+              setShowAddressModal(false);
+              setNewAddressQuery('');
+              clearSearch();
+            }}
+            onTouchMove={(e) => e.preventDefault()}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              drag={false}
+              className="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl max-h-[90vh] overflow-hidden touch-none"
+              onClick={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+            >
+              {/* Header fijo */}
+              <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold">Dirección de entrega</h3>
+                  <button
+                    onClick={() => {
+                      setShowAddressModal(false);
+                      setNewAddressQuery('');
+                      clearSearch();
+                    }}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <PiXBold className="w-6 h-6" />
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500 mt-1">Zona Cholula, Puebla</p>
+              </div>
+
+              {/* Contenido con scroll interno */}
+              <div className="overflow-y-auto overscroll-contain p-6 touch-auto" style={{ maxHeight: 'calc(90vh - 100px)' }}>
+                {/* Buscar dirección */}
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-gray-700">Ingresa tu dirección</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Buscar calle, colonia..."
+                      value={newAddressQuery}
+                      onChange={(e) => setNewAddressQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddressSearch()}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    />
+                    <button
+                      onClick={handleAddressSearch}
+                      disabled={searchLoading || newAddressQuery.length < 3}
+                      className="px-4 py-3 bg-rose-600 text-white rounded-xl disabled:bg-gray-300"
+                    >
+                      {searchLoading ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : (
+                        <PiMagnifyingGlassBold className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+
+                  {searchResults.length > 0 && (
+                    <div className="space-y-1 bg-gray-50 rounded-xl border overflow-hidden">
+                      {searchResults.map((result, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleSelectSearchResult(result)}
+                          className="w-full text-left p-3 text-sm hover:bg-gray-100 border-b last:border-0 flex items-center gap-2"
+                        >
+                          <PiMapPinBold className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <span className="line-clamp-2">{result.formatted}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Modal para agregar tarjeta */}
+      <AnimatePresence>
+        {showCardModal && (
+          <div
+            className="fixed inset-0 z-50 bg-black/50"
+            onClick={() => setShowCardModal(false)}
+            onTouchMove={(e) => e.preventDefault()}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              drag={false}
+              className="absolute inset-x-0 bottom-0 bg-white rounded-t-3xl max-h-[90vh] overflow-hidden touch-none"
+              onClick={(e) => e.stopPropagation()}
+              onTouchMove={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="sticky top-0 bg-white px-6 pt-6 pb-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-gray-900">Agregar tarjeta</h3>
+                  <button
+                    onClick={() => setShowCardModal(false)}
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                  >
+                    <PiXBold className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Formulario */}
+              <div className="p-6 space-y-4 overflow-y-auto touch-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+                {/* Número de tarjeta */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Número de tarjeta
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="1234 5678 9012 3456"
+                    maxLength={19}
+                    value={cardData.number}
+                    onChange={(e) => {
+                      const value = e.target.value
+                        .replace(/\s/g, '')
+                        .replace(/\D/g, '')
+                        .replace(/(\d{4})/g, '$1 ')
+                        .trim();
+                      setCardData({ ...cardData, number: value });
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Nombre en la tarjeta */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre en la tarjeta
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="JUAN PÉREZ"
+                    value={cardData.name}
+                    onChange={(e) => setCardData({ ...cardData, name: e.target.value.toUpperCase() })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Fecha y CVV en fila */}
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vencimiento
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="MM/AA"
+                      maxLength={5}
+                      value={cardData.expiry}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, '');
+                        if (value.length >= 2) {
+                          value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                        }
+                        setCardData({ ...cardData, expiry: value });
+                      }}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      CVV
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="123"
+                      maxLength={4}
+                      value={cardData.cvv}
+                      onChange={(e) => setCardData({ ...cardData, cvv: e.target.value.replace(/\D/g, '') })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                {/* Botón guardar */}
+                <button
+                  onClick={() => {
+                    if (cardData.number && cardData.name && cardData.expiry && cardData.cvv) {
+                      setShowCardModal(false);
+                      toast.success('Tarjeta agregada correctamente');
+                    } else {
+                      toast.error('Por favor completa todos los campos');
+                    }
+                  }}
+                  className="w-full mt-4 py-4 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-full transition-colors"
+                >
+                  Guardar tarjeta
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
