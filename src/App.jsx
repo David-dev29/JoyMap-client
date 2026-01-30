@@ -1,6 +1,9 @@
 // App.jsx
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import { useState } from "react";
+import { RouterProvider, createBrowserRouter, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
+import { AnimatePresence } from "framer-motion";
+import SplashScreen from "./Components/SplashScreen.jsx";
 import HeaderUnifiedLayout from "./Layouts/UnifiedLayout.jsx";
 import Home from "./Pages/Home.jsx";
 import Tienda from "./Pages/Store.jsx";
@@ -21,8 +24,9 @@ const router = createBrowserRouter([
     element: <HeaderUnifiedLayout />,
     children: [
       {
+        // Redirigir "/" a "/home" para que "Comida" esté seleccionada por defecto
         index: true,
-        element: <Home />,
+        element: <Navigate to="/home" replace />,
       },
       {
         path: "home",
@@ -87,21 +91,35 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
     <>
-      <RouterProvider router={router} />
-      <Toaster
-        position="top-center"
-        richColors
-        expand={false}
-        duration={3000}
-        toastOptions={{
-          className: 'sonner-toast',
-          style: {
-            borderRadius: '12px',
-          },
-        }}
-      />
+      {/* Splash Screen con animación de salida */}
+      <AnimatePresence mode="wait">
+        {showSplash && (
+          <SplashScreen onFinish={() => setShowSplash(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* App principal - se muestra cuando el splash termina */}
+      {!showSplash && (
+        <>
+          <RouterProvider router={router} />
+          <Toaster
+            position="top-center"
+            richColors
+            expand={false}
+            duration={3000}
+            toastOptions={{
+              className: 'sonner-toast',
+              style: {
+                borderRadius: '12px',
+              },
+            }}
+          />
+        </>
+      )}
     </>
   );
 }
