@@ -22,6 +22,7 @@ import { useCart } from '../hooks/useCart';
 import { useAddresses } from '../hooks/useAddresses';
 import { createOrder } from '../services/orderService';
 import { DELIVERY_FEE } from '../constants';
+import PaymentTutorial from '../Components/PaymentTutorial';
 
 // Helper para normalizar URLs de imágenes
 const normalizeImageUrl = (url) => {
@@ -85,6 +86,9 @@ export default function Checkout() {
   // Sticky banner visibility
   const [showStickyBanner, setShowStickyBanner] = useState(false);
 
+  // Payment tutorial (onboarding)
+  const [showPaymentTutorial, setShowPaymentTutorial] = useState(false);
+
   // Pre-fill user data
   useEffect(() => {
     if (user) {
@@ -92,6 +96,20 @@ export default function Checkout() {
       setPhone(user.phone || '');
     }
   }, [user]);
+
+  // Show payment tutorial on first visit
+  useEffect(() => {
+    // TEMPORALMENTE: Mostrar siempre para pruebas
+    const timer = setTimeout(() => setShowPaymentTutorial(true), 800);
+    return () => clearTimeout(timer);
+
+    // PARA PRODUCCIÓN: Descomentar esto y comentar lo de arriba
+    // const tutorialSeen = localStorage.getItem('paymentTutorialSeen');
+    // if (!tutorialSeen) {
+    //   const timer = setTimeout(() => setShowPaymentTutorial(true), 800);
+    //   return () => clearTimeout(timer);
+    // }
+  }, []);
 
   // Load applied coupon from localStorage
   useEffect(() => {
@@ -1040,6 +1058,14 @@ export default function Checkout() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Tutorial de métodos de pago - solo la primera vez */}
+      {showPaymentTutorial && (
+        <PaymentTutorial
+          onComplete={() => setShowPaymentTutorial(false)}
+          carouselRef={paymentCarouselRef}
+        />
+      )}
     </div>
   );
 }
